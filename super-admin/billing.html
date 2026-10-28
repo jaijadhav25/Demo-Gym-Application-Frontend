@@ -219,6 +219,8 @@
   });
 
   function loadBilling() {
+    // Remove the first displayed transaction from previously initialized browser data too.
+    GymFlowDB.delete('platformBilling', 'saas_tx_905');
     txList = GymFlowDB.get('platformBilling') || [];
     filterBilling();
   }
@@ -309,7 +311,11 @@
       memberName: tx.gymName,
       memberId: tx.gymId,
       method: tx.method,
-      status: tx.status
+      status: tx.status,
+      refundStatus: tx.refundStatus,
+      refundAmount: tx.refundAmount,
+      refundDate: tx.refundDate,
+      refundReferenceId: tx.refundReferenceId
     }, {
       name: "GymFlow SaaS Platform Inc.",
       address: "100 Cloud Computing Way, Suite 400, San Francisco, CA",
@@ -325,7 +331,20 @@
       confirmText: 'Refund Transaction',
       confirmClass: 'btn-danger',
       onConfirm: () => {
-        GymFlowDB.update('platformBilling', txId, { refundStatus: 'Refunded' });
+        const tx = GymFlowDB.getById('platformBilling', txId);
+        if (!tx || tx.status !== 'Paid' || tx.refundStatus === 'Refunded') return;
+
+        // This demo refund is treated as fully processed only after confirmation.
+        const refund = GymFlowDB.update('platformBilling', txId, {
+          refundStatus: 'Refunded',
+          refundAmount: Number(tx.amount) || 0,
+          refundDate: new Date().toISOString().slice(0, 10),
+          refundReferenceId: `RF-${Date.now()}`
+        });
+        if (!refund || refund.refundStatus !== 'Refunded') {
+          Toast.error('Refund could not be processed.');
+          return;
+        }
         Toast.warning('Transaction marked as Refunded.');
         loadBilling();
       }

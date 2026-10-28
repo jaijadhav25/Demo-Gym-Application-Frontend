@@ -1378,18 +1378,6 @@ const INITIAL_MOCK_DATA = {
       refundStatus: "None"
     },
     {
-      id: "saas_tx_905",
-      invoiceNo: "SAAS-INV-2026-05",
-      gymId: "gym_5",
-      gymName: "CrossFit Vanguard",
-      planName: "Growth",
-      amount: 99.00,
-      date: "2026-04-18",
-      method: "Stripe Automatic",
-      status: "Paid",
-      refundStatus: "None"
-    },
-    {
       id: "saas_tx_906",
       invoiceNo: "SAAS-INV-2026-06",
       gymId: "gym_8",

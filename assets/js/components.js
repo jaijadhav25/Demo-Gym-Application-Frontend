@@ -244,6 +244,10 @@ const PrintHelper = {
 
     const taxAmount = (paymentRecord.amount * 0.0825).toFixed(2);
     const subtotal = (paymentRecord.amount - taxAmount).toFixed(2);
+    const originalAmount = Number(paymentRecord.amount) || 0;
+    const refundAmount = Math.min(originalAmount, Math.max(0, Number(paymentRecord.refundAmount) || 0));
+    const refunded = ['Refunded', 'Partially Refunded', 'Partial'].includes(paymentRecord.refundStatus) && refundAmount > 0;
+    const remainingAmount = Math.max(0, originalAmount - refundAmount);
 
     modal.innerHTML = `
       <div class="modal modal-lg">
@@ -266,7 +270,7 @@ const PrintHelper = {
                 </div>
               </div>
               <div style="text-align: right;">
-                <span class="badge badge-success" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; margin-bottom: 0.5rem;">${paymentRecord.status}</span>
+                <span class="badge ${refunded ? 'badge-warning' : 'badge-success'}" style="font-size: 0.85rem; padding: 0.4rem 0.8rem; margin-bottom: 0.5rem;">${refunded ? 'REFUNDED' : paymentRecord.status}</span>
                 <div style="font-size: 0.875rem; font-weight: 700; color: #0f172a;">Invoice #: ${paymentRecord.invoiceNo || 'INV-' + paymentRecord.id}</div>
                 <div style="font-size: 0.8rem; color: #64748b;">Date: ${paymentRecord.date}</div>
               </div>
@@ -316,9 +320,25 @@ const PrintHelper = {
                   <span style="color: #64748b;">Taxes (8.25%):</span>
                   <span>₹${taxAmount}</span>
                 </div>
+                ${refunded ? `
+                <div style="display: flex; justify-content: space-between; padding: 0.35rem 0;">
+                  <span style="color: #64748b;">Original invoice amount:</span>
+                  <span>₹${originalAmount.toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.35rem 0; color: #b45309;">
+                  <span>Refunded amount:</span>
+                  <span>−₹${refundAmount.toFixed(2)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.35rem 0;">
+                  <span style="color: #64748b;">${remainingAmount === 0 ? 'Remaining payable balance:' : 'Remaining amount paid:'}</span>
+                  <span>₹${remainingAmount.toFixed(2)}</span>
+                </div>
+                <div style="padding: 0.35rem 0; color: #64748b; font-size: 0.8rem;">
+                  Refund date: ${paymentRecord.refundDate || '—'}${paymentRecord.refundReferenceId ? `<br>Refund reference: ${paymentRecord.refundReferenceId}` : ''}
+                </div>` : ''}
                 <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-top: 2px solid #e2e8f0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">
-                  <span>Grand Total:</span>
-                  <span style="color: #10b981;">₹${Number(paymentRecord.amount).toFixed(2)}</span>
+                  <span>${refunded ? 'Original invoice total:' : 'Grand Total:'}</span>
+                  <span style="color: #10b981;">₹${originalAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
