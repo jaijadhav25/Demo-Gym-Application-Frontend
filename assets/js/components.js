@@ -154,7 +154,7 @@ const TableHelper = {
     const endItem = Math.min(totalItems, currentPage * pageSize);
 
     let html = `
-      ${includeSummary ? `<div class="table-info">Showing <strong>${startItem}-${endItem}</strong> of <strong>${totalItems}</strong> entries</div>` : ''}
+      ${includeSummary ? `<div class="table-info">Showing <strong>${startItem}–${endItem}</strong> of <strong>${totalItems}</strong> records</div>` : ''}
       ${typeof onPageSizeChange === 'function' ? `<label class="table-page-size">Rows per page
         <select class="form-select" aria-label="Records per page">
           ${[10, 25, 50, 100].map(size => `<option value="${size}" ${pageSize === size ? 'selected' : ''}>${size}</option>`).join('')}
@@ -572,13 +572,14 @@ const DynamicTableHelper = {
       }
       tbody.replaceChildren(fragment);
       expectedMarkup = markup();
-      pagination.innerHTML = `<div class="table-info">Showing <strong>${total ? start + 1 : 0}–${end}</strong> of <strong>${total}</strong> records</div>
-        <label class="dynamic-table-size">Rows per page <select class="form-select" aria-label="Records per page"><option>10</option><option>25</option><option>50</option><option>100</option></select></label>
-        <div class="dynamic-page-buttons"></div>`;
-      const select = pagination.querySelector('select');
-      select.value = String(pageSize);
-      select.addEventListener('change', () => { pageSize = Number(select.value); page = 1; render(); });
-      TableHelper.renderPagination(pagination.querySelector('.dynamic-page-buttons'), total, page, pageSize, next => { page = next; render(); }, undefined, false);
+      TableHelper.renderPagination(
+        pagination,
+        total,
+        page,
+        pageSize,
+        next => { page = next; render(); },
+        nextSize => { pageSize = nextSize; page = 1; render(); }
+      );
     };
     const observer = new MutationObserver(() => {
       if (renderQueued) return;

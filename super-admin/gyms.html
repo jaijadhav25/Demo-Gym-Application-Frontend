@@ -219,11 +219,13 @@
               <i class="fa-solid fa-arrow-rotate-left"></i> Reset
             </button>
           </div>
+        </div>
 
         <div class="table-responsive">
           <table class="data-table">
             <thead>
               <tr>
+                <th>S.No.</th>
                 <th class="sortable" onclick="sortGyms('name')" style="cursor: pointer;">
                   Gym Organization <i class="fa-solid fa-sort text-muted" id="sort-icon-name"></i>
                 </th>
@@ -388,7 +390,7 @@
   let gymsList = [];
   let filteredList = [];
   let currentPage = 1;
-  const pageSize = 6;
+  let pageSize = 10;
   let sortKey = 'name';
   let sortAsc = true;
 
@@ -494,6 +496,24 @@
     filterGyms();
   }
 
+  function renderGymPagination(totalItems) {
+    TableHelper.renderPagination(
+      document.getElementById('gyms-pagination'),
+      totalItems,
+      currentPage,
+      pageSize,
+      newPage => {
+        currentPage = newPage;
+        renderTable();
+      },
+      newPageSize => {
+        pageSize = newPageSize;
+        currentPage = 1;
+        renderTable();
+      }
+    );
+  }
+
   function renderTable() {
     const tbody = document.getElementById('gyms-tbody');
     const start = (currentPage - 1) * pageSize;
@@ -502,7 +522,7 @@
     if (paged.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="8">
+          <td colspan="9">
             <div class="empty-state">
               <div class="empty-icon"><i class="fa-solid fa-building-slash"></i></div>
               <div class="empty-title">No Gym Organizations Found</div>
@@ -512,11 +532,11 @@
           </td>
         </tr>
       `;
-      TableHelper.renderPagination(document.getElementById('gyms-pagination'), 0, 1, pageSize, () => {});
+      renderGymPagination(0);
       return;
     }
 
-    tbody.innerHTML = paged.map(gym => {
+    tbody.innerHTML = paged.map((gym, index) => {
       let badgeClass = 'badge-success';
       if (gym.status === 'trial') badgeClass = 'badge-warning';
       if (gym.status === 'suspended') badgeClass = 'badge-danger';
@@ -525,6 +545,7 @@
 
       return `
         <tr>
+          <td>${start + index + 1}</td>
           <td>
             <div class="cell-entity">
               <div class="avatar">
@@ -575,16 +596,7 @@
       `;
     }).join('');
 
-    TableHelper.renderPagination(
-      document.getElementById('gyms-pagination'),
-      filteredList.length,
-      currentPage,
-      pageSize,
-      (newPage) => {
-        currentPage = newPage;
-        renderTable();
-      }
-    );
+    renderGymPagination(filteredList.length);
   }
 
   function toggleStatus(gymId, currentStatus) {
