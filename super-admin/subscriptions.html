@@ -314,7 +314,10 @@
             <button class="btn btn-sm btn-outline" onclick="openManageSub('${g.id}')">
               <i class="fa-solid fa-sliders"></i> Modify
             </button>
-            <button type="button" class="btn-icon btn-icon-sm text-danger" onclick="deleteSubscription('${g.id}')" title="Delete subscription" aria-label="Delete subscription for ${g.name}">
+            <button type="button" class="btn-icon btn-icon-sm text-danger" onclick="deleteSubscription('${g.id}')"
+              ${String(g.status || '').trim().toLowerCase() !== 'suspended' ? 'disabled' : ''}
+              title="${String(g.status || '').trim().toLowerCase() === 'suspended' ? 'Delete subscription' : 'Gym can only be deleted when its status is Suspended.'}"
+              aria-label="Delete subscription for ${g.name}${String(g.status || '').trim().toLowerCase() === 'suspended' ? '' : '. Gym can only be deleted when its status is Suspended.'}">
               <i class="fa-solid fa-trash"></i>
             </button>
           </td>
@@ -368,18 +371,27 @@
       Toast.error('Subscription record was not found.');
       return;
     }
+    if (String(gym.status || '').trim().toLowerCase() !== 'suspended') {
+      Toast.error('Gym can only be deleted when its status is Suspended.');
+      return;
+    }
     Modal.confirm({
-      title: 'Delete Subscription?',
-      message: 'This removes the selected gym record from both lists. Related records in other collections are not deleted.',
-      confirmText: 'Delete Subscription',
+      title: 'Delete Gym Organization?',
+      message: `Are you sure you want to delete ${gym.name}? This action cannot be undone.`,
+      confirmText: 'Delete Gym',
       confirmClass: 'btn-danger',
       onConfirm: () => {
-        const deleted = GymFlowDB.delete('gyms', gymId);
-        if (!deleted) {
-          Toast.error('Could not delete this subscription. Please try again.');
+        const currentGym = GymFlowDB.getById('gyms', gymId);
+        if (!currentGym || String(currentGym.status || '').trim().toLowerCase() !== 'suspended') {
+          Toast.error('Gym can only be deleted when its status is Suspended.');
           return;
         }
-        Toast.success('Subscription for ' + gym.name + ' was deleted.');
+        const deleted = GymFlowDB.delete('gyms', gymId);
+        if (!deleted) {
+          Toast.error('Could not delete this gym. Please try again.');
+          return;
+        }
+        Toast.success(currentGym.name + ' was deleted.');
         loadSubs();
       }
     });

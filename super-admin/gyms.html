@@ -590,6 +590,12 @@
                 onclick="toggleStatus('${gym.id}', '${gym.status}')">
                 <i class="fa-solid ${gym.status === 'suspended' ? 'fa-rotate-left' : 'fa-ban'}"></i>
               </button>
+              <button type="button" class="btn-icon btn-icon-sm text-danger" onclick="deleteGym('${gym.id}')"
+                ${String(gym.status || '').toLowerCase() !== 'suspended' ? 'disabled' : ''}
+                title="${String(gym.status || '').toLowerCase() === 'suspended' ? 'Delete gym' : 'Gym can only be deleted when its status is Suspended.'}"
+                aria-label="Delete ${gym.name}${String(gym.status || '').toLowerCase() === 'suspended' ? '' : '. Gym can only be deleted when its status is Suspended.'}">
+                <i class="fa-solid fa-trash"></i>
+              </button>
             </div>
           </td>
         </tr>
@@ -611,6 +617,38 @@
       onConfirm: () => {
         GymFlowDB.update('gyms', gymId, { status: nextStatus });
         Toast.success(`Gym status updated to ${nextStatus}.`);
+        loadGyms();
+      }
+    });
+  }
+
+  function deleteGym(gymId) {
+    const gym = GymFlowDB.getById('gyms', gymId);
+    if (!gym) {
+      Toast.error('Gym organization was not found.');
+      return;
+    }
+    if (String(gym.status || '').trim().toLowerCase() !== 'suspended') {
+      Toast.error('Gym can only be deleted when its status is Suspended.');
+      return;
+    }
+
+    Modal.confirm({
+      title: 'Delete Gym Organization?',
+      message: `Are you sure you want to delete ${gym.name}? This action cannot be undone.`,
+      confirmText: 'Delete Gym',
+      confirmClass: 'btn-danger',
+      onConfirm: () => {
+        const currentGym = GymFlowDB.getById('gyms', gymId);
+        if (!currentGym || String(currentGym.status || '').trim().toLowerCase() !== 'suspended') {
+          Toast.error('Gym can only be deleted when its status is Suspended.');
+          return;
+        }
+        if (!GymFlowDB.delete('gyms', gymId)) {
+          Toast.error('Could not delete this gym. Please try again.');
+          return;
+        }
+        Toast.success(`${currentGym.name} was deleted.`);
         loadGyms();
       }
     });
