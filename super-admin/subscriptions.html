@@ -142,7 +142,7 @@
                 <th class="sortable" onclick="sortSubs('status')" style="cursor: pointer;">
                   Status <i class="fa-solid fa-sort text-muted" id="sort-icon-status"></i>
                 </th>
-                <th class="table-actions-column" style="text-align: right;">Simulate Action</th>
+                <th style="text-align: right;">Simulate Action</th>
               </tr>
             </thead>
             <tbody id="subs-tbody">
@@ -219,8 +219,14 @@
     loadSubs();
   });
 
+  window.addEventListener('storage', event => {
+    if (event.key === 'gymflow_saas_db') loadSubs();
+  });
+
+  window.addEventListener('gymflow:data-changed', () => loadSubs());
+
   function loadSubs() {
-    gyms = GymFlowDB.get('gyms') || [];
+    gyms = (GymFlowDB.get('gyms') || []).filter(g => g.subscriptionDeleted !== true);
     filterSubs();
   }
 
@@ -304,15 +310,13 @@
           <td><strong>₹${rate}.00 / mo</strong></td>
           <td class="text-xs text-muted">${g.renewalDate || '2026-05-15'}</td>
           <td><span class="badge ${badge}"><span class="badge-dot"></span>${g.status ? g.status.toUpperCase() : 'ACTIVE'}</span></td>
-          <td class="table-actions-cell" style="text-align: right;">
-            <div class="table-row-actions">
+          <td style="text-align: right;">
             <button class="btn btn-sm btn-outline" onclick="openManageSub('${g.id}')">
               <i class="fa-solid fa-sliders"></i> Modify
             </button>
-            <button class="btn-icon btn-icon-sm text-danger" onclick="deleteSubscription('${g.id}')" title="Delete subscription" aria-label="Delete subscription for ${g.name}">
+            <button type="button" class="btn-icon btn-icon-sm text-danger" onclick="deleteSubscription('${g.id}')" title="Delete subscription" aria-label="Delete subscription for ${g.name}">
               <i class="fa-solid fa-trash"></i>
             </button>
-            </div>
           </td>
         </tr>
       `;
@@ -349,7 +353,8 @@
       planName: planMap[planId].name,
       mrr: planMap[planId].mrr,
       status: status,
-      renewalDate: newRenewalDate
+      renewalDate: newRenewalDate,
+      subscriptionDeleted: false
     });
 
     Modal.close('modal-manage-sub');
@@ -357,43 +362,25 @@
     loadSubs();
   }
 
-  function getSubscriptionDependents(gymId) {
-    const linkedCollections = [
-      'branches', 'gymPlans', 'members', 'trainers', 'classes', 'classBookings',
-      'attendance', 'payments', 'platformBilling', 'expenses', 'leads', 'equipment',
-      'maintenance', 'workoutPlans', 'progressRecords', 'supportTickets', 'announcements', 'staff'
-    ];
-    return linkedCollections.reduce((count, collection) =>
-      count + (GymFlowDB.get(collection, { gymId }) || []).length, 0);
-  }
-
   function deleteSubscription(gymId) {
     const gym = GymFlowDB.getById('gyms', gymId);
-    if (!gym) { Toast.error('Subscription record was not found.'); return; }
-    const dependents = getSubscriptionDependents(gymId);
-    if (dependents) {
-      Toast.error(`This subscription is linked to ${dependents} related record(s). Resolve them before deleting the gym subscription.`);
+    if (!gym) {
+      Toast.error('Subscription record was not found.');
       return;
     }
-
     Modal.confirm({
       title: 'Delete Subscription?',
-      message: `This demo stores subscriptions on the gym record. Deleting ${gym.name}'s subscription will also remove its gym organization. Continue?`,
-      confirmText: 'Delete',
+      message: 'This removes the selected gym record from both lists. Related records in other collections are not deleted.',
+      confirmText: 'Delete Subscription',
       confirmClass: 'btn-danger',
       onConfirm: () => {
-        try {
-          if (getSubscriptionDependents(gymId)) {
-            Toast.error('This subscription now has linked records and cannot be deleted safely.');
-            return;
-          }
-          if (!GymFlowDB.delete('gyms', gymId)) throw new Error('Subscription was not deleted.');
-          Toast.success(`Subscription for ${gym.name} was deleted.`);
-          loadSubs();
-        } catch (error) {
-          console.error('Unable to delete subscription:', error);
+        const deleted = GymFlowDB.delete('gyms', gymId);
+        if (!deleted) {
           Toast.error('Could not delete this subscription. Please try again.');
+          return;
         }
+        Toast.success('Subscription for ' + gym.name + ' was deleted.');
+        loadSubs();
       }
     });
   }
