@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout Plans — Gym Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <style>
+    .wp-toolbar { display:grid; grid-template-columns:minmax(250px,1fr) auto; align-items:center; gap:1rem; padding:1rem 1.25rem; }
+    .wp-toolbar .table-search { width:min(340px,100%); }
+    .wp-toolbar-controls { display:flex; align-items:center; justify-content:flex-end; gap:.6rem; flex-wrap:nowrap; white-space:nowrap; }
+    .wp-toolbar-controls .form-select { width:150px; min-width:150px; }
+    .wp-toolbar-controls .btn { flex:0 0 auto; white-space:nowrap; }
+    .wp-table-wrap { overflow-x:auto; }
+    .wp-table { min-width:1120px; }
+    .wp-plan-member { display:flex; align-items:center; gap:.65rem; min-width:155px; }
+    .wp-plan-member .avatar { flex:0 0 auto; }
+    .wp-plan-title { font-weight:700; white-space:normal; min-width:155px; }
+    .wp-actions { display:flex; align-items:center; justify-content:flex-end; gap:.4rem; flex-wrap:nowrap; white-space:nowrap; }
+    .wp-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.9rem 1rem; }
+    .wp-routine-days { display:grid; gap:.75rem; }
+    .wp-routine-day { border:1px solid var(--border-color); border-radius:var(--radius-md); background:var(--bg-surface); }
+    .wp-routine-day summary { cursor:pointer; padding:.8rem 1rem; font-weight:700; display:flex; justify-content:space-between; align-items:center; gap:.75rem; }
+    .wp-routine-body { padding:0 1rem 1rem; }
+    .wp-exercise-list { display:grid; gap:.65rem; margin:.75rem 0; }
+    .wp-exercise-row { display:grid; grid-template-columns:minmax(180px,2fr) repeat(4,minmax(82px,.7fr)) minmax(150px,1.3fr) auto; gap:.5rem; align-items:end; }
+    .wp-exercise-row .form-group { margin:0; }
+    .wp-exercise-row .form-label { font-size:.7rem; margin-bottom:.25rem; }
+    .wp-exercise-row .form-control,.wp-exercise-row .form-select { min-width:0; padding:.5rem; font-size:.8rem; }
+    .wp-rest-row { padding:.8rem; border-radius:var(--radius-sm); background:var(--bg-surface-secondary); color:var(--text-muted); }
+    .wp-detail-head { display:flex; align-items:center; gap:1rem; padding:1rem; border:1px solid var(--border-color); border-radius:var(--radius-md); margin-bottom:1rem; }
+    .wp-detail-meta { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.75rem; margin-bottom:1rem; }
+    .wp-meta-item { padding:.8rem; border:1px solid var(--border-color); border-radius:var(--radius-sm); }
+    .wp-meta-label { display:block; color:var(--text-muted); font-size:.72rem; margin-bottom:.25rem; }
+    .wp-day-tabs { display:flex; gap:.4rem; overflow-x:auto; margin-bottom:1rem; padding-bottom:.25rem; }
+    .wp-day-tab { flex:0 0 auto; }
+    .wp-day-tab.is-rest { border-style:dashed; }
+    .wp-detail-table { width:100%; min-width:680px; border-collapse:collapse; }
+    .wp-detail-table th,.wp-detail-table td { padding:.7rem; text-align:left; border-bottom:1px solid var(--border-color); vertical-align:top; }
+    .wp-detail-table th { color:var(--text-muted); font-size:.72rem; text-transform:uppercase; }
+    .wp-detail-actions { display:flex; justify-content:flex-end; gap:.5rem; }
+    @media(max-width:900px) { .wp-detail-meta { grid-template-columns:repeat(2,minmax(0,1fr)); } .wp-exercise-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media(max-width:900px) { .wp-toolbar { grid-template-columns:1fr; } .wp-toolbar .table-search { width:min(340px,100%); } .wp-toolbar-controls { justify-content:flex-start; overflow-x:auto; padding-bottom:.25rem; } }
+    @media(max-width:600px) { .wp-form-grid,.wp-detail-meta { grid-template-columns:1fr; } .wp-toolbar { padding:.85rem; } .wp-toolbar-controls .form-select { width:145px; min-width:145px; } }
+    @media print {
+      body.printing-workout * { visibility:hidden !important; }
+      body.printing-workout #modal-workout-view, body.printing-workout #modal-workout-view * { visibility:visible !important; }
+      body.printing-workout #modal-workout-view { position:static !important; display:block !important; background:#fff !important; padding:0 !important; }
+      body.printing-workout #modal-workout-view .modal { width:100% !important; max-width:none !important; max-height:none !important; overflow:visible !important; box-shadow:none !important; border:0 !important; }
+      body.printing-workout .modal-header button, body.printing-workout .wp-detail-actions, body.printing-workout .wp-day-tabs { display:none !important; }
+      body.printing-workout .modal-body { overflow:visible !important; max-height:none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <a href="dashboard.html" class="brand-link">
+        <div class="brand-icon"><i class="fa-solid fa-dumbbell"></i></div>
+        <div class="brand-text">Gym<span>Flow</span></div>
+      </a>
+      <button class="topbar-toggle sidebar-toggle-btn d-none"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a></div>
+      <div class="nav-section-title">Members & Club</div>
+      <div class="nav-item"><a href="branches.html" class="nav-link"><i class="fa-solid fa-network-wired"></i><span>Branches</span></a></div>
+      <div class="nav-item"><a href="members.html" class="nav-link"><i class="fa-solid fa-users"></i><span>Membership Management</span></a></div>
+      <div class="nav-item"><a href="membership-plans.html" class="nav-link"><i class="fa-solid fa-tags"></i><span>Plans</span></a></div>
+      <div class="nav-item"><a href="attendance.html" class="nav-link"><i class="fa-solid fa-id-card-clip"></i><span>Attendance Desk</span></a></div>
+      <div class="nav-section-title">Training & Classes</div>
+      <div class="nav-item"><a href="trainers.html" class="nav-link"><i class="fa-solid fa-user-ninja"></i><span>Trainers</span></a></div>
+      <div class="nav-item"><a href="classes.html" class="nav-link"><i class="fa-solid fa-calendar-days"></i><span>Classes & Timetable</span></a></div>
+      <div class="nav-item"><a href="class-bookings.html" class="nav-link"><i class="fa-solid fa-book-bookmark"></i><span>Class Bookings</span></a></div>
+      <div class="nav-item"><a href="workout-plans.html" class="nav-link active"><i class="fa-solid fa-clipboard-list"></i><span>Workout Plans</span></a></div>
+      <div class="nav-section-title">Financials & Sales</div>
+      <div class="nav-item"><a href="payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span>Payments</span></a></div>
+      <div class="nav-item"><a href="invoices.html" class="nav-link"><i class="fa-solid fa-file-invoice-dollar"></i><span>Invoices</span></a></div>
+      <div class="nav-item"><a href="expenses.html" class="nav-link"><i class="fa-solid fa-receipt"></i><span>Expenses</span></a></div>
+      <div class="nav-item"><a href="leads.html" class="nav-link"><i class="fa-solid fa-user-plus"></i><span>Leads CRM</span></a></div>
+      <div class="nav-section-title">Operations</div>
+      <div class="nav-item"><a href="equipment.html" class="nav-link"><i class="fa-solid fa-dumbbell"></i><span>Equipment</span></a></div>
+      <div class="nav-item"><a href="maintenance.html" class="nav-link"><i class="fa-solid fa-screwdriver-wrench"></i><span>Maintenance</span></a></div>
+      <div class="nav-item"><a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-line"></i><span>Reports & Analytics</span></a></div>
+      <div class="nav-section-title">Administration</div>
+      <div class="nav-item"><a href="staff.html" class="nav-link"><i class="fa-solid fa-user-tie"></i><span>Staff Accounts</span></a></div>
+      <div class="nav-item"><a href="roles-permissions.html" class="nav-link"><i class="fa-solid fa-lock"></i><span>Roles & Access</span></a></div>
+      <div class="nav-item"><a href="notifications.html" class="nav-link"><i class="fa-solid fa-bell"></i><span>Notifications</span></a></div>
+      <div class="nav-item"><a href="support.html" class="nav-link"><i class="fa-solid fa-headset"></i><span>Support Helpdesk</span></a></div>
+      <div class="nav-item"><a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i><span>Gym Settings</span></a></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar avatar-sm"><img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&h=100&fit=crop" alt="User" class="current-user-avatar"></div>
+        <div class="sidebar-user-info"><span class="sidebar-user-name current-user-name">Marcus Vance</span><span class="sidebar-user-role">Gym Admin</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-left"><button class="topbar-toggle sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button></div>
+      <div class="topbar-right">
+        <span class="role-indicator admin"><i class="fa-solid fa-building"></i> Gym Admin</span>
+        <button class="topbar-action-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
+        <button class="topbar-action-btn" id="btn-notifications"><i class="fa-solid fa-bell"></i><span class="action-badge"></span></button>
+        <div class="dropdown">
+          <button class="topbar-user-btn" data-dropdown-toggle>
+            <div class="avatar avatar-sm"><img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&h=100&fit=crop" class="current-user-avatar" alt="Avatar"></div>
+            <div><div class="topbar-user-name current-user-name">Marcus Vance</div><div class="topbar-user-role">Gym Admin</div></div>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-subtle);"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a href="settings.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item text-danger btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-wrapper">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb">
+            <a href="dashboard.html">Gym Admin</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Workout Plans</span>
+          </div>
+          <h1 class="page-title">Personalized Workout Plans</h1>
+          <p class="page-subtitle">Build customized training regimens, prescribe sets and repetitions, and assign directly to member portals.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-accent" onclick="openCreateWorkout()"><i class="fa-solid fa-plus"></i> Create Workout Plan</button>
+        </div>
+      </div>
+
+      <section class="card" aria-label="Workout plan management">
+        <div class="wp-toolbar">
+          <div class="table-search">
+            <div class="input-with-icon"><i class="fa-solid fa-magnifying-glass input-icon"></i><input type="search" id="wp-search" class="form-control" placeholder="Search member, plan, or coach..." oninput="filterWorkouts()" aria-label="Search workout plans"></div>
+          </div>
+          <div class="wp-toolbar-controls">
+            <select id="wp-filter-goal" class="form-select" onchange="filterWorkouts()" aria-label="Filter by training goal"><option value="">All Goals</option></select>
+            <select id="wp-filter-coach" class="form-select" onchange="filterWorkouts()" aria-label="Filter by coach"><option value="">All Coaches</option></select>
+            <select id="wp-filter-split" class="form-select" onchange="filterWorkouts()" aria-label="Filter by workout split"><option value="">All Splits</option></select>
+            <select id="wp-filter-status" class="form-select" onchange="filterWorkouts()" aria-label="Filter by status"><option value="">All Statuses</option></select>
+            <button type="button" class="btn btn-outline btn-sm" onclick="resetWorkoutFilters()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
+          </div>
+        </div>
+        <div class="table-responsive wp-table-wrap">
+          <table class="data-table wp-table" id="workout-plans-table">
+            <thead><tr>
+              <th class="table-serial-heading">S.No.</th>
+              <th class="sortable" onclick="sortWorkouts('memberName')" style="cursor:pointer">Member <i class="fa-solid fa-sort text-muted" data-sort-icon="memberName"></i></th>
+              <th class="sortable" onclick="sortWorkouts('title')" style="cursor:pointer">Workout Plan <i class="fa-solid fa-sort text-muted" data-sort-icon="title"></i></th>
+              <th class="sortable" onclick="sortWorkouts('goal')" style="cursor:pointer">Training Goal <i class="fa-solid fa-sort text-muted" data-sort-icon="goal"></i></th>
+              <th>Assigned Coach</th><th>Workout Split</th>
+              <th class="sortable" onclick="sortWorkouts('startDate')" style="cursor:pointer">Start Date <i class="fa-solid fa-sort text-muted" data-sort-icon="startDate"></i></th>
+              <th class="sortable" onclick="sortWorkouts('endDate')" style="cursor:pointer">End Date <i class="fa-solid fa-sort text-muted" data-sort-icon="endDate"></i></th>
+              <th class="sortable" onclick="sortWorkouts('status')" style="cursor:pointer">Status <i class="fa-solid fa-sort text-muted" data-sort-icon="status"></i></th>
+              <th class="table-actions-column" style="text-align:right">Actions</th>
+            </tr></thead>
+            <tbody id="workout-plans-tbody"></tbody>
+          </table>
+        </div>
+        <div class="table-pagination" id="workout-plans-pagination" aria-label="Workout plan pagination"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Modal: Create/Edit Workout Plan -->
+<div class="modal-backdrop" id="modal-add-workout">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title" id="wp-form-heading"><i class="fa-solid fa-dumbbell text-accent"></i> Create Workout Plan</h3>
+      <button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button>
+    </div>
+    <form id="workout-plan-form" onsubmit="handleSaveWorkout(event)">
+      <input type="hidden" id="wp-record-id">
+      <div class="modal-body">
+        <div class="wp-form-grid">
+          <div class="form-group"><label class="form-label" for="wp-title">Plan Title <span class="required">*</span></label><input type="text" id="wp-title" class="form-control" required maxlength="100" placeholder="e.g. 5-Day Strength Foundation"></div>
+          <div class="form-group"><label class="form-label" for="wp-goal">Training Goal <span class="required">*</span></label><input type="text" id="wp-goal" class="form-control" required maxlength="100" placeholder="e.g. Strength and muscle building"></div>
+          <div class="form-group"><label class="form-label" for="wp-member-select">Member <span class="required">*</span></label><select id="wp-member-select" class="form-select" required></select></div>
+          <div class="form-group"><label class="form-label" for="wp-trainer-select">Assigned Coach <span class="required">*</span></label><select id="wp-trainer-select" class="form-select" required></select></div>
+          <div class="form-group"><label class="form-label" for="wp-split">Workout Split <span class="required">*</span></label><select id="wp-split" class="form-select" required><option value="">Choose a split</option><option>Full Body</option><option>Upper / Lower</option><option>Push / Pull / Legs</option><option>Bro Split</option><option>Strength</option><option>Custom</option></select></div>
+          <div class="form-group"><label class="form-label" for="wp-status">Plan Status</label><select id="wp-status" class="form-select"><option value="active">Active</option><option value="draft">Draft</option><option value="completed">Completed</option><option value="expired">Expired</option></select></div>
+          <div class="form-group"><label class="form-label" for="wp-start-date">Start Date <span class="required">*</span></label><input type="date" id="wp-start-date" class="form-control" required></div>
+          <div class="form-group"><label class="form-label" for="wp-end-date">End Date</label><input type="date" id="wp-end-date" class="form-control"></div>
+        </div>
+        <div style="margin:1rem 0 .65rem"><h4 style="margin-bottom:.25rem">Weekly Schedule</h4><p class="text-xs text-muted">Set workout and rest days. Add as many exercises as needed to each training day.</p></div>
+        <div class="wp-routine-days" id="wp-routine-days"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-accent" id="wp-save-button"><i class="fa-solid fa-check"></i> Save Workout Plan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Workout Plan Detail View -->
+<div class="modal-backdrop" id="modal-workout-view">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fa-solid fa-clipboard-list text-accent"></i> Workout Plan Details</h3>
+      <button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="wp-detail-content"></div>
+    <div class="modal-footer wp-detail-actions">
+      <button type="button" class="btn btn-secondary" data-modal-close>Close</button>
+      <button type="button" class="btn btn-outline" onclick="printWorkoutPlan()"><i class="fa-solid fa-print"></i> Print Plan</button>
+      <button type="button" class="btn btn-accent" onclick="editViewedWorkout()"><i class="fa-solid fa-pen"></i> Edit Plan</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/app.js"></script>
+
+<script>
+  const WP_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const WP_EXERCISES = {
+    Chest: ['Barbell Bench Press', 'Incline Dumbbell Press', 'Chest Fly', 'Push-ups'],
+    Back: ['Lat Pulldown', 'Seated Cable Row', 'Barbell Row', 'Pull-ups'],
+    Shoulders: ['Overhead Press', 'Dumbbell Shoulder Press', 'Lateral Raises', 'Face Pulls'],
+    Arms: ['Barbell Biceps Curl', 'Hammer Curl', 'Triceps Rope Pushdown', 'Triceps Extension'],
+    Legs: ['Barbell Back Squat', 'Leg Press', 'Romanian Deadlift', 'Leg Curl', 'Leg Extension', 'Calf Raise'],
+    Core: ['Plank', 'Crunches', 'Leg Raises', 'Dead Bug'],
+    Cardio: ['Treadmill', 'Cycling', 'Rowing Machine', 'Elliptical']
+  };
+  let workoutPlans = [];
+  let filteredWorkouts = [];
+  let workoutPage = 1;
+  let workoutPageSize = 10;
+  let workoutSortKey = 'memberName';
+  let workoutSortAsc = true;
+  let viewedWorkout = null;
+  let viewedDayIndex = 0;
+  let editSourceWorkout = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadWorkouts();
+    populateMemberOptions();
+    populateTrainerOptions();
+    document.getElementById('workout-plans-tbody').addEventListener('click', event => {
+      const button = event.target.closest('[data-workout-action]');
+      if (!button) return;
+      const { workoutAction, workoutId } = button.dataset;
+      if (workoutAction === 'view') viewWorkout(workoutId);
+      if (workoutAction === 'edit') openEditWorkout(workoutId);
+      if (workoutAction === 'delete') deleteWorkout(workoutId);
+    });
+    document.getElementById('wp-routine-days').addEventListener('click', event => {
+      const addButton = event.target.closest('[data-add-exercise]');
+      const removeButton = event.target.closest('[data-remove-exercise]');
+      if (addButton) addRoutineExercise(Number(addButton.dataset.addExercise));
+      if (removeButton) removeRoutineExercise(removeButton);
+    });
+    document.getElementById('wp-routine-days').addEventListener('change', event => {
+      if (event.target.matches('[data-rest-day]')) toggleRoutineDay(event.target);
+    });
+    document.getElementById('wp-detail-content').addEventListener('click', event => {
+      const dayButton = event.target.closest('[data-detail-day]');
+      if (dayButton) selectWorkoutDay(Number(dayButton.dataset.detailDay));
+    });
+  });
+
+  function escapeWp(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+  }
+
+  function initials(name) {
+    return String(name || 'Member').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase();
+  }
+
+  function normalizeSchedule(plan) {
+    const stored = Array.isArray(plan.weeklySchedule) ? plan.weeklySchedule : [];
+    const days = WP_DAYS.map((day, index) => {
+      let source = stored.find(item => new RegExp(`^${day}\\b`, 'i').test(String(item.day || '')));
+      if (!source) source = stored.find(item => {
+        const match = String(item.day || '').match(/^Day\s*(\d+)/i);
+        return match && Number(match[1]) === index + 1;
+      });
+      const exercises = source && Array.isArray(source.exercises) ? source.exercises : [];
+      return {
+        day,
+        focus: source?.focus || (String(source?.day || '').match(/\((.*?)\)/)?.[1] || ''),
+        isRestDay: Boolean(source?.isRestDay) || exercises.length === 0,
+        exercises: exercises.map(exercise => ({
+          name: exercise.name || '', sets: Number(exercise.sets) || 0, reps: exercise.reps || '',
+          weight: exercise.weight || '', restInterval: exercise.restInterval || '', notes: exercise.notes || '',
+          completed: Boolean(exercise.completed)
+        }))
+      };
+    });
+    return days;
+  }
+
+  function getWorkoutSplit(plan) {
+    if (plan.workoutSplit || plan.split) return plan.workoutSplit || plan.split;
+    const scheduled = normalizeSchedule(plan).filter(day => !day.isRestDay).length;
+    if (/push\s*\/\s*pull\s*\/\s*legs/i.test(plan.title || '')) return 'Push / Pull / Legs';
+    return scheduled ? `${scheduled} days / week` : 'Custom';
+  }
+
+  function getWorkoutStatus(plan) {
+    const status = String(plan.status || '').toLowerCase();
+    if (['active', 'draft', 'completed', 'expired'].includes(status)) return status;
+    const endDate = plan.endDate || '';
+    if (endDate && endDate < new Date().toISOString().slice(0, 10)) return 'expired';
+    return 'active';
+  }
+
+  function getPlanStart(plan) { return plan.startDate || plan.assignedDate || ''; }
+  function statusBadge(status) {
+    const classes = { active: 'badge-success', draft: 'badge-neutral', completed: 'badge-primary', expired: 'badge-danger' };
+    return `<span class="badge ${classes[status] || 'badge-neutral'}"><span class="badge-dot"></span>${escapeWp(status[0].toUpperCase() + status.slice(1))}</span>`;
+  }
+
+  function populateMemberOptions(selectedId = '') {
+    const gymId = Auth.getTenantGymId();
+    const members = GymFlowDB.get('members', { gymId }) || [];
+    const select = document.getElementById('wp-member-select');
+    select.innerHTML = '<option value="">Select a member</option>' + members.map(member =>
+      `<option value="${escapeWp(member.id)}" ${String(member.id) === String(selectedId) ? 'selected' : ''}>${escapeWp(member.name)}${member.id ? ` (${escapeWp(member.id)})` : ''}</option>`
+    ).join('');
+  }
+
+  function populateTrainerOptions(selectedName = '') {
+    const gymId = Auth.getTenantGymId();
+    const trainers = GymFlowDB.get('trainers', { gymId }) || [];
+    const select = document.getElementById('wp-trainer-select');
+    const names = Array.from(new Set(trainers.map(trainer => trainer.name).filter(Boolean)));
+    if (selectedName && !names.includes(selectedName)) names.unshift(selectedName);
+    select.innerHTML = '<option value="">Select a coach</option>' + names.map(name =>
+      `<option value="${escapeWp(name)}" ${name === selectedName ? 'selected' : ''}>${escapeWp(name)}</option>`
+    ).join('');
+  }
+
+  function populateWorkoutFilters() {
+    const options = [
+      ['wp-filter-goal', 'All Goals', Array.from(new Set(workoutPlans.map(plan => plan.goal).filter(Boolean)))],
+      ['wp-filter-coach', 'All Coaches', Array.from(new Set(workoutPlans.map(plan => plan.trainerName).filter(Boolean)))],
+      ['wp-filter-split', 'All Splits', Array.from(new Set(workoutPlans.map(getWorkoutSplit).filter(Boolean)))],
+      ['wp-filter-status', 'All Statuses', ['active', 'draft', 'completed', 'expired']]
+    ];
+    options.forEach(([id, label, values]) => {
+      const select = document.getElementById(id);
+      const selected = select.value;
+      select.innerHTML = `<option value="">${label}</option>` + values.map(value =>
+        `<option value="${escapeWp(value)}">${escapeWp(value[0].toUpperCase() + value.slice(1))}</option>`
+      ).join('');
+      if (Array.from(select.options).some(option => option.value === selected)) select.value = selected;
+    });
+  }
+
+  function loadWorkouts() {
+    workoutPlans = GymFlowDB.get('workoutPlans', { gymId: Auth.getTenantGymId() }) || [];
+    populateWorkoutFilters();
+    filterWorkouts();
+  }
+
+  function filterWorkouts() {
+    const query = (document.getElementById('wp-search').value || '').trim().toLowerCase();
+    const goal = document.getElementById('wp-filter-goal').value;
+    const coach = document.getElementById('wp-filter-coach').value;
+    const split = document.getElementById('wp-filter-split').value;
+    const status = document.getElementById('wp-filter-status').value;
+    filteredWorkouts = workoutPlans.filter(plan => {
+      const member = GymFlowDB.getById('members', plan.memberId);
+      const memberName = member?.name || plan.memberName || '';
+      const text = [memberName, plan.title, plan.trainerName, plan.goal].join(' ').toLowerCase();
+      return (!query || text.includes(query)) && (!goal || plan.goal === goal) &&
+        (!coach || plan.trainerName === coach) && (!split || getWorkoutSplit(plan) === split) &&
+        (!status || getWorkoutStatus(plan) === status);
+    });
+    filteredWorkouts.sort((a, b) => {
+      let left, right;
+      if (workoutSortKey === 'startDate') { left = getPlanStart(a); right = getPlanStart(b); }
+      else if (workoutSortKey === 'endDate') { left = a.endDate || ''; right = b.endDate || ''; }
+      else if (workoutSortKey === 'status') { left = getWorkoutStatus(a); right = getWorkoutStatus(b); }
+      else if (workoutSortKey === 'memberName') { left = GymFlowDB.getById('members', a.memberId)?.name || a.memberName || ''; right = GymFlowDB.getById('members', b.memberId)?.name || b.memberName || ''; }
+      else { left = a[workoutSortKey] || ''; right = b[workoutSortKey] || ''; }
+      return DataGridHelper.compare({ value: left }, { value: right }, 'value', workoutSortAsc);
+    });
+    workoutPage = 1;
+    renderWorkouts();
+  }
+
+  function sortWorkouts(key) {
+    if (workoutSortKey === key) workoutSortAsc = !workoutSortAsc;
+    else { workoutSortKey = key; workoutSortAsc = true; }
+    document.querySelectorAll('[data-sort-icon]').forEach(icon => {
+      icon.className = `fa-solid ${icon.dataset.sortIcon === key ? (workoutSortAsc ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} text-muted`;
+    });
+    filterWorkouts();
+  }
+
+  function resetWorkoutFilters() {
+    document.getElementById('wp-search').value = '';
+    ['wp-filter-goal', 'wp-filter-coach', 'wp-filter-split', 'wp-filter-status'].forEach(id => document.getElementById(id).value = '');
+    workoutSortKey = 'memberName';
+    workoutSortAsc = true;
+    document.querySelectorAll('[data-sort-icon]').forEach(icon => icon.className = 'fa-solid fa-sort text-muted');
+    filterWorkouts();
+  }
+
+  function renderWorkouts() {
+    const tbody = document.getElementById('workout-plans-tbody');
+    const total = filteredWorkouts.length;
+    const pageCount = Math.max(1, Math.ceil(total / workoutPageSize));
+    workoutPage = Math.min(Math.max(workoutPage, 1), pageCount);
+    const start = (workoutPage - 1) * workoutPageSize;
+    const pageRows = filteredWorkouts.slice(start, start + workoutPageSize);
+    if (!total) {
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state" style="padding:2.5rem 1rem;text-align:center"><div class="empty-icon"><i class="fa-solid fa-dumbbell"></i></div><div class="empty-title">No workout plans found</div><p class="text-muted text-xs">Try a different search or filter, or create a plan for a member.</p><button type="button" class="btn btn-sm btn-outline" onclick="resetWorkoutFilters()">Reset filters</button></div></td></tr>`;
+    } else {
+      tbody.innerHTML = pageRows.map((plan, index) => {
+        const member = GymFlowDB.getById('members', plan.memberId);
+        const memberName = member?.name || plan.memberName || 'Member';
+        const avatar = member?.avatar || '';
+        const split = getWorkoutSplit(plan);
+        const status = getWorkoutStatus(plan);
+        return `<tr>
+          <td class="table-serial-number">${start + index + 1}</td>
+          <td><div class="wp-plan-member"><div class="avatar avatar-sm">${avatar ? `<img src="${escapeWp(avatar)}" alt="${escapeWp(memberName)}">` : escapeWp(initials(memberName))}</div><div><strong>${escapeWp(memberName)}</strong><div class="text-xs text-muted">${escapeWp(plan.memberId || '')}</div></div></div></td>
+          <td><div class="wp-plan-title">${escapeWp(plan.title || 'Untitled plan')}</div></td>
+          <td>${escapeWp(plan.goal || '—')}</td>
+          <td>${escapeWp(plan.trainerName || 'Unassigned')}</td>
+          <td><span class="badge badge-neutral">${escapeWp(split)}</span></td>
+          <td class="text-xs text-muted">${escapeWp(getPlanStart(plan) || '—')}</td>
+          <td class="text-xs text-muted">${escapeWp(plan.endDate || '—')}</td>
+          <td>${statusBadge(status)}</td>
+          <td class="table-actions-cell"><div class="wp-actions">
+            <button type="button" class="btn-icon btn-icon-sm" data-workout-action="view" data-workout-id="${escapeWp(plan.id)}" title="View plan" aria-label="View ${escapeWp(plan.title)}"><i class="fa-solid fa-eye"></i></button>
+            <button type="button" class="btn-icon btn-icon-sm" data-workout-action="edit" data-workout-id="${escapeWp(plan.id)}" title="Edit plan" aria-label="Edit ${escapeWp(plan.title)}"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" class="btn-icon btn-icon-sm text-danger" data-workout-action="delete" data-workout-id="${escapeWp(plan.id)}" title="Delete plan" aria-label="Delete ${escapeWp(plan.title)}"><i class="fa-solid fa-trash"></i></button>
+          </div></td>
+        </tr>`;
+      }).join('');
+    }
+    TableHelper.renderPagination(document.getElementById('workout-plans-pagination'), total, workoutPage, workoutPageSize,
+      nextPage => { workoutPage = nextPage; renderWorkouts(); },
+      nextSize => { workoutPageSize = nextSize; workoutPage = 1; renderWorkouts(); });
+  }
+
+  function newWorkoutSchedule() {
+    return WP_DAYS.map((day, index) => ({ day, focus: '', isRestDay: index !== 0, exercises: [] }));
+  }
+
+  function openCreateWorkout() {
+    editSourceWorkout = null;
+    populateMemberOptions();
+    populateTrainerOptions();
+    document.getElementById('workout-plan-form').reset();
+    document.getElementById('wp-record-id').value = '';
+    document.getElementById('wp-form-heading').innerHTML = '<i class="fa-solid fa-dumbbell text-accent"></i> Create Workout Plan';
+    document.getElementById('wp-save-button').innerHTML = '<i class="fa-solid fa-check"></i> Save Workout Plan';
+    document.getElementById('wp-start-date').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('wp-status').value = 'active';
+    renderRoutineEditor(newWorkoutSchedule());
+    Modal.open('modal-add-workout');
+  }
+
+  function openEditWorkout(id) {
+    const plan = GymFlowDB.getById('workoutPlans', id);
+    if (!plan || plan.gymId !== Auth.getTenantGymId()) { Toast.error('Workout plan was not found in this gym.'); return; }
+    editSourceWorkout = plan;
+    populateMemberOptions(plan.memberId);
+    populateTrainerOptions(plan.trainerName);
+    document.getElementById('wp-record-id').value = plan.id;
+    document.getElementById('wp-form-heading').innerHTML = '<i class="fa-solid fa-pen text-accent"></i> Edit Workout Plan';
+    document.getElementById('wp-save-button').innerHTML = '<i class="fa-solid fa-check"></i> Save Changes';
+    document.getElementById('wp-title').value = plan.title || '';
+    document.getElementById('wp-goal').value = plan.goal || '';
+    document.getElementById('wp-member-select').value = plan.memberId || '';
+    document.getElementById('wp-trainer-select').value = plan.trainerName || '';
+    const splitSelect = document.getElementById('wp-split');
+    const savedSplit = plan.workoutSplit || plan.split || '';
+    splitSelect.value = Array.from(splitSelect.options).some(option => option.value === savedSplit) ? savedSplit : 'Custom';
+    document.getElementById('wp-status').value = getWorkoutStatus(plan);
+    document.getElementById('wp-start-date').value = getPlanStart(plan);
+    document.getElementById('wp-end-date').value = plan.endDate || '';
+    renderRoutineEditor(normalizeSchedule(plan));
+    if (viewedWorkout?.id === id) Modal.close('modal-workout-view');
+    Modal.open('modal-add-workout');
+  }
+
+  function renderRoutineEditor(schedule) {
+    document.getElementById('wp-routine-days').innerHTML = schedule.map((day, index) => `
+      <details class="wp-routine-day" ${index < 2 ? 'open' : ''}>
+        <summary><span>${day.day}${day.focus ? ` · ${escapeWp(day.focus)}` : ''}</span><span class="badge ${day.isRestDay ? 'badge-neutral' : 'badge-success'}">${day.isRestDay ? 'Rest day' : `${day.exercises.length} exercises`}</span></summary>
+        <div class="wp-routine-body">
+          <label class="text-sm"><input type="checkbox" data-rest-day data-day-index="${index}" ${day.isRestDay ? 'checked' : ''}> Rest day</label>
+          <div class="wp-exercise-list" data-exercise-list="${index}" ${day.isRestDay ? 'hidden' : ''}>
+            ${day.exercises.map(exercise => exerciseEditorRow(index, exercise)).join('')}
+          </div>
+          <button type="button" class="btn btn-sm btn-outline wp-add-exercise" data-add-exercise="${index}" ${day.isRestDay ? 'hidden' : ''}><i class="fa-solid fa-plus"></i> Add exercise</button>
+        </div>
+      </details>`).join('');
+  }
+
+  function exerciseEditorRow(dayIndex, exercise = {}) {
+    const options = Object.entries(WP_EXERCISES).map(([group, names]) => `<optgroup label="${group}">${names.map(name => `<option value="${escapeWp(name)}" ${name === exercise.name ? 'selected' : ''}>${escapeWp(name)}</option>`).join('')}</optgroup>`).join('');
+    const existingOption = exercise.name && !Object.values(WP_EXERCISES).flat().includes(exercise.name) ? `<option value="${escapeWp(exercise.name)}" selected>${escapeWp(exercise.name)}</option>` : '';
+    return `<div class="wp-exercise-row">
+      <div class="form-group"><label class="form-label">Exercise</label><select class="form-select" data-field="name" required><option value="">Select exercise</option>${existingOption}${options}</select></div>
+      <div class="form-group"><label class="form-label">Sets</label><input class="form-control" data-field="sets" type="number" min="1" max="30" value="${exercise.sets || 3}" required></div>
+      <div class="form-group"><label class="form-label">Reps / time</label><input class="form-control" data-field="reps" value="${escapeWp(exercise.reps || '')}" required placeholder="8-12"></div>
+      <div class="form-group"><label class="form-label">Weight</label><input class="form-control" data-field="weight" value="${escapeWp(exercise.weight || '')}" placeholder="Bodyweight"></div>
+      <div class="form-group"><label class="form-label">Rest</label><input class="form-control" data-field="restInterval" value="${escapeWp(exercise.restInterval || '')}" placeholder="60 sec"></div>
+      <div class="form-group"><label class="form-label">Coach notes</label><input class="form-control" data-field="notes" value="${escapeWp(exercise.notes || '')}" placeholder="Optional"></div>
+      <button type="button" class="btn-icon btn-icon-sm text-danger" data-remove-exercise title="Remove exercise" aria-label="Remove exercise"><i class="fa-solid fa-trash"></i></button>
+    </div>`;
+  }
+
+  function addRoutineExercise(dayIndex, exercise = {}) {
+    const list = document.querySelector(`[data-exercise-list="${dayIndex}"]`);
+    if (!list) return;
+    list.insertAdjacentHTML('beforeend', exerciseEditorRow(dayIndex, exercise));
+    updateRoutineDayBadge(dayIndex);
+  }
+
+  function removeRoutineExercise(button) {
+    const row = button.closest('.wp-exercise-row');
+    if (!row) return;
+    const dayIndex = row.closest('[data-exercise-list]')?.dataset.exerciseList;
+    row.remove();
+    if (dayIndex !== undefined) updateRoutineDayBadge(dayIndex);
+  }
+
+  function updateRoutineDayBadge(dayIndex) {
+    const details = document.querySelector(`[data-exercise-list="${dayIndex}"]`)?.closest('details');
+    if (!details) return;
+    const rest = details.querySelector('[data-rest-day]').checked;
+    const count = details.querySelectorAll('.wp-exercise-row').length;
+    const badge = details.querySelector('summary .badge');
+    badge.className = `badge ${rest ? 'badge-neutral' : 'badge-success'}`;
+    badge.textContent = rest ? 'Rest day' : `${count} exercises`;
+  }
+
+  function toggleRoutineDay(checkbox) {
+    const index = checkbox.dataset.dayIndex;
+    const list = document.querySelector(`[data-exercise-list="${index}"]`);
+    const addButton = document.querySelector(`[data-add-exercise="${index}"]`);
+    list.hidden = checkbox.checked;
+    addButton.hidden = checkbox.checked;
+    const summaryBadge = checkbox.closest('details').querySelector('summary .badge');
+    summaryBadge.className = `badge ${checkbox.checked ? 'badge-neutral' : 'badge-success'}`;
+    summaryBadge.textContent = checkbox.checked ? 'Rest day' : `${list.querySelectorAll('.wp-exercise-row').length} exercises`;
+  }
+
+  function serializeRoutineEditor() {
+    return Array.from(document.querySelectorAll('#wp-routine-days .wp-routine-day')).map((details, index) => {
+      const rest = details.querySelector('[data-rest-day]').checked;
+      const exercises = rest ? [] : Array.from(details.querySelectorAll('.wp-exercise-row')).map(row => {
+        const value = field => row.querySelector(`[data-field="${field}"]`)?.value.trim() || '';
+        const name = value('name');
+        const existingDay = normalizeSchedule(editSourceWorkout || {}).find(day => day.day === WP_DAYS[index]);
+        const oldExercise = existingDay?.exercises.find(exercise => exercise.name === name);
+        return { name, sets: Number(value('sets')), reps: value('reps'), weight: value('weight'), restInterval: value('restInterval'), notes: value('notes'), completed: oldExercise?.completed || false };
+      }).filter(exercise => exercise.name);
+      return { day: WP_DAYS[index], focus: '', isRestDay: rest || !exercises.length, exercises };
+    });
+  }
+
+  function handleSaveWorkout(event) {
+    event.preventDefault();
+    const submitButton = document.getElementById('wp-save-button');
+    if (submitButton.disabled) return;
+    const gymId = Auth.getTenantGymId();
+    const memberId = document.getElementById('wp-member-select').value;
+    const member = GymFlowDB.get('members', { gymId }).find(item => String(item.id) === String(memberId));
+    const schedule = serializeRoutineEditor();
+    const startDate = document.getElementById('wp-start-date').value;
+    const endDate = document.getElementById('wp-end-date').value;
+    if (!member) { Toast.error('Select a member from this gym.'); return; }
+    if (endDate && endDate < startDate) { Toast.error('End date must be on or after the start date.'); return; }
+    if (!schedule.some(day => day.exercises.length)) { Toast.error('Add at least one exercise to a workout day.'); return; }
+
+    const id = document.getElementById('wp-record-id').value;
+    const existing = id ? GymFlowDB.getById('workoutPlans', id) : null;
+    if (id && (!existing || existing.gymId !== gymId)) { Toast.error('Workout plan could not be found.'); return; }
+    const updates = {
+      gymId, memberId, memberName: member.name,
+      trainerName: document.getElementById('wp-trainer-select').value,
+      title: document.getElementById('wp-title').value.trim(),
+      goal: document.getElementById('wp-goal').value.trim(),
+      workoutSplit: document.getElementById('wp-split').value,
+      weeklyFrequency: schedule.filter(day => !day.isRestDay).length,
+      startDate, endDate,
+      assignedDate: existing?.assignedDate || startDate,
+      status: document.getElementById('wp-status').value,
+      weeklySchedule: schedule
+    };
+    submitButton.disabled = true;
+    try {
+      if (existing) {
+        if (!GymFlowDB.update('workoutPlans', id, updates)) throw new Error('Plan update was not saved.');
+      } else {
+        const newPlan = { id: `wp_${Date.now()}`, ...updates };
+        if (!GymFlowDB.insert('workoutPlans', newPlan)) throw new Error('Plan was not saved.');
+      }
+      Modal.close('modal-add-workout');
+      Toast.success(existing ? 'Workout plan updated.' : `Workout plan assigned to ${member.name}.`);
+      editSourceWorkout = null;
+      populateMemberOptions();
+      loadWorkouts();
+    } catch (error) {
+      console.error('Unable to save workout plan:', error);
+      Toast.error('Could not save this workout plan. Please try again.');
+    } finally {
+      submitButton.disabled = false;
+    }
+  }
+
+  function viewWorkout(id) {
+    const plan = GymFlowDB.getById('workoutPlans', id);
+    if (!plan || plan.gymId !== Auth.getTenantGymId()) { Toast.error('Workout plan was not found in this gym.'); return; }
+    viewedWorkout = plan;
+    viewedDayIndex = 0;
+    renderWorkoutDetails();
+    Modal.open('modal-workout-view');
+  }
+
+  function renderWorkoutDetails() {
+    if (!viewedWorkout) return;
+    const member = GymFlowDB.getById('members', viewedWorkout.memberId);
+    const coach = (GymFlowDB.get('trainers', { gymId: viewedWorkout.gymId }) || []).find(item => item.name === viewedWorkout.trainerName);
+    const name = member?.name || viewedWorkout.memberName || 'Member';
+    const avatar = member?.avatar || coach?.avatar || '';
+    const days = normalizeSchedule(viewedWorkout);
+    const day = days[viewedDayIndex] || days[0];
+    const detail = document.getElementById('wp-detail-content');
+    detail.innerHTML = `
+      <div class="wp-detail-head">
+        <div class="avatar avatar-lg">${avatar ? `<img src="${escapeWp(avatar)}" alt="${escapeWp(name)}">` : escapeWp(initials(name))}</div>
+        <div style="min-width:0"><div class="text-xs text-muted">${escapeWp(viewedWorkout.title || 'Workout plan')}</div><h3 style="margin:.2rem 0">${escapeWp(name)}</h3><div class="text-xs text-muted">Member ID: ${escapeWp(viewedWorkout.memberId || '—')} · Coach: ${escapeWp(viewedWorkout.trainerName || 'Unassigned')}</div></div>
+        <div style="margin-left:auto">${statusBadge(getWorkoutStatus(viewedWorkout))}</div>
+      </div>
+      <div class="wp-detail-meta">
+        <div class="wp-meta-item"><span class="wp-meta-label">Training goal</span><strong>${escapeWp(viewedWorkout.goal || '—')}</strong></div>
+        <div class="wp-meta-item"><span class="wp-meta-label">Workout split</span><strong>${escapeWp(getWorkoutSplit(viewedWorkout))}</strong></div>
+        <div class="wp-meta-item"><span class="wp-meta-label">Plan dates</span><strong>${escapeWp(getPlanStart(viewedWorkout) || '—')} – ${escapeWp(viewedWorkout.endDate || '—')}</strong></div>
+        <div class="wp-meta-item"><span class="wp-meta-label">Weekly frequency</span><strong>${days.filter(item => !item.isRestDay).length} days / week</strong></div>
+      </div>
+      <h4 style="margin-bottom:.6rem">Weekly schedule</h4>
+      <div class="wp-day-tabs">${days.map((item, index) => `<button type="button" class="btn btn-sm ${index === viewedDayIndex ? 'btn-accent' : 'btn-outline'} wp-day-tab ${item.isRestDay ? 'is-rest' : ''}" data-detail-day="${index}">${item.day}${item.isRestDay ? ' · Rest' : ` · ${item.exercises.length}`}</button>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-bottom:.55rem"><h4 style="margin:0">${day.day}${day.focus ? ` · ${escapeWp(day.focus)}` : ''}</h4><span class="badge ${day.isRestDay ? 'badge-neutral' : 'badge-primary'}">${day.isRestDay ? 'Rest day' : `${day.exercises.length} exercises`}</span></div>
+      ${day.isRestDay || !day.exercises.length ? `<div class="wp-rest-row"><i class="fa-solid fa-bed"></i> Recovery day — no exercises scheduled.</div>` : `<div class="table-responsive"><table class="wp-detail-table"><thead><tr><th>Exercise</th><th>Sets</th><th>Reps / duration</th><th>Weight</th><th>Rest</th><th>Coach notes</th></tr></thead><tbody>${day.exercises.map(exercise => `<tr><td><strong>${escapeWp(exercise.name)}</strong></td><td>${escapeWp(exercise.sets || '—')}</td><td>${escapeWp(exercise.reps || '—')}</td><td>${escapeWp(exercise.weight || 'Bodyweight')}</td><td>${escapeWp(exercise.restInterval || '—')}</td><td>${escapeWp(exercise.notes || '—')}</td></tr>`).join('')}</tbody></table></div>`}`;
+  }
+
+  function selectWorkoutDay(index) {
+    if (index < 0 || index > 6) return;
+    viewedDayIndex = index;
+    renderWorkoutDetails();
+  }
+
+  function editViewedWorkout() {
+    if (viewedWorkout) openEditWorkout(viewedWorkout.id);
+  }
+
+  function deleteWorkout(id) {
+    const plan = GymFlowDB.getById('workoutPlans', id);
+    if (!plan || plan.gymId !== Auth.getTenantGymId()) { Toast.error('Workout plan was not found in this gym.'); return; }
+    Modal.confirm({
+      title: 'Delete Workout Plan?',
+      message: `Delete “${plan.title}” for ${plan.memberName || 'this member'}? This cannot be undone.`,
+      confirmText: 'Delete Plan',
+      confirmClass: 'btn-danger',
+      onConfirm: () => {
+        try {
+          const current = GymFlowDB.getById('workoutPlans', id);
+          if (!current || current.gymId !== Auth.getTenantGymId()) throw new Error('Plan no longer exists.');
+          if (!GymFlowDB.delete('workoutPlans', id)) throw new Error('Plan was not deleted.');
+          Toast.success('Workout plan deleted.');
+          if (viewedWorkout?.id === id) { Modal.close('modal-workout-view'); viewedWorkout = null; }
+          loadWorkouts();
+        } catch (error) {
+          console.error('Unable to delete workout plan:', error);
+          Toast.error('Could not delete this workout plan. Please try again.');
+        }
+      }
+    });
+  }
+
+  function printWorkoutPlan() {
+    document.body.classList.add('printing-workout');
+    window.print();
+    setTimeout(() => document.body.classList.remove('printing-workout'), 500);
+  }
+</script>
+</body>
+</html>

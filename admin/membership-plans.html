@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membership Plans — Gym Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+<style>
+.membership-plan-price{font-size:2.1rem!important;line-height:1.1}.membership-plan-price small{margin-left:4px;color:var(--text-muted);font-size:.78rem;font-weight:500}.membership-plan-package-note{margin-bottom:.35rem;color:var(--text-muted);font-size:.75rem}
+.annual-discount-group{max-width:260px;margin:.25rem 0 .65rem}.membership-annual-preview{margin:0 0 1rem;padding:12px;border:1px solid var(--border-color);border-radius:10px;background:linear-gradient(135deg,rgba(16,185,129,.07),rgba(59,130,246,.035));transition:background .2s ease}.membership-annual-preview.is-empty{background:var(--bg-surface)}.membership-annual-preview-heading{display:flex;align-items:center;gap:7px;margin-bottom:10px;color:var(--text-main);font-size:.8rem;font-weight:700}.membership-annual-preview-heading i{color:var(--color-accent)}.membership-annual-preview-heading span{margin-left:auto;padding:4px 8px;border-radius:999px;background:rgba(16,185,129,.12);color:#087f5b;font-size:.68rem}.membership-annual-preview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.membership-annual-preview-grid>div{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:7px;background:rgba(255,255,255,.8)}.membership-annual-preview-grid span{color:var(--text-muted);font-size:.68rem}.membership-annual-preview-grid strong{color:var(--text-main);font-size:.9rem}.membership-annual-preview-grid>div:nth-child(n+2) strong{color:var(--color-accent)}.membership-annual-preview-note{display:block;margin-top:8px;color:var(--text-muted);font-size:.68rem}
+.membership-benefit-checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;max-height:170px;overflow:auto;padding:8px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-surface);scrollbar-width:thin}.membership-benefit-option{display:flex;align-items:flex-start;gap:8px;padding:7px;border-radius:6px;color:var(--text-muted);font-size:.78rem;line-height:1.35;cursor:pointer;transition:background .16s ease,color .16s ease}.membership-benefit-option:hover,.membership-benefit-option.is-selected{background:rgba(16,185,129,.07);color:var(--text-main)}.membership-benefit-option input{width:15px;height:15px;margin:1px 0 0;accent-color:var(--color-accent)}.membership-selected-benefits{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.membership-benefit-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid rgba(16,185,129,.22);border-radius:999px;background:rgba(16,185,129,.07);color:var(--text-main);font-size:.7rem}.membership-benefit-chip button{border:0;background:transparent;color:var(--text-muted);cursor:pointer;font-size:1rem;line-height:1}.membership-benefits-error{display:block;margin-top:4px;color:#dc2626;font-size:.75rem}.membership-benefits-error:empty{display:none}
+@media(max-width:600px){.membership-annual-preview-grid{grid-template-columns:1fr}.membership-annual-preview-grid>div{flex-direction:row;justify-content:space-between;align-items:center}.membership-benefit-checklist{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.membership-annual-preview,.membership-benefit-option{transition:none}}
+.membership-plan-benefit-list{display:flex;flex-direction:column;gap:.5rem;padding:0;list-style:none;font-size:.82rem;color:var(--text-muted)}.membership-plan-actions{display:flex;align-items:center;justify-content:space-between;gap:.5rem}.membership-plan-actions-left{display:flex;align-items:center;gap:.4rem}.membership-plan-actions .btn{padding:.42rem .65rem;font-size:.75rem;white-space:nowrap}
+@media(max-width:700px){.membership-plan-actions{align-items:stretch;flex-direction:column}.membership-plan-actions-left{width:100%}.membership-plan-actions-left .btn{flex:1}.membership-plan-actions>.btn{width:100%}}</style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <a href="dashboard.html" class="brand-link">
+        <div class="brand-icon"><i class="fa-solid fa-dumbbell"></i></div>
+        <div class="brand-text">Gym<span>Flow</span></div>
+      </a>
+      <button class="topbar-toggle sidebar-toggle-btn d-none"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a></div>
+      <div class="nav-section-title">Members & Club</div>
+      <div class="nav-item"><a href="branches.html" class="nav-link"><i class="fa-solid fa-network-wired"></i><span>Branches</span></a></div>
+      <div class="nav-item"><a href="members.html" class="nav-link"><i class="fa-solid fa-users"></i><span>Membership Management</span></a></div>
+      <div class="nav-item"><a href="membership-plans.html" class="nav-link active"><i class="fa-solid fa-tags"></i><span>Plans</span></a></div>
+      <div class="nav-item"><a href="attendance.html" class="nav-link"><i class="fa-solid fa-id-card-clip"></i><span>Attendance Desk</span></a></div>
+      <div class="nav-section-title">Training & Classes</div>
+      <div class="nav-item"><a href="trainers.html" class="nav-link"><i class="fa-solid fa-user-ninja"></i><span>Trainers</span></a></div>
+      <div class="nav-item"><a href="classes.html" class="nav-link"><i class="fa-solid fa-calendar-days"></i><span>Classes & Timetable</span></a></div>
+      <div class="nav-item"><a href="class-bookings.html" class="nav-link"><i class="fa-solid fa-book-bookmark"></i><span>Class Bookings</span></a></div>
+      <div class="nav-item"><a href="workout-plans.html" class="nav-link"><i class="fa-solid fa-clipboard-list"></i><span>Workout Plans</span></a></div>
+      <div class="nav-section-title">Financials & Sales</div>
+      <div class="nav-item"><a href="payments.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span>Payments</span></a></div>
+      <div class="nav-item"><a href="invoices.html" class="nav-link"><i class="fa-solid fa-file-invoice-dollar"></i><span>Invoices</span></a></div>
+      <div class="nav-item"><a href="expenses.html" class="nav-link"><i class="fa-solid fa-receipt"></i><span>Expenses</span></a></div>
+      <div class="nav-item"><a href="leads.html" class="nav-link"><i class="fa-solid fa-user-plus"></i><span>Leads CRM</span></a></div>
+      <div class="nav-section-title">Operations</div>
+      <div class="nav-item"><a href="equipment.html" class="nav-link"><i class="fa-solid fa-dumbbell"></i><span>Equipment</span></a></div>
+      <div class="nav-item"><a href="maintenance.html" class="nav-link"><i class="fa-solid fa-screwdriver-wrench"></i><span>Maintenance</span></a></div>
+      <div class="nav-item"><a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-line"></i><span>Reports & Analytics</span></a></div>
+      <div class="nav-section-title">Administration</div>
+      <div class="nav-item"><a href="staff.html" class="nav-link"><i class="fa-solid fa-user-tie"></i><span>Staff Accounts</span></a></div>
+      <div class="nav-item"><a href="roles-permissions.html" class="nav-link"><i class="fa-solid fa-lock"></i><span>Roles & Access</span></a></div>
+      <div class="nav-item"><a href="notifications.html" class="nav-link"><i class="fa-solid fa-bell"></i><span>Notifications</span></a></div>
+      <div class="nav-item"><a href="support.html" class="nav-link"><i class="fa-solid fa-headset"></i><span>Support Helpdesk</span></a></div>
+      <div class="nav-item"><a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i><span>Gym Settings</span></a></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar avatar-sm"><img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&h=100&fit=crop" alt="User" class="current-user-avatar"></div>
+        <div class="sidebar-user-info"><span class="sidebar-user-name current-user-name">Marcus Vance</span><span class="sidebar-user-role">Gym Admin</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-left"><button class="topbar-toggle sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button></div>
+      <div class="topbar-right">
+        <span class="role-indicator admin"><i class="fa-solid fa-building"></i> Gym Admin</span>
+        <button class="topbar-action-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
+        <button class="topbar-action-btn" id="btn-notifications"><i class="fa-solid fa-bell"></i><span class="action-badge"></span></button>
+        <div class="dropdown">
+          <button class="topbar-user-btn" data-dropdown-toggle>
+            <div class="avatar avatar-sm"><img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&h=100&fit=crop" class="current-user-avatar" alt="Avatar"></div>
+            <div><div class="topbar-user-name current-user-name">Marcus Vance</div><div class="topbar-user-role">Gym Admin</div></div>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-subtle);"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a href="settings.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Gym Settings</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item text-danger btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-wrapper">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb">
+            <a href="dashboard.html">Gym Admin</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Membership Plans</span>
+          </div>
+          <h1 class="page-title">Gym Membership Packages</h1>
+          <p class="page-subtitle">Configure packages, validity terms, admission fees, and privileges for gym members.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-accent" onclick="openAddGymPlanModal()"><i class="fa-solid fa-plus"></i> Create Package</button>
+        </div>
+      </div>
+
+      <!-- Search, Filter & Sort Toolbar -->
+      <div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+          <!-- Search input -->
+          <div style="position: relative; flex: 1; min-width: 250px; max-width: 350px;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+            <input type="text" id="plan-search" class="form-control" placeholder="Search plans by name..." style="padding-left: 38px;" oninput="filterGymPlans()">
+          </div>
+
+          <!-- Filters and Sort -->
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <!-- Duration filter -->
+            <select id="plan-filter-duration" class="form-select" style="width: 140px;" onchange="filterGymPlans()">
+              <option value="">All Durations</option>
+            </select>
+
+            <!-- Price Range filter -->
+            <select id="plan-filter-price" class="form-select" style="width: 150px;" onchange="filterGymPlans()">
+              <option value="">All Prices</option>
+              <option value="0-50">Under â‚¹50</option>
+              <option value="50-150">â‚¹50 - â‚¹150</option>
+              <option value="150-300">â‚¹150 - â‚¹300</option>
+              <option value="300+">â‚¹300 & Above</option>
+            </select>
+
+            <!-- Status filter -->
+            <select id="plan-filter-status" class="form-select" style="width: 140px;" onchange="filterGymPlans()">
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+
+            <!-- Sort By dropdown -->
+            <select id="plan-sort-by" class="form-select" style="width: 160px;" onchange="filterGymPlans()">
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="name_desc">Name (Z-A)</option>
+              <option value="price_asc">Price (Low-High)</option>
+              <option value="price_desc">Price (High-Low)</option>
+              <option value="duration_asc">Duration (Shortest)</option>
+              <option value="duration_desc">Duration (Longest)</option>
+            </select>
+
+            <!-- Reset Button -->
+            <button type="button" class="btn btn-outline btn-sm" id="btn-reset-plan-filters" onclick="resetPlanFilters()" title="Reset all filters">
+              <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+<div class="grid-3" id="plans-grid">
+        <!-- Rendered via JS -->
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal: Add / Edit Plan -->
+<div class="modal-backdrop" id="modal-add-plan">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title" id="gymplan-modal-title"><i class="fa-solid fa-tags text-accent"></i> Create Membership Plan</h3>
+      <button type="button" class="modal-close" data-modal-close>&times;</button>
+    </div>
+    <form onsubmit="handleSaveGymPlan(event)">
+      <input type="hidden" id="gp-id">
+      <div class="modal-body">
+        <div class="grid-2" style="margin-bottom: 0;">
+          <div class="form-group">
+            <label class="form-label">Plan Name <span class="required">*</span></label>
+            <input type="text" id="gp-name" class="form-control" placeholder="e.g. Semi-Annual VIP" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration Label <span class="required">*</span></label>
+            <input type="text" id="gp-duration" class="form-control" placeholder="e.g. 6 Months" required>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:0;">
+          <div class="form-group">
+            <label class="form-label" for="gp-days">Validity (Days) <span class="required">*</span></label>
+            <input type="number" id="gp-days" class="form-control" placeholder="30" min="1" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="gp-price">Monthly Price (INR) <span class="required">*</span></label>
+            <input type="number" id="gp-price" class="form-control" placeholder="e.g. 999" min="0" step="1" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="gp-joining">Joining Fee (INR)</label>
+            <input type="number" id="gp-joining" class="form-control" placeholder="0" min="0">
+          </div>
+        </div>
+        <div class="form-group annual-discount-group">
+          <label class="form-label" for="gp-annual-discount">Annual Discount (%)</label>
+          <input type="number" id="gp-annual-discount" class="form-control" min="0" max="100" step="0.5" value="15">
+        </div>
+        <div id="membership-annual-preview" class="membership-annual-preview is-empty" aria-live="polite">
+          <div class="membership-annual-preview-heading"><i class="fa-solid fa-calendar-check"></i> Annual price preview <span id="membership-discount-badge">Save 15%</span></div>
+          <div class="membership-annual-preview-grid">
+            <div><span>12 monthly payments</span><strong id="membership-full-year-price">—</strong></div>
+            <div><span>Pay yearly</span><strong id="membership-annual-price">—</strong></div>
+            <div><span>You save</span><strong id="membership-annual-savings">—</strong></div>
+          </div>
+          <small class="membership-annual-preview-note">The yearly preview is used as the package total for a 12-month plan.</small>
+        </div><div class="form-group membership-benefits-group">
+          <label class="form-label">Plan Benefits <span class="required">*</span></label>
+          <div id="gp-benefit-checklist" class="membership-benefit-checklist"></div>
+          <small class="form-help">Select benefits from the available options.</small>
+          <div id="gp-selected-benefits" class="membership-selected-benefits" aria-live="polite"></div>
+          <input type="hidden" id="gp-benefits" name="benefits">
+          <small id="gp-benefits-error" class="membership-benefits-error" role="alert"></small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-accent"><i class="fa-solid fa-check"></i> Save Package</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/app.js"></script>
+
+<script>
+let allGymPlans=[], filteredGymPlans=[], selectedGymPlanBenefits=[];
+const GYM_MEMBERSHIP_BENEFITS=['Access to Gym floor & free weights','Locker room access','1 Free Trainer Consultation','All gym equipment & cardio zone','Free fitness assessment','Access to sauna & steam room','10% off cafe','Unlimited access to both branches','Group class access (Spin, HIIT, Yoga)','Locker & towel service','All branches 24/7 access','Unlimited group classes','Monthly 1-on-1 personal training','Guest pass every month','Custom diet chart','12 one-on-one PT sessions','Full nutrition & macro plan','Bi-weekly body composition analysis','Dedicated coach chat','Priority support','Personalized workout plan'];
+document.addEventListener('DOMContentLoaded',()=>{initializeGymPlanBenefitChecklist();document.getElementById('gp-price')?.addEventListener('input',calculateGymPlanAnnualPreview);document.getElementById('gp-annual-discount')?.addEventListener('input',calculateGymPlanAnnualPreview);loadGymPlans();calculateGymPlanAnnualPreview();});
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function initializeGymPlanBenefitChecklist(extra=[]){const el=document.getElementById('gp-benefit-checklist');if(!el)return;el.innerHTML=[...new Set([...GYM_MEMBERSHIP_BENEFITS,...extra])].map((b,i)=>`<label class="membership-benefit-option" for="gp-benefit-${i}"><input type="checkbox" id="gp-benefit-${i}" value="${esc(b)}" onchange="onGymPlanBenefitChange(this)"><span>${esc(b)}</span></label>`).join('');syncBenefits();}
+function onGymPlanBenefitChange(input){if(input.checked&&!selectedGymPlanBenefits.includes(input.value))selectedGymPlanBenefits.push(input.value);else if(!input.checked)selectedGymPlanBenefits=selectedGymPlanBenefits.filter(x=>x!==input.value);document.getElementById('gp-benefits-error').textContent='';renderBenefits();}
+function syncBenefits(){document.querySelectorAll('#gp-benefit-checklist input').forEach(x=>{x.checked=selectedGymPlanBenefits.includes(x.value);x.closest('label')?.classList.toggle('is-selected',x.checked);});}
+function renderBenefits(){const chips=document.getElementById('gp-selected-benefits'),hidden=document.getElementById('gp-benefits');if(!chips||!hidden)return;hidden.value=JSON.stringify(selectedGymPlanBenefits);chips.innerHTML=selectedGymPlanBenefits.map(b=>`<span class="membership-benefit-chip">${esc(b)}<button type="button" aria-label="Remove ${esc(b)}" onclick="removeGymPlanBenefit(${JSON.stringify(b)})">&times;</button></span>`).join('');syncBenefits();}
+function removeGymPlanBenefit(b){selectedGymPlanBenefits=selectedGymPlanBenefits.filter(x=>x!==b);renderBenefits();}
+function loadPlanBenefits(b){if(typeof b==='string'){try{b=JSON.parse(b);}catch{b=b.split('\\n');}}selectedGymPlanBenefits=Array.isArray(b)?b.filter(Boolean):[];initializeGymPlanBenefitChecklist(selectedGymPlanBenefits);renderBenefits();}
+function money(n){return '₹'+Number(n||0).toLocaleString('en-IN');}
+function calculateGymPlanAnnualPreview(){const price=document.getElementById('gp-price'),discountEl=document.getElementById('gp-annual-discount'),preview=document.getElementById('membership-annual-preview'),full=document.getElementById('membership-full-year-price'),annual=document.getElementById('membership-annual-price'),saved=document.getElementById('membership-annual-savings'),badge=document.getElementById('membership-discount-badge');if(!preview||!price||!full||!annual||!saved||!badge)return;let d=Math.max(0,Math.min(100,Number(discountEl.value)||0));if(Number(discountEl.value)>100)discountEl.value=100;badge.textContent=`Save ${d}%`;if(price.value===''){preview.classList.add('is-empty');full.textContent=annual.textContent=saved.textContent='—';return;}let gross=Math.round(Number(price.value)*12),year=Math.round(gross*(1-d/100));preview.classList.remove('is-empty');full.textContent=money(gross);annual.textContent=money(year);saved.textContent=money(gross-year);}
+function loadGymPlans(){const gymId=Auth.getTenantGymId();allGymPlans=GymFlowDB.get('gymPlans',{gymId})||[];const sel=document.getElementById('plan-filter-duration');if(sel){const ds=[...new Set(allGymPlans.map(p=>p.duration).filter(Boolean))];sel.innerHTML='<option value="">All Durations</option>'+ds.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');}filterGymPlans();}
+function filterGymPlans(){const q=(document.getElementById('plan-search')?.value||'').trim(),dur=document.getElementById('plan-filter-duration')?.value||'',range=document.getElementById('plan-filter-price')?.value||'',status=document.getElementById('plan-filter-status')?.value||'',sort=document.getElementById('plan-sort-by')?.value||'name_asc';filteredGymPlans=allGymPlans.filter(p=>{const mq=DataGridHelper.matchSearch(p,q,['name','duration','benefits']),md=!dur||p.duration===dur,ms=!status||(p.status||'active').toLowerCase()===status.toLowerCase(),n=Number(p.price)||0;let mp=true;if(range==='0-50')mp=n<50;else if(range==='50-150')mp=n>=50&&n<=150;else if(range==='150-300')mp=n>150&&n<=300;else if(range==='300+')mp=n>300;return mq&&md&&ms&&mp;});filteredGymPlans.sort((a,b)=>{if(sort==='name_asc')return DataGridHelper.compare(a,b,'name',true);if(sort==='name_desc')return DataGridHelper.compare(a,b,'name',false);if(sort==='price_asc')return(Number(a.price)||0)-(Number(b.price)||0);if(sort==='price_desc')return(Number(b.price)||0)-(Number(a.price)||0);if(sort==='duration_asc')return(Number(a.durationDays)||0)-(Number(b.durationDays)||0);if(sort==='duration_desc')return(Number(b.durationDays)||0)-(Number(a.durationDays)||0);return 0;});renderGymPlans();}
+function resetPlanFilters(){['plan-search','plan-filter-duration','plan-filter-price','plan-filter-status'].forEach(id=>{const x=document.getElementById(id);if(x)x.value='';});document.getElementById('plan-sort-by').value='name_asc';filterGymPlans();}
+function renderGymPlans(){const c=document.getElementById('plans-grid');if(!c)return;if(!filteredGymPlans.length){c.className='';c.innerHTML=DataGridHelper.getEmptyStateHtml('No Membership Packages Found','No packages match your search criteria or filter combinations.','resetPlanFilters()');return;}c.className='grid-3';c.innerHTML=filteredGymPlans.map(p=>{const st=(p.status||'active').toLowerCase(),id=esc(p.id),benefits=Array.isArray(p.benefits)?p.benefits:[];return `<div class="card card-hover membership-plan-card" style="display:flex;flex-direction:column"><div class="card-header"><div><h3 class="card-title">${esc(p.name)}</h3><span class="text-xs text-muted"><i class="fa-solid fa-clock"></i> Term: ${esc(p.duration)}</span></div><span class="badge ${st==='active'?'badge-success':'badge-neutral'}">${esc(st.toUpperCase())}</span></div><div class="card-body" style="flex:1"><div class="membership-plan-price">${money(p.price)}</div><div class="membership-plan-package-note">Package total for ${esc(p.duration)}</div><div class="text-xs text-muted mb-4">${Number(p.joiningFee)?'+'+money(p.joiningFee)+' One-Time Initiation Fee':'Zero Joining Fee'}</div><ul class="membership-plan-benefit-list">${benefits.map(b=>`<li><i class="fa-solid fa-check text-accent"></i> ${esc(b)}</li>`).join('')}</ul></div><div class="card-footer membership-plan-actions"><div class="membership-plan-actions-left"><button type="button" class="btn btn-sm btn-outline" onclick="editGymPlan('${id}')"><i class="fa-solid fa-pen"></i> Edit</button><button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteGymPlan('${id}')"><i class="fa-solid fa-trash"></i> Delete</button></div><button type="button" class="btn btn-sm ${st==='active'?'btn-outline-danger':'btn-accent'}" onclick="toggleGymPlanStatus('${id}','${st}')">${st==='active'?'Deactivate':'Activate'}</button></div></div>`;}).join('');}
+function openAddGymPlanModal(){document.querySelector('#modal-add-plan form')?.reset();document.getElementById('gymplan-modal-title').innerHTML='<i class="fa-solid fa-tags text-accent"></i> Create Membership Plan';document.getElementById('gp-id').value='';document.getElementById('gp-annual-discount').value='15';selectedGymPlanBenefits=[];initializeGymPlanBenefitChecklist();renderBenefits();document.getElementById('gp-benefits-error').textContent='';calculateGymPlanAnnualPreview();Modal.open('modal-add-plan');}
+function editGymPlan(id){const p=GymFlowDB.getById('gymPlans',id);if(!p)return;document.getElementById('gymplan-modal-title').innerHTML='<i class="fa-solid fa-pen text-electric"></i> Edit Membership Plan';document.getElementById('gp-id').value=p.id;document.getElementById('gp-name').value=p.name||'';document.getElementById('gp-duration').value=p.duration||'';const days=Math.max(1,Number(p.durationDays)||30);document.getElementById('gp-days').value=days;const monthly=Number.isFinite(Number(p.monthlyPrice))?Number(p.monthlyPrice):(days>=330?(Number(p.price)||0)/12:(Number(p.price)||0)*30/days);document.getElementById('gp-price').value=Math.round(monthly*100)/100;document.getElementById('gp-joining').value=Number(p.joiningFee)||0;document.getElementById('gp-annual-discount').value=Number.isFinite(Number(p.annualDiscountPercent))?Number(p.annualDiscountPercent):0;loadPlanBenefits(p.benefits||[]);document.getElementById('gp-benefits-error').textContent='';calculateGymPlanAnnualPreview();Modal.open('modal-add-plan');}
+function handleSaveGymPlan(e){e.preventDefault();if(!selectedGymPlanBenefits.length){document.getElementById('gp-benefits-error').textContent='Select at least one plan benefit.';document.getElementById('gp-benefit-checklist')?.scrollIntoView({behavior:'smooth',block:'center'});return;}const gymId=Auth.getTenantGymId(),id=document.getElementById('gp-id').value,monthly=Number(document.getElementById('gp-price').value)||0,days=Math.max(1,Number(document.getElementById('gp-days').value)||30),discount=Math.min(100,Math.max(0,Number(document.getElementById('gp-annual-discount').value)||0)),annual=Math.round(monthly*12*(1-discount/100)),price=days>=330?annual:Math.round(monthly*days/30),existing=id?GymFlowDB.getById('gymPlans',id):null;const data={gymId,name:document.getElementById('gp-name').value.trim(),duration:document.getElementById('gp-duration').value.trim(),durationDays:days,price,monthlyPrice:monthly,annualPrice:annual,annualDiscountPercent:discount,joiningFee:Number(document.getElementById('gp-joining').value)||0,benefits:[...selectedGymPlanBenefits],status:existing?.status||'active'};if(id){GymFlowDB.update('gymPlans',id,data);Toast.success('Membership plan updated.');}else{data.id=`gplan_${Date.now()}`;GymFlowDB.insert('gymPlans',data);Toast.success('New membership package created.');}Modal.close('modal-add-plan');loadGymPlans();}
+function deleteGymPlan(id){const p=GymFlowDB.getById('gymPlans',id);if(!p)return;Modal.confirm({title:'Delete Membership Plan',message:`Delete “${esc(p.name)}”?`,confirmText:'Delete Plan',confirmClass:'btn-danger',onConfirm:()=>{GymFlowDB.delete('gymPlans',id);Toast.success('Membership plan deleted.');loadGymPlans();}});}
+function toggleGymPlanStatus(id,current){const next=current==='active'?'inactive':'active';GymFlowDB.update('gymPlans',id,{status:next});Toast.success(`Plan marked as ${next}.`);loadGymPlans();}
+</script>
+</body>
+</html>

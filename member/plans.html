@@ -1,0 +1,871 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Membership Plans & Upgrade — Member Portal</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <style>
+    .member-plans-page { width: 100%; min-width: 0; padding-bottom: 32px; }
+    .member-plans-page, .member-plans-page * { box-sizing: border-box; }
+    .member-plans-page .page-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+    .member-plans-page .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; color: var(--text-muted); font-size: 13px; }
+    .member-plans-page .breadcrumb a { color: var(--color-accent); text-decoration: none; }
+    .member-plans-page .breadcrumb a:hover { text-decoration: underline; }
+    .member-plans-page .breadcrumb-separator { opacity: 0.65; }
+    .member-plans-page .breadcrumb-current { color: var(--text-main); font-weight: 600; }
+    .member-plans-page .page-title { margin: 0 0 8px; color: var(--text-main); font-size: clamp(25px, 2vw, 32px); line-height: 1.3; font-weight: 750; }
+    .member-plans-page .page-subtitle { max-width: 720px; margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+    .member-plans-page .member-plan-toolbar { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(0, 2.2fr); gap: 24px; align-items: end; width: 100%; margin-bottom: 28px; padding: 22px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-surface); box-shadow: var(--shadow-sm); }
+    .member-plans-page .member-plan-toolbar * { box-sizing: border-box; }
+    .plan-toolbar-label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 12px; font-weight: 600; line-height: 1.4; }
+    .plan-search { width: 100%; min-width: 0; }
+    .plan-search-input { position: relative; width: 100%; }
+    .plan-search-input > i { position: absolute; top: 50%; left: 14px; z-index: 1; color: var(--text-muted); font-size: 14px; transform: translateY(-50%); pointer-events: none; }
+    .plan-search-input .form-control { width: 100%; height: 46px; padding: 0 14px 0 40px; border: 1px solid var(--border-color); border-radius: 9px; background: var(--bg-surface); color: var(--text-main); font-size: 13px; }
+    .plan-search-input .form-control:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-subtle); }
+    .plan-filters { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)) auto; align-items: end; gap: 12px; min-width: 0; }
+    .plan-filter-group, .plan-reset-group { min-width: 0; }
+    .plan-filter-group .form-select { width: 100%; height: 46px; padding: 0 30px 0 11px; border: 1px solid var(--border-color); border-radius: 9px; background-color: var(--bg-surface); color: var(--text-main); font-size: 12px; cursor: pointer; }
+    .plan-filter-group .form-select:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-subtle); }
+    .plan-reset-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-width: 105px; height: 46px; padding: 0 14px; border-radius: 9px; white-space: nowrap; font-size: 12px; font-weight: 600; transition: background 0.2s ease, transform 0.2s ease; }
+    .plan-reset-btn:hover { transform: translateY(-1px); }
+    .member-plans-page #plans-container { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; align-items: stretch; gap: 24px !important; width: 100%; margin-bottom: 36px !important; }
+    .member-plans-page #plans-container > * { min-width: 0; max-width: 100%; }
+    .member-plans-page #plans-container > .card { display: flex; flex-direction: column; height: 100%; padding: 24px; border-radius: 16px; background: var(--bg-surface); box-shadow: var(--shadow-sm); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .member-plans-page #plans-container > .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .member-plans-page #plans-container h2, .member-plans-page #plans-container h3, .member-plans-page #plans-container h4 { color: var(--text-main); overflow-wrap: anywhere; }
+    .member-plans-page #plans-container p { line-height: 1.65; overflow-wrap: anywhere; }
+    .member-plans-page #plans-container ul { padding-left: 20px; }
+    .member-plans-page #plans-container li { margin-bottom: 10px; line-height: 1.55; }
+    .member-plans-page #plans-container .btn { min-height: 42px; border-radius: 9px; }
+    .member-plans-page .membership-faq { margin-top: 34px; overflow: hidden; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-surface); }
+    .member-plans-page .membership-faq .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); }
+    .member-plans-page .membership-faq .card-title { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .member-plans-page .membership-faq .card-body { padding: 24px; }
+    .member-plans-page .faq-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 36px; }
+    .member-plans-page .faq-grid h4 { margin: 0 0 9px; color: var(--text-main); font-size: 15px; font-weight: 650; line-height: 1.5; }
+    .member-plans-page .faq-grid p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.8; }
+    #modal-upgrade-plan { z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; background: rgba(15, 23, 42, 0.62); backdrop-filter: blur(5px); }
+    #modal-upgrade-plan .modal { width: 100%; max-width: 510px; max-height: calc(100vh - 40px); margin: auto; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 16px; background: var(--bg-surface); color: var(--text-main); box-shadow: var(--shadow-xl); }
+    #modal-upgrade-plan .modal-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 20px 24px; border-bottom: 1px solid var(--border-color); }
+    #modal-upgrade-plan .modal-title { margin: 0; color: var(--text-main); font-size: 18px; line-height: 1.5; font-weight: 700; }
+    #modal-upgrade-plan .modal-body { padding: 24px; }
+    #modal-upgrade-plan #modal-plan-name { color: var(--text-main); font-size: 20px; line-height: 1.4; overflow-wrap: anywhere; }
+    #modal-upgrade-plan #modal-plan-price { color: var(--color-accent) !important; }
+    #modal-upgrade-plan .form-group { margin-top: 20px; }
+    #modal-upgrade-plan .form-label { display: block; margin-bottom: 8px; color: var(--text-main); font-size: 13px; font-weight: 600; }
+    #modal-upgrade-plan .form-select { width: 100%; min-height: 44px; border-radius: 9px; }
+    #modal-upgrade-plan .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; padding: 18px 24px; border-top: 1px solid var(--border-color); }
+    #modal-upgrade-plan .modal-footer .btn { min-height: 42px; border-radius: 9px; }
+    @media (max-width: 1250px) { .member-plans-page .member-plan-toolbar { grid-template-columns: 1fr; gap: 18px; } .plan-search { max-width: 480px; } }
+    @media (max-width: 1100px) { .member-plans-page #plans-container { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 18px !important; } }
+    @media (max-width: 850px) { .member-plans-page .member-plan-toolbar { padding: 18px; } .plan-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; } }
+    @media (max-width: 650px) { .member-plans-page .page-header { margin-bottom: 20px; } .member-plans-page .page-title { font-size: 25px; } .member-plans-page .page-subtitle { font-size: 13px; } .member-plans-page .member-plan-toolbar { padding: 15px; margin-bottom: 20px; } .plan-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .plan-reset-btn { width: 100%; } .member-plans-page #member-plan-sort { grid-column: 1 / -1; } .member-plans-page #plans-container { grid-template-columns: 1fr !important; gap: 16px !important; margin-bottom: 26px !important; } .member-plans-page #plans-container > .card { padding: 20px; } .member-plans-page .membership-faq { margin-top: 26px; } .member-plans-page .membership-faq .card-header { padding: 17px; } .member-plans-page .membership-faq .card-body { padding: 18px; } .member-plans-page .faq-grid { grid-template-columns: 1fr; gap: 22px; } #modal-upgrade-plan { padding: 12px; } #modal-upgrade-plan .modal-header, #modal-upgrade-plan .modal-body { padding: 18px; } #modal-upgrade-plan .modal-footer { padding: 16px 18px; } }
+    @media (max-width: 520px) { .member-plans-page .member-plan-toolbar { gap: 18px; padding: 15px; margin-bottom: 20px; } .plan-search { max-width: 100%; } .plan-filters { grid-template-columns: minmax(0, 1fr); gap: 13px; } .plan-toolbar-label { margin-bottom: 6px; } .plan-filter-group .form-select, .plan-search-input .form-control { height: 44px; } .plan-reset-group { display: flex; flex-direction: column; } }
+    @media (max-width: 380px) { .member-plans-page .page-title { font-size: 22px; } #modal-upgrade-plan .modal-footer { flex-direction: column-reverse; align-items: stretch; } #modal-upgrade-plan .modal-footer .btn { width: 100%; } }
+  </style>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
+      <a href="dashboard.html" class="brand-link">
+        <div class="brand-icon">
+          <i class="fa-solid fa-dumbbell"></i>
+        </div>
+        <div class="brand-text">Gym<span>Flow</span></div>
+      </a>
+
+      <button class="topbar-toggle sidebar-toggle-btn d-none">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+
+    <div class="sidebar-nav">
+
+      <div class="nav-section-title">Overview</div>
+
+      <div class="nav-item">
+        <a href="dashboard.html" class="nav-link">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span>Dashboard</span>
+        </a>
+      </div>
+
+      <div class="nav-section-title">Fitness & Training</div>
+
+      <div class="nav-item">
+        <a href="workout-plan.html" class="nav-link">
+          <i class="fa-solid fa-clipboard-list"></i>
+          <span>Workout Plan</span>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a href="classes.html" class="nav-link">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span>Classes & Timetable</span>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a href="my-bookings.html" class="nav-link">
+          <i class="fa-solid fa-bookmark"></i>
+          <span>My Bookings</span>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a href="progress.html" class="nav-link">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Body Progress</span>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a href="attendance.html" class="nav-link">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Attendance History</span>
+        </a>
+      </div>
+
+      <div class="nav-section-title">Membership & Billing</div>
+
+      <div class="nav-item">
+        <a href="my-membership.html" class="nav-link">
+          <i class="fa-solid fa-id-card"></i>
+          <span>My Membership</span>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a href="plans.html" class="nav-link active">
+          <i class="fa-solid fa-tags"></i>
+          <span>Plans & Upgrade</span>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a href="payments.html" class="nav-link">
+          <i class="fa-solid fa-credit-card"></i>
+          <span>Billing & Receipts</span>
+        </a>
+      </div>
+
+      <div class="nav-section-title">Account & Support</div>
+
+      <div class="nav-item">
+        <a href="my-profile.html" class="nav-link">
+          <i class="fa-solid fa-user"></i>
+          <span>My Profile</span>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a href="notifications.html" class="nav-link">
+          <i class="fa-solid fa-bell"></i>
+          <span>Notifications</span>
+        </a>
+      </div>
+
+      <div class="nav-item">
+        <a href="support.html" class="nav-link">
+          <i class="fa-solid fa-headset"></i>
+          <span>Member Support</span>
+        </a>
+      </div>
+
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+
+        <div class="avatar avatar-sm">
+          <img
+            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
+            alt="Member"
+            class="current-user-avatar"
+          >
+        </div>
+
+        <div class="sidebar-user-info">
+          <span class="sidebar-user-name current-user-name">Alex Morgan</span>
+          <span class="sidebar-user-role">IronPulse Member</span>
+        </div>
+
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+
+      <div class="topbar-left">
+        <button class="topbar-toggle sidebar-toggle-btn">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <div class="topbar-right">
+
+        <span
+          class="role-indicator member"
+          style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;"
+        >
+          <i class="fa-solid fa-person-running"></i>
+          Gym Member
+        </span>
+
+        <button class="topbar-action-btn theme-toggle-btn">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <a href="notifications.html" class="topbar-action-btn" id="btn-notifications">
+          <i class="fa-solid fa-bell"></i>
+          <span class="action-badge"></span>
+        </a>
+
+        <div class="dropdown">
+
+          <button class="topbar-user-btn" data-dropdown-toggle>
+
+            <div class="avatar avatar-sm">
+              <img
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
+                class="current-user-avatar"
+                alt="Avatar"
+              >
+            </div>
+
+            <div>
+              <div class="topbar-user-name current-user-name">Alex Morgan</div>
+              <div class="topbar-user-role">IronPulse Member</div>
+            </div>
+
+            <i
+              class="fa-solid fa-chevron-down"
+              style="font-size: 0.75rem; color: var(--text-subtle);"
+            ></i>
+
+          </button>
+
+          <div class="dropdown-menu">
+
+            <a href="my-profile.html" class="dropdown-item">
+              <i class="fa-solid fa-user"></i>
+              My Profile
+            </a>
+
+            <a href="my-membership.html" class="dropdown-item">
+              <i class="fa-solid fa-id-card"></i>
+              Membership
+            </a>
+
+            <div class="dropdown-divider"></div>
+
+            <a href="#" class="dropdown-item text-danger btn-logout">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Sign Out
+            </a>
+
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="content-wrapper member-plans-page">
+
+      <!-- Page Header -->
+      <div class="page-header">
+
+        <div>
+
+          <div class="breadcrumb">
+            <a href="dashboard.html">Member Portal</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Gym Plans</span>
+          </div>
+
+          <h1 class="page-title">Gym Membership Options</h1>
+
+          <p class="page-subtitle">
+            Compare club membership plans and easily upgrade or adjust your subscription.
+          </p>
+
+        </div>
+
+      </div>
+
+      <!-- Search, Filter & Sort Toolbar -->
+      <div class="card member-plan-toolbar">
+
+        <!-- Search Input -->
+        <div class="plan-search">
+
+          <label for="member-plan-search" class="plan-toolbar-label">
+            Search Membership Plans
+          </label>
+
+          <div class="plan-search-input">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+              type="text"
+              id="member-plan-search"
+              class="form-control"
+              placeholder="Search plan name or perks..."
+              oninput="filterMemberPlans()"
+            >
+
+          </div>
+        </div>
+
+        <!-- Filters and Sorting -->
+        <div class="plan-filters">
+
+          <!-- Duration Filter -->
+          <div class="plan-filter-group">
+
+            <label for="member-plan-filter-duration" class="plan-toolbar-label">
+              Billing Frequency
+            </label>
+
+            <select
+              id="member-plan-filter-duration"
+              class="form-select"
+              onchange="filterMemberPlans()"
+            >
+              <option value="">All Frequencies</option>
+            </select>
+
+          </div>
+
+          <!-- Price Filter -->
+          <div class="plan-filter-group">
+
+            <label for="member-plan-filter-price" class="plan-toolbar-label">
+              Price Range
+            </label>
+
+            <select
+              id="member-plan-filter-price"
+              class="form-select"
+              onchange="filterMemberPlans()"
+            >
+              <option value="">All Price Tiers</option>
+              <option value="0-50">Under ₹50</option>
+              <option value="50-150">₹50 - ₹150</option>
+              <option value="150+">₹150 & Above</option>
+            </select>
+
+          </div>
+
+          <!-- Sorting -->
+          <div class="plan-filter-group">
+
+            <label for="member-plan-sort" class="plan-toolbar-label">
+              Sort By
+            </label>
+
+            <select
+              id="member-plan-sort"
+              class="form-select"
+              onchange="filterMemberPlans()"
+            >
+              <option value="price_asc">Price: Lowest First</option>
+              <option value="price_desc">Price: Highest First</option>
+              <option value="duration_desc">Duration: Longest</option>
+              <option value="name_asc">Name: A–Z</option>
+            </select>
+
+          </div>
+
+          <!-- Reset Filters -->
+          <div class="plan-reset-group">
+
+            <span class="plan-toolbar-label">Actions</span>
+
+            <button
+              type="button"
+              class="btn btn-outline plan-reset-btn"
+              onclick="resetMemberPlanFilters()"
+              title="Reset all filters"
+            >
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+              Reset Filters
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Plan Cards Grid -->
+      <div
+        class="pricing-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;"
+        id="plans-container"
+      >
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="card membership-faq">
+
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fa-solid fa-circle-question text-accent"></i>
+            Membership FAQs
+          </h3>
+        </div>
+
+        <div class="card-body">
+
+          <div class="faq-grid">
+
+            <div>
+              <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">
+                How does upgrading work?
+              </h4>
+
+              <p class="text-xs text-muted">
+                When you upgrade mid-cycle, your remaining balance is pro-rated and applied immediately as a discount toward your new tier.
+              </p>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">
+                Can I switch between monthly and annual?
+              </h4>
+
+              <p class="text-xs text-muted">
+                Yes, switching to annual saves you up to 20% compared to monthly dues and includes extra perks like free guest passes.
+              </p>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">
+                Are there cancellation fees?
+              </h4>
+
+              <p class="text-xs text-muted">
+                No contracts or hidden cancellation fees. You can cancel your renewal anytime with 30 days notice before the next billing cycle.
+              </p>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">
+                Does my keycard change?
+              </h4>
+
+              <p class="text-xs text-muted">
+                No, your existing keycard and digital app QR code will automatically unlock upgraded amenities (such as 24/7 branch doors or recovery lounge).
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+</div>
+
+<!-- Modal: Confirm Plan Upgrade -->
+<div class="modal-backdrop" id="modal-upgrade-plan">
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h3 class="modal-title">
+        <i class="fa-solid fa-circle-arrow-up text-accent"></i>
+        Confirm Plan Selection
+      </h3>
+
+      <button type="button" class="modal-close" data-modal-close>
+        &times;
+      </button>
+
+    </div>
+
+    <form onsubmit="handleConfirmUpgrade(event)">
+
+      <div class="modal-body">
+
+        <p class="text-sm text-muted">
+          You are selecting the following membership plan:
+        </p>
+
+        <div
+          style="background: var(--bg-hover); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;"
+        >
+
+          <h3 id="modal-plan-name" style="margin-bottom: 0.25rem;">
+            Standard Fitness Pro
+          </h3>
+
+          <p
+            id="modal-plan-price"
+            style="font-size: 1.25rem; font-weight: 700; color: var(--accent-color); margin: 0;"
+          >
+            ₹69 / month
+          </p>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="form-label">Payment Method</label>
+
+          <select class="form-select">
+            <option>Visa ending in 4242</option>
+            <option>Mastercard ending in 8891</option>
+          </select>
+
+        </div>
+
+        <p class="text-xs text-muted">
+          A confirmation receipt will be generated and added to your billing history.
+        </p>
+
+      </div>
+
+      <div class="modal-footer">
+
+        <button type="button" class="btn btn-secondary" data-modal-close>
+          Cancel
+        </button>
+
+        <button type="submit" class="btn btn-accent">
+          <i class="fa-solid fa-lock"></i>
+          Confirm & Activate Plan
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<!-- JavaScript Files -->
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/app.js"></script>
+
+<script>
+  let selectedPlanId = null;
+  let allPlans = [];
+  let filteredPlans = [];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadPlans();
+  });
+
+  function loadPlans() {
+    const gymId = Auth.getTenantGymId();
+
+    allPlans = GymFlowDB.get('gymPlans', { gymId: gymId }) || [];
+
+    // Populate duration filter
+    const durSelect = document.getElementById('member-plan-filter-duration');
+
+    if (durSelect) {
+      const durs = Array.from(
+        new Set(allPlans.map(p => p.duration).filter(Boolean))
+      );
+
+      durSelect.innerHTML =
+        '<option value="">All Frequencies</option>' +
+        durs.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+
+    filterMemberPlans();
+  }
+
+  function filterMemberPlans() {
+    const q = (
+      document.getElementById('member-plan-search')?.value || ''
+    ).trim();
+
+    const duration =
+      document.getElementById('member-plan-filter-duration')?.value || '';
+
+    const priceRange =
+      document.getElementById('member-plan-filter-price')?.value || '';
+
+    const sortVal =
+      document.getElementById('member-plan-sort')?.value || 'price_asc';
+
+    filteredPlans = allPlans.filter(p => {
+
+      const matchQ = DataGridHelper.matchSearch(
+        p,
+        q,
+        ['name', 'duration', 'benefits']
+      );
+
+      const matchDuration = !duration || p.duration === duration;
+
+      let matchPrice = true;
+      const price = Number(p.price) || 0;
+
+      if (priceRange === '0-50') {
+        matchPrice = price < 50;
+      } else if (priceRange === '50-150') {
+        matchPrice = price >= 50 && price <= 150;
+      } else if (priceRange === '150+') {
+        matchPrice = price > 150;
+      }
+
+      return matchQ && matchDuration && matchPrice;
+    });
+
+    // Sorting
+    filteredPlans.sort((a, b) => {
+
+      if (sortVal === 'price_asc') {
+        return (Number(a.price) || 0) - (Number(b.price) || 0);
+      }
+
+      if (sortVal === 'price_desc') {
+        return (Number(b.price) || 0) - (Number(a.price) || 0);
+      }
+
+      if (sortVal === 'duration_desc') {
+        return (Number(b.durationDays) || 0) -
+               (Number(a.durationDays) || 0);
+      }
+
+      if (sortVal === 'name_asc') {
+        return DataGridHelper.compare(a, b, 'name', true);
+      }
+
+      return 0;
+    });
+
+    renderPlans();
+  }
+
+  function resetMemberPlanFilters() {
+
+    if (document.getElementById('member-plan-search')) {
+      document.getElementById('member-plan-search').value = '';
+    }
+
+    if (document.getElementById('member-plan-filter-duration')) {
+      document.getElementById('member-plan-filter-duration').value = '';
+    }
+
+    if (document.getElementById('member-plan-filter-price')) {
+      document.getElementById('member-plan-filter-price').value = '';
+    }
+
+    if (document.getElementById('member-plan-sort')) {
+      document.getElementById('member-plan-sort').value = 'price_asc';
+    }
+
+    filterMemberPlans();
+  }
+
+  function renderPlans() {
+
+    const memberId = Auth.getActiveMemberId();
+    const member = GymFlowDB.findById('members', memberId);
+
+    const container = document.getElementById('plans-container');
+
+    if (!filteredPlans.length) {
+
+      container.style.display = 'block';
+
+      container.innerHTML = DataGridHelper.getEmptyStateHtml(
+        'No Membership Packages Found',
+        'No gym tiers match your selected search or filter options.',
+        'resetMemberPlanFilters()'
+      );
+
+      return;
+    }
+
+    container.style.display = 'grid';
+
+    container.innerHTML = filteredPlans.map(p => {
+
+      const isCurrent = member &&
+        (member.planId === p.id || member.planName === p.name);
+
+      return `
+        <div
+          class="card"
+          style="display: flex; flex-direction: column; justify-content: space-between; border: ${isCurrent ? '2px solid var(--accent-color)' : '1px solid var(--border-color)'}; position: relative; overflow: hidden;"
+        >
+
+          ${isCurrent ? `
+            <div style="position: absolute; top: 12px; right: 12px;">
+              <span class="badge badge-accent">CURRENT PLAN</span>
+            </div>
+          ` : ''}
+
+          <div class="card-body" style="padding: 1.75rem 1.5rem;">
+
+            <span
+              class="badge badge-neutral"
+              style="margin-bottom: 0.75rem; text-transform: uppercase;"
+            >
+              ${p.duration}
+            </span>
+
+            <h3
+              style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;"
+            >
+              ${p.name}
+            </h3>
+
+            <div
+              style="font-size: 2rem; font-weight: 800; color: var(--text-heading); margin-bottom: 1.25rem;"
+            >
+              ₹${p.price}<span
+                style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);"
+              >/${p.duration.includes('Annual') || p.duration.includes('Year') ? 'yr' : 'mo'}</span>
+            </div>
+
+            <ul
+              style="list-style: none; padding: 0; margin: 0 0 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem;"
+            >
+
+              ${(p.benefits || [
+                'Gym floor & weight area access',
+                'Locker rooms & hot showers',
+                'Mobile app digital QR pass'
+              ]).map(f => `
+                <li style="display: flex; gap: 0.5rem; align-items: center;">
+                  <i
+                    class="fa-solid fa-check text-success"
+                    style="font-size: 0.8rem;"
+                  ></i>
+                  <span>${f}</span>
+                </li>
+              `).join('')}
+
+            </ul>
+
+          </div>
+
+          <div
+            class="card-footer"
+            style="padding: 1.25rem 1.5rem; background: var(--bg-surface); border-top: 1px solid var(--border-color);"
+          >
+
+            ${isCurrent ? `
+              <button
+                class="btn btn-outline"
+                style="width: 100%;"
+                disabled
+              >
+                <i class="fa-solid fa-circle-check text-success"></i>
+                Active Plan
+              </button>
+            ` : `
+              <button
+                class="btn btn-primary"
+                style="width: 100%;"
+                onclick="openUpgradeModal('${p.id}', '${p.name}', ${p.price}, '${p.duration}')"
+              >
+                Select & Switch Plan
+              </button>
+            `}
+
+          </div>
+
+        </div>
+      `;
+
+    }).join('');
+  }
+
+  function openUpgradeModal(id, name, price, duration) {
+
+    selectedPlanId = id;
+
+    document.getElementById('modal-plan-name').textContent = name;
+
+    document.getElementById('modal-plan-price').textContent =
+      `₹${price} / ${duration}`;
+
+    Modal.open('modal-upgrade-plan');
+  }
+
+  function handleConfirmUpgrade(e) {
+
+    e.preventDefault();
+
+    const memberId = Auth.getActiveMemberId();
+    const gymId = Auth.getTenantGymId();
+
+    const plan = GymFlowDB.findById('gymPlans', selectedPlanId);
+
+    if (plan) {
+
+      GymFlowDB.update('members', memberId, {
+        planId: plan.id,
+        planName: plan.name
+      });
+
+      // Record transaction
+      GymFlowDB.insert('payments', {
+        id: `pay_${Date.now()}`,
+        gymId: gymId,
+        memberId: memberId,
+        memberName: 'Alex Morgan',
+        invoiceNumber: `INV-IP-${Math.floor(1000 + Math.random() * 9000)}`,
+        amount: plan.price,
+        description: `Plan Switch to ${plan.name}`,
+        method: 'Visa •••• 4242',
+        status: 'Paid',
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      Modal.close('modal-upgrade-plan');
+
+      Toast.success(`Membership updated to ${plan.name}!`);
+
+      renderPlans();
+    }
+  }
+</script>
+
+</body>
+</html>
+```

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gym Directory — GymFlow Super Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <style>
+    #gyms-pagination{overflow-x:auto}
+    .gym-pagination-controls{display:flex;align-items:center;justify-content:flex-end;gap:1rem;flex-wrap:nowrap;white-space:nowrap}
+    .gym-page-size{display:flex;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.875rem;white-space:nowrap}
+    .gym-page-size select{min-width:68px}
+    .gym-pagination-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:nowrap;width:max-content;min-width:100%}
+    .gym-pagination-summary{font-size:.875rem;color:var(--text-muted);white-space:nowrap}
+    .gym-pagination-buttons{display:flex;align-items:center;gap:.35rem;flex-wrap:nowrap;white-space:nowrap}
+    .gym-pagination-buttons button{min-width:36px;min-height:36px}
+    .gym-pagination-buttons button[aria-current="page"]{background:var(--color-primary,#10b981);color:#fff;border-color:var(--color-primary,#10b981)}
+    .gym-pagination-buttons button:disabled{opacity:.45;cursor:not-allowed}
+    .gym-action-buttons{display:flex;gap:.4rem;align-items:center;justify-content:flex-end;flex-wrap:nowrap;white-space:nowrap;width:max-content;margin-left:auto}
+    .gym-delete-btn{color:var(--color-danger,#dc2626)}
+    .gym-delete-btn:hover{background:rgba(220,38,38,.1)}
+    .gym-sno{white-space:nowrap;color:var(--text-muted);font-variant-numeric:tabular-nums}
+    @media(max-width:640px){.gym-pagination-inner{align-items:center;flex-direction:row}.gym-pagination-controls{width:auto;align-items:center;flex-direction:row}.gym-pagination-buttons{width:auto}}
+  </style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <a href="dashboard.html" class="brand-link">
+        <div class="brand-icon"><i class="fa-solid fa-dumbbell"></i></div>
+        <div class="brand-text">Gym<span>Flow</span></div>
+      </a>
+      <button class="topbar-toggle sidebar-toggle-btn d-none" aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a></div>
+      <div class="nav-section-title">Organizations</div>
+      <div class="nav-item"><a href="gyms.html" class="nav-link active"><i class="fa-solid fa-building"></i><span>Gym Directory</span></a></div>
+      <div class="nav-item"><a href="subscriptions.html" class="nav-link"><i class="fa-solid fa-receipt"></i><span>Subscriptions</span></a></div>
+      <div class="nav-item"><a href="plans.html" class="nav-link"><i class="fa-solid fa-tags"></i><span>SaaS Plans</span></a></div>
+      <div class="nav-section-title">Finance</div>
+      <div class="nav-item"><a href="billing.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span>Platform Billing</span></a></div>
+      <div class="nav-section-title">Platform Team</div>
+      <div class="nav-item"><a href="platform-users.html" class="nav-link"><i class="fa-solid fa-user-shield"></i><span>Platform Users</span></a></div>
+      <div class="nav-item"><a href="roles-permissions.html" class="nav-link"><i class="fa-solid fa-lock"></i><span>Roles &amp; Matrix</span></a></div>
+      <div class="nav-item"><a href="announcements.html" class="nav-link"><i class="fa-solid fa-bullhorn"></i><span>Announcements</span></a></div>
+      <div class="nav-section-title">Operations</div>
+      <div class="nav-item"><a href="support-tickets.html" class="nav-link"><i class="fa-solid fa-headset"></i><span>Support Tickets</span><span class="badge badge-danger nav-badge">3</span></a></div>
+      <div class="nav-item"><a href="audit-logs.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span>Audit Logs</span></a></div>
+      <div class="nav-item"><a href="system-health.html" class="nav-link"><i class="fa-solid fa-heart-pulse"></i><span>System Health</span></a></div>
+      <div class="nav-item"><a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i><span>Platform Settings</span></a></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar avatar-sm"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" alt="Admin" class="current-user-avatar"></div>
+        <div class="sidebar-user-info"><span class="sidebar-user-name current-user-name">Alex Vance</span><span class="sidebar-user-role">Super Admin</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-toggle sidebar-toggle-btn" aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
+        <div class="topbar-search"><div class="input-with-icon"><i class="fa-solid fa-magnifying-glass input-icon"></i><input type="text" id="global-search-input" class="form-control" placeholder="Quick search..." oninput="handleSearch(this.value)"></div></div>
+      </div>
+      <div class="topbar-right">
+        <span class="role-indicator super-admin"><i class="fa-solid fa-shield-halved"></i> Super Admin</span>
+        <button class="topbar-action-btn theme-toggle-btn" title="Toggle Theme" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+        <button class="topbar-action-btn" id="btn-notifications" aria-label="Notifications"><i class="fa-solid fa-bell"></i><span class="action-badge"></span></button>
+        <div class="dropdown">
+          <button class="topbar-user-btn" data-dropdown-toggle>
+            <div class="avatar avatar-sm"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" class="current-user-avatar" alt="User"></div>
+            <div><div class="topbar-user-name current-user-name">Alex Vance</div><div class="topbar-user-role">Super Admin</div></div>
+            <i class="fa-solid fa-chevron-down" style="font-size:.75rem;color:var(--text-subtle)"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a href="settings.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item text-danger btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-wrapper">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><a href="dashboard.html">Super Admin</a><span class="breadcrumb-separator">/</span><span class="breadcrumb-current">Gym Organizations</span></div>
+          <h1 class="page-title">Registered Gyms Directory</h1>
+          <p class="page-subtitle">Manage SaaS tenant accounts, branches, subscription tiers, and access statuses.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline" onclick="exportGymsCsv()"><i class="fa-solid fa-download"></i> Export CSV</button>
+          <button class="btn btn-accent" onclick="Modal.open('modal-add-gym')"><i class="fa-solid fa-plus"></i> Add New Gym</button>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="margin-bottom:1.5rem">
+        <div class="stat-card"><div class="stat-card-header"><span class="stat-label">Total Gym Organizations</span><span class="stat-icon green"><i class="fa-solid fa-building"></i></span></div><div class="stat-value" id="kpi-total-gyms">0</div><div class="stat-meta"><span class="text-muted">Registered SaaS tenants</span></div></div>
+        <div class="stat-card" style="cursor:pointer;transition:transform .2s,box-shadow .2s" onclick="filterByBranchType('multi')" title="Click to filter multi-branch gyms"><div class="stat-card-header"><span class="stat-label">Multi-Branch Gyms (2+)</span><span class="stat-icon blue"><i class="fa-solid fa-network-wired"></i></span></div><div class="stat-value" id="kpi-multibranch-gyms" style="color:var(--color-primary,#10b981)">0</div><div class="stat-meta"><span class="badge badge-primary" id="kpi-multibranch-pct">0% of tenant network</span></div></div>
+        <div class="stat-card" style="cursor:pointer;transition:transform .2s,box-shadow .2s" onclick="filterByBranchType('single')" title="Click to filter single-branch gyms"><div class="stat-card-header"><span class="stat-label">Single-Branch Gyms</span><span class="stat-icon purple"><i class="fa-solid fa-store"></i></span></div><div class="stat-value" id="kpi-singlebranch-gyms">0</div><div class="stat-meta"><span class="text-muted">Single facility gyms</span></div></div>
+        <div class="stat-card"><div class="stat-card-header"><span class="stat-label">Total Network Branches</span><span class="stat-icon amber"><i class="fa-solid fa-map-location-dot"></i></span></div><div class="stat-value" id="kpi-total-branches">0</div><div class="stat-meta"><span class="text-muted">Combined authorized locations</span></div></div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-toolbar">
+          <div class="table-search"><div class="input-with-icon"><i class="fa-solid fa-magnifying-glass input-icon"></i><input type="text" id="gym-search" class="form-control" placeholder="Search gym, owner, or city..." oninput="filterGyms()"></div></div>
+          <div class="table-actions" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+            <select id="filter-status" class="form-select" style="width:150px" onchange="filterGyms()" aria-label="Filter by status">
+              <option value="">All Statuses</option><option value="active">Active</option><option value="trial">Free Trial</option><option value="suspended">Suspended</option>
+            </select>
+            <select id="filter-plan" class="form-select" style="width:160px" onchange="filterGyms()" aria-label="Filter by plan">
+              <option value="">All Plans</option><option value="Starter">Starter (₹49)</option><option value="Growth">Growth (₹99)</option><option value="Enterprise Pro">Enterprise Pro (₹199)</option>
+            </select>
+            <select id="filter-branches" class="form-select" style="width:170px" onchange="filterGyms()" aria-label="Filter by branch type">
+              <option value="">All Branch Types</option><option value="multi">Multi-Branch (2+)</option><option value="single">Single Branch (1)</option>
+            </select>
+            <button type="button" class="btn btn-outline btn-sm" onclick="resetGymFilters()" title="Reset all filters"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">S.No.</th>
+                <th scope="col" class="sortable" data-sort-key="name" onclick="sortGyms('name')" style="cursor:pointer">Gym Organization <i class="fa-solid fa-sort text-muted" id="sort-icon-name"></i></th>
+                <th scope="col">Owner &amp; Contact</th>
+                <th scope="col" class="sortable" data-sort-key="branchesCount" onclick="sortGyms('branchesCount')" style="cursor:pointer">Branches <i class="fa-solid fa-sort text-muted" id="sort-icon-branchesCount"></i></th>
+                <th scope="col" class="sortable" data-sort-key="membersCount" onclick="sortGyms('membersCount')" style="cursor:pointer">Members <i class="fa-solid fa-sort text-muted" id="sort-icon-membersCount"></i></th>
+                <th scope="col">Subscription Plan</th>
+                <th scope="col" class="sortable" data-sort-key="status" onclick="sortGyms('status')" style="cursor:pointer">Status <i class="fa-solid fa-sort text-muted" id="sort-icon-status"></i></th>
+                <th scope="col" class="sortable" data-sort-key="registrationDate" onclick="sortGyms('registrationDate')" style="cursor:pointer">Reg. Date <i class="fa-solid fa-sort text-muted" id="sort-icon-registrationDate"></i></th>
+                <th scope="col" class="table-actions-column" style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="gyms-tbody"><tr><td colspan="9">Loading gyms...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="table-pagination" id="gyms-pagination" aria-label="Gym directory pagination"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-add-gym">
+  <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="add-gym-title">
+    <div class="modal-header"><h3 class="modal-title" id="add-gym-title"><i class="fa-solid fa-building text-accent"></i> Add New Gym Organization</h3><button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button></div>
+    <form id="form-new-gym" onsubmit="submitNewGym(event)">
+      <div class="modal-body">
+        <div class="grid-2" style="margin-bottom:0"><div class="form-group"><label class="form-label" for="new-gym-name">Gym Name <span class="required">*</span></label><input type="text" id="new-gym-name" class="form-control" placeholder="Apex Fitness" required></div><div class="form-group"><label class="form-label" for="new-gym-owner">Owner Full Name <span class="required">*</span></label><input type="text" id="new-gym-owner" class="form-control" placeholder="Jane Doe" required></div></div>
+        <div class="grid-2" style="margin-bottom:0"><div class="form-group"><label class="form-label" for="new-gym-email">Email <span class="required">*</span></label><input type="email" id="new-gym-email" class="form-control" placeholder="jane@apex.com" required></div><div class="form-group"><label class="form-label" for="new-gym-phone">Phone <span class="required">*</span></label><input type="tel" id="new-gym-phone" class="form-control" placeholder="+1 (555) 123-4567" required></div></div>
+        <div class="grid-2" style="margin-bottom:0"><div class="form-group"><label class="form-label" for="new-gym-city">City, State <span class="required">*</span></label><input type="text" id="new-gym-city" class="form-control" placeholder="Miami, FL" required></div><div class="form-group"><label class="form-label" for="new-gym-plan">SaaS Plan <span class="required">*</span></label><select id="new-gym-plan" class="form-select" required><option value="saas_starter">Starter (₹49/mo)</option><option value="saas_growth" selected>Growth (₹99/mo)</option><option value="saas_enterprise">Enterprise Pro (₹199/mo)</option></select></div></div>
+        <div class="grid-2" style="margin-bottom:0"><div class="form-group"><label class="form-label" for="new-gym-branches">Authorized Branches <span class="required">*</span></label><input type="number" id="new-gym-branches" class="form-control" value="1" min="1" max="50" required><small class="text-xs text-muted">Multi-branch requires Growth (up to 3) or Enterprise (up to 10).</small></div></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-modal-close>Cancel</button><button type="submit" class="btn btn-accent"><i class="fa-solid fa-plus"></i> Save Gym</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-edit-gym">
+  <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="edit-gym-title">
+    <div class="modal-header"><h3 class="modal-title" id="edit-gym-title"><i class="fa-solid fa-pen-to-square text-electric"></i> Edit Gym Organization</h3><button type="button" class="modal-close" data-modal-close aria-label="Close">&times;</button></div>
+    <form id="form-edit-gym" onsubmit="submitEditGym(event)">
+      <input type="hidden" id="edit-gym-id">
+      <div class="modal-body">
+        <div class="grid-2" style="margin-bottom:0"><div class="form-group"><label class="form-label" for="edit-gym-name">Gym Name <span class="required">*</span></label><input type="text" id="edit-gym-name" class="form-control" required></div><div class="form-group"><label class="form-label" for="edit-gym-owner">Owner Name <span class="required">*</span></label><input type="text" id="edit-gym-owner" class="form-control" required></div></div>
+        <div class="grid-2" style="margin-bottom:0"><div class="form-group"><label class="form-label" for="edit-gym-email">Email <span class="required">*</span></label><input type="email" id="edit-gym-email" class="form-control" required></div><div class="form-group"><label class="form-label" for="edit-gym-phone">Phone <span class="required">*</span></label><input type="tel" id="edit-gym-phone" class="form-control" required></div></div>
+        <div class="grid-2" style="margin-bottom:0"><div class="form-group"><label class="form-label" for="edit-gym-city">City, State</label><input type="text" id="edit-gym-city" class="form-control"></div><div class="form-group"><label class="form-label" for="edit-gym-status">Status</label><select id="edit-gym-status" class="form-select"><option value="active">Active</option><option value="trial">Trial</option><option value="suspended">Suspended</option></select></div></div>
+        <div class="grid-2" style="margin-bottom:0"><div class="form-group"><label class="form-label" for="edit-gym-branches">Authorized Branches <span class="required">*</span></label><input type="number" id="edit-gym-branches" class="form-control" min="1" max="50" required></div></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-modal-close>Cancel</button><button type="submit" class="btn btn-electric"><i class="fa-solid fa-floppy-disk"></i> Update Changes</button></div>
+    </form>
+  </div>
+</div>
+
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+'use strict';
+
+let gymsList = [];
+let filteredList = [];
+let currentPage = 1;
+let pageSize = 10;
+let sortKey = 'name';
+let sortAsc = true;
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadGyms();
+});
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[char]);
+}
+
+function loadGyms() {
+  try {
+    const stored = GymFlowDB.get('gyms');
+    gymsList = Array.isArray(stored) ? stored : [];
+    updateGymKPIs();
+    filterGyms(false);
+  } catch (error) {
+    console.error('Unable to load gyms:', error);
+    gymsList = [];
+    filteredList = [];
+    updateGymKPIs();
+    renderTable('Gym records could not be loaded. Please refresh and try again.');
+    if (window.Toast?.error) Toast.error('Unable to load gym records.');
+  }
+}
+
+function updateGymKPIs() {
+  const total = gymsList.length;
+  const multi = gymsList.filter(g => Number(g.branchesCount || 1) > 1).length;
+  const single = gymsList.filter(g => Number(g.branchesCount || 1) === 1).length;
+  const totalBranches = gymsList.reduce((acc, g) => acc + Math.max(1, Number(g.branchesCount) || 1), 0);
+  const multiPct = total > 0 ? Math.round((multi / total) * 100) : 0;
+  document.getElementById('kpi-total-gyms').textContent = total;
+  document.getElementById('kpi-multibranch-gyms').textContent = multi;
+  document.getElementById('kpi-multibranch-pct').textContent = `${multiPct}% of tenant network`;
+  document.getElementById('kpi-singlebranch-gyms').textContent = single;
+  document.getElementById('kpi-total-branches').textContent = totalBranches;
+}
+
+function filterByBranchType(type) {
+  const select = document.getElementById('filter-branches');
+  if (select) {
+    select.value = type;
+    filterGyms();
+    document.querySelector('.table-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function filterGyms(resetPage = true) {
+  const q = (document.getElementById('gym-search')?.value || '').trim();
+  const status = document.getElementById('filter-status')?.value || '';
+  const plan = document.getElementById('filter-plan')?.value || '';
+  const branchType = document.getElementById('filter-branches')?.value || '';
+
+  filteredList = gymsList.filter(gym => {
+    const searchable = ['name', 'owner', 'city', 'email', 'id', 'planName', 'phone']
+      .map(key => String(gym?.[key] ?? '')).join(' ');
+    const matchQ = typeof DataGridHelper?.matchSearch === 'function'
+      ? DataGridHelper.matchSearch(gym, q, ['name', 'owner', 'city', 'email', 'id', 'planName', 'phone'])
+      : searchable.toLowerCase().includes(q.toLowerCase());
+    const matchStatus = !status || String(gym.status || '').toLowerCase() === status.toLowerCase();
+    const matchPlan = !plan || String(gym.planName || '').toLowerCase() === plan.toLowerCase();
+    const count = Number(gym.branchesCount) || 1;
+    const matchBranch = !branchType || (branchType === 'multi' ? count > 1 : count === 1);
+    return matchQ && matchStatus && matchPlan && matchBranch;
+  });
+
+  filteredList.sort((a, b) => {
+    let result;
+    if (typeof DataGridHelper?.compare === 'function') {
+      result = DataGridHelper.compare(a, b, sortKey, sortAsc);
+    } else {
+      const av = a?.[sortKey] ?? '';
+      const bv = b?.[sortKey] ?? '';
+      result = typeof av === 'number' && typeof bv === 'number'
+        ? av - bv
+        : String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' });
+      if (!sortAsc) result *= -1;
+    }
+    return result;
+  });
+
+  if (resetPage) currentPage = 1;
+  const maxPage = Math.max(1, Math.ceil(filteredList.length / pageSize));
+  currentPage = Math.min(Math.max(1, currentPage), maxPage);
+  updateSortHeaders();
+  renderTable();
+}
+
+function sortGyms(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = true; }
+  filterGyms(true);
+}
+
+function updateSortHeaders() {
+  document.querySelectorAll('[data-sort-key]').forEach(th => {
+    const key = th.dataset.sortKey;
+    const icon = th.querySelector('i');
+    if (!icon) return;
+    icon.className = key !== sortKey
+      ? 'fa-solid fa-sort text-muted'
+      : `fa-solid ${sortAsc ? 'fa-sort-up' : 'fa-sort-down'} text-muted`;
+  });
+}
+
+function resetGymFilters() {
+  document.getElementById('gym-search').value = '';
+  document.getElementById('filter-status').value = '';
+  document.getElementById('filter-plan').value = '';
+  document.getElementById('filter-branches').value = '';
+  sortKey = 'name';
+  sortAsc = true;
+  currentPage = 1;
+  filterGyms();
+}
+
+function renderTable(errorMessage = '') {
+  const tbody = document.getElementById('gyms-tbody');
+  const total = filteredList.length;
+  const maxPage = Math.max(1, Math.ceil(total / pageSize));
+  currentPage = Math.min(Math.max(1, currentPage), maxPage);
+  const start = (currentPage - 1) * pageSize;
+  const paged = filteredList.slice(start, start + pageSize);
+
+  if (errorMessage) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-title">${escapeHtml(errorMessage)}</div></div></td></tr>`;
+    renderGymPagination(0);
+    return;
+  }
+
+  if (paged.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+      <div class="empty-icon"><i class="fa-solid fa-building-slash"></i></div>
+      <div class="empty-title">No Gym Organizations Found</div>
+      <div class="empty-description">No tenants match your search query or selected filter criteria.</div>
+      <button type="button" class="btn btn-sm btn-outline" onclick="resetGymFilters()" style="margin-top:.75rem"><i class="fa-solid fa-arrow-rotate-left"></i> Reset Filters</button>
+    </div></td></tr>`;
+    renderGymPagination(0);
+    return;
+  }
+
+  tbody.innerHTML = paged.map((gym, index) => {
+    const serialNo = start + index + 1;
+    const status = String(gym.status || 'unknown').toLowerCase();
+    const badgeClass = status === 'trial' ? 'badge-warning' : status === 'suspended' ? 'badge-danger' : status === 'active' ? 'badge-success' : 'badge-neutral';
+    const branches = Number(gym.branchesCount) || 1;
+    const isMulti = branches > 1;
+    const gymId = String(gym.id ?? '');
+    const safeId = escapeHtml(gymId);
+    const logo = escapeHtml(gym.logo || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=100&h=100&fit=crop');
+    const name = escapeHtml(gym.name || 'Unnamed Gym');
+    const city = escapeHtml(gym.city || '—');
+    const owner = escapeHtml(gym.owner || '—');
+    const email = escapeHtml(gym.email || '—');
+    const phone = escapeHtml(gym.phone || '—');
+    const planName = escapeHtml(gym.planName || '—');
+    const registrationDate = escapeHtml(gym.registrationDate || '—');
+
+    return `<tr>
+      <td class="gym-sno">${serialNo}</td>
+      <td><div class="cell-entity"><div class="avatar"><img src="${logo}" alt="${name}" loading="lazy"></div><div><strong><a href="gym-details.html?id=${encodeURIComponent(gymId)}" class="text-main">${name}</a></strong><div class="text-xs text-muted"><i class="fa-solid fa-location-dot"></i> ${city}</div></div></div></td>
+      <td><div style="font-weight:600">${owner}</div><div class="text-xs text-muted">${email} &bull; ${phone}</div></td>
+      <td>${isMulti
+        ? `<span class="badge badge-primary" style="display:inline-flex;align-items:center;gap:.35rem;font-weight:600"><i class="fa-solid fa-network-wired"></i> ${branches} Branches</span><div class="text-xs text-muted" style="margin-top:2px">Multi-branch chain</div>`
+        : `<span class="badge badge-neutral" style="display:inline-flex;align-items:center;gap:.35rem"><i class="fa-solid fa-store"></i> 1 Branch</span><div class="text-xs text-muted" style="margin-top:2px">Single location</div>`}
+      </td>
+      <td><strong>${Number(gym.membersCount) || 0}</strong> <span class="text-xs text-muted">members</span></td>
+      <td><span class="badge badge-neutral">${planName}</span></td>
+      <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${escapeHtml(status.toUpperCase())}</span></td>
+      <td class="text-xs text-muted">${registrationDate}</td>
+      <td class="table-actions-cell" style="text-align:right"><div class="gym-action-buttons">
+        <a href="gym-details.html?id=${encodeURIComponent(gymId)}" class="btn-icon btn-icon-sm" title="View Full Details" aria-label="View ${name} details"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        <button type="button" class="btn-icon btn-icon-sm" title="Edit" aria-label="Edit ${name}" data-action="edit" data-id="${safeId}"><i class="fa-solid fa-pen"></i></button>
+        <button type="button" class="btn-icon btn-icon-sm ${status === 'suspended' ? 'text-success' : 'text-danger'}" title="${status === 'suspended' ? 'Reactivate' : 'Suspend'}" aria-label="${status === 'suspended' ? 'Reactivate' : 'Suspend'} ${name}" data-action="toggle" data-id="${safeId}" data-status="${escapeHtml(status)}"><i class="fa-solid ${status === 'suspended' ? 'fa-rotate-left' : 'fa-ban'}"></i></button>
+        <button type="button" class="btn-icon btn-icon-sm gym-delete-btn" title="Delete Gym" aria-label="Delete ${name}" data-action="delete" data-id="${safeId}"><i class="fa-solid fa-trash"></i></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  renderGymPagination(start);
+}
+
+function renderGymPagination(start) {
+  const container = document.getElementById('gyms-pagination');
+  const total = filteredList.length;
+  const maxPage = Math.max(1, Math.ceil(total / pageSize));
+  const from = total ? start + 1 : 0;
+  const to = total ? Math.min(start + pageSize, total) : 0;
+  const button = (label, page, disabled = false, current = false, aria = '') =>
+    `<button type="button" class="btn btn-outline btn-sm" ${disabled ? 'disabled' : ''} ${current ? 'aria-current="page"' : ''} aria-label="${escapeHtml(aria || label)}" data-page="${page}">${label}</button>`;
+
+  let pageButtons = button('<i class="fa-solid fa-chevron-left"></i>', currentPage - 1, currentPage <= 1, false, 'Previous page');
+  const pages = new Set([1, maxPage, currentPage - 1, currentPage, currentPage + 1]);
+  const visible = [...pages].filter(p => p >= 1 && p <= maxPage).sort((a, b) => a - b);
+  let previous = 0;
+  visible.forEach(page => {
+    if (previous && page - previous > 1) pageButtons += '<span class="text-muted" aria-hidden="true">…</span>';
+    pageButtons += button(String(page), page, false, page === currentPage, `Page ${page}`);
+    previous = page;
+  });
+  pageButtons += button('<i class="fa-solid fa-chevron-right"></i>', currentPage + 1, currentPage >= maxPage, false, 'Next page');
+
+  container.innerHTML = `<div class="gym-pagination-inner">
+    <span class="gym-pagination-summary">Showing ${from}–${to} of ${total} record${total === 1 ? '' : 's'}</span>
+    <div class="gym-pagination-controls">
+      <label class="gym-page-size" for="gym-page-size">Rows per page
+        <select id="gym-page-size" class="form-select" aria-label="Records per page">
+          <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
+          <option value="25" ${pageSize === 25 ? 'selected' : ''}>25</option>
+          <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
+          <option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option>
+        </select>
+      </label>
+      <div class="gym-pagination-buttons">${pageButtons}</div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('gyms-pagination').addEventListener('change', event => {
+  if (event.target.id !== 'gym-page-size') return;
+  const parsedSize = Number.parseInt(event.target.value, 10);
+  pageSize = [10, 25, 50, 100].includes(parsedSize) ? parsedSize : 10;
+  currentPage = 1;
+  renderTable();
+});
+
+document.getElementById('gyms-pagination').addEventListener('click', event => {
+  const button = event.target.closest('button[data-page]');
+  if (!button || button.disabled) return;
+  const page = Number.parseInt(button.dataset.page, 10);
+  const maxPage = Math.max(1, Math.ceil(filteredList.length / pageSize));
+  if (!Number.isInteger(page) || page < 1 || page > maxPage) return;
+  currentPage = page;
+  renderTable();
+});
+
+document.getElementById('gyms-tbody').addEventListener('click', event => {
+  const button = event.target.closest('button[data-action]');
+  if (!button) return;
+  const { action, id, status } = button.dataset;
+  if (action === 'edit') openEditModal(id);
+  if (action === 'toggle') toggleStatus(id, status);
+  if (action === 'delete') deleteGym(id);
+});
+
+function toggleStatus(gymId, currentStatus) {
+  const gym = gymsList.find(item => String(item.id) === String(gymId));
+  if (!gym) { Toast.error('Gym record was not found.'); return; }
+  const nextStatus = currentStatus === 'suspended' ? 'active' : 'suspended';
+  const actionLabel = nextStatus === 'active' ? 'Reactivate' : 'Suspend';
+  Modal.confirm({
+    title: `${actionLabel} Gym Account?`,
+    message: `Are you sure you want to ${actionLabel.toLowerCase()} access for "${gym.name}"?`,
+    confirmText: actionLabel,
+    confirmClass: nextStatus === 'active' ? 'btn-accent' : 'btn-danger',
+    onConfirm: () => {
+      try {
+        const result = GymFlowDB.update('gyms', gymId, { status: nextStatus });
+        if (result === false) throw new Error('Storage did not confirm the update.');
+        Toast.success(`Gym status updated to ${nextStatus}.`);
+        loadGyms();
+      } catch (error) {
+        console.error('Unable to update gym status:', error);
+        Toast.error('Could not update gym status. Please try again.');
+      }
+    }
+  });
+}
+
+function deleteGym(gymId) {
+  const gym = gymsList.find(item => String(item.id) === String(gymId));
+  if (!gym) { Toast.error('Gym record was not found.'); return; }
+
+  const relatedCollections = [
+    'branches', 'gymPlans', 'members', 'trainers', 'classes', 'classBookings',
+    'attendance', 'payments', 'platformBilling', 'expenses', 'leads', 'equipment',
+    'maintenance', 'workoutPlans', 'progressRecords', 'supportTickets', 'announcements', 'staff'
+  ];
+  const dependents = relatedCollections.reduce((count, collection) => {
+    const records = GymFlowDB.get(collection, { gymId: gym.id }) || [];
+    return count + records.length;
+  }, 0);
+  if (dependents) {
+    Toast.error(`Cannot delete ${gym.name}: ${dependents} related record(s) must be resolved first.`);
+    return;
+  }
+
+  Modal.confirm({
+    title: 'Delete Gym Organization?',
+    message: `Are you sure you want to delete "${gym.name}"? This action may affect related subscriptions, branches, members, and billing records. Continue only if your data rules allow permanent deletion.`,
+    confirmText: 'Delete Gym',
+    confirmClass: 'btn-danger',
+    onConfirm: () => {
+      try {
+        const remainingDependents = relatedCollections.reduce((count, collection) => {
+          const records = GymFlowDB.get(collection, { gymId: gym.id }) || [];
+          return count + records.length;
+        }, 0);
+        if (remainingDependents) {
+          Toast.error(`Cannot delete ${gym.name}: ${remainingDependents} related record(s) must be resolved first.`);
+          return;
+        }
+        const result = GymFlowDB.delete('gyms', gymId);
+        if (result === false) throw new Error('Storage did not confirm deletion.');
+        Toast.success(`"${gym.name}" was deleted.`);
+        loadGyms();
+      } catch (error) {
+        console.error('Unable to delete gym:', error);
+        Toast.error('Could not delete this gym. Please try again.');
+      }
+    }
+  });
+}
+
+function openEditModal(gymId) {
+  const gym = GymFlowDB.getById('gyms', gymId);
+  if (!gym) { Toast.error('Gym record was not found.'); return; }
+  document.getElementById('edit-gym-id').value = gym.id;
+  document.getElementById('edit-gym-name').value = gym.name || '';
+  document.getElementById('edit-gym-owner').value = gym.owner || '';
+  document.getElementById('edit-gym-email').value = gym.email || '';
+  document.getElementById('edit-gym-phone').value = gym.phone || '';
+  document.getElementById('edit-gym-city').value = gym.city || '';
+  document.getElementById('edit-gym-status').value = gym.status || 'active';
+  document.getElementById('edit-gym-branches').value = Number(gym.branchesCount) || 1;
+  Modal.open('modal-edit-gym');
+}
+
+function submitEditGym(event) {
+  event.preventDefault();
+  const id = document.getElementById('edit-gym-id').value;
+  const branches = Number.parseInt(document.getElementById('edit-gym-branches').value, 10);
+  if (!Number.isInteger(branches) || branches < 1 || branches > 50) {
+    Toast.error('Authorized branches must be between 1 and 50.');
+    return;
+  }
+  const updates = {
+    name: document.getElementById('edit-gym-name').value.trim(),
+    owner: document.getElementById('edit-gym-owner').value.trim(),
+    email: document.getElementById('edit-gym-email').value.trim(),
+    phone: document.getElementById('edit-gym-phone').value.trim(),
+    city: document.getElementById('edit-gym-city').value.trim(),
+    status: document.getElementById('edit-gym-status').value,
+    branchesCount: branches
+  };
+  if (!updates.name || !updates.owner || !updates.email || !updates.phone) {
+    Toast.error('Please complete all required fields.');
+    return;
+  }
+  try {
+    const result = GymFlowDB.update('gyms', id, updates);
+    if (result === false) throw new Error('Storage did not confirm the update.');
+    Modal.close('modal-edit-gym');
+    Toast.success('Gym organization details updated.');
+    loadGyms();
+  } catch (error) {
+    console.error('Unable to update gym:', error);
+    Toast.error('Could not update gym details. Please try again.');
+  }
+}
+
+function submitNewGym(event) {
+  event.preventDefault();
+  const name = document.getElementById('new-gym-name').value.trim();
+  const owner = document.getElementById('new-gym-owner').value.trim();
+  const email = document.getElementById('new-gym-email').value.trim();
+  const phone = document.getElementById('new-gym-phone').value.trim();
+  const city = document.getElementById('new-gym-city').value.trim();
+  const planId = document.getElementById('new-gym-plan').value;
+  const branches = Number.parseInt(document.getElementById('new-gym-branches').value, 10);
+
+  const planMap = {
+    saas_starter: { name: 'Starter', mrr: 49 },
+    saas_growth: { name: 'Growth', mrr: 99 },
+    saas_enterprise: { name: 'Enterprise Pro', mrr: 199 }
+  };
+  if (!name || !owner || !email || !phone || !city || !planMap[planId]) {
+    Toast.error('Please complete all required fields.');
+    return;
+  }
+  if (!Number.isInteger(branches) || branches < 1 || branches > 50) {
+    Toast.error('Authorized branches must be between 1 and 50.');
+    return;
+  }
+
+  const plan = planMap[planId];
+  const newGym = {
+    id: `gym_${Date.now()}`,
+    name,
+    slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+    logo: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=100&h=100&fit=crop',
+    owner, email, phone,
+    address: 'Main Commercial Ave',
+    city,
+    planId,
+    planName: plan.name,
+    status: 'active',
+    registrationDate: new Date().toISOString().split('T')[0],
+    renewalDate: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+    mrr: plan.mrr,
+    membersCount: 0,
+    branchesCount: branches
+  };
+
+  try {
+    const result = GymFlowDB.insert('gyms', newGym);
+    if (result === false) throw new Error('Storage did not confirm insertion.');
+    Modal.close('modal-add-gym');
+    document.getElementById('form-new-gym').reset();
+    Toast.success(`Added ${name} successfully.`);
+    loadGyms();
+  } catch (error) {
+    console.error('Unable to add gym:', error);
+    Toast.error('Could not add the gym. Please try again.');
+  }
+}
+
+function exportGymsCsv() {
+  if (!filteredList.length) {
+    Toast.error('There are no filtered gym records to export.');
+    return;
+  }
+  const headers = ['S.No.', 'Gym ID', 'Gym Name', 'Owner', 'Email', 'Phone', 'City', 'Branches', 'Plan', 'Status', 'MRR (₹)', 'Members'];
+  const rows = filteredList.map((gym, index) => [
+    index + 1, gym.id, gym.name, gym.owner, gym.email, gym.phone, gym.city,
+    gym.branchesCount || 1, gym.planName, gym.status, gym.mrr, gym.membersCount
+  ]);
+  if (typeof TableHelper?.exportToCsv === 'function') {
+    TableHelper.exportToCsv('gymflow-gyms-export.csv', headers, rows);
+    return;
+  }
+  const csvCell = value => {
+    const text = String(value ?? '');
+    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  };
+  const csv = [headers, ...rows].map(row => row.map(csvCell).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'gymflow-gyms-export.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

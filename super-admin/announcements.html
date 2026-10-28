@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Announcements — Super Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <style>
+    .announcement-table-card { overflow:hidden; }
+    .announcement-toolbar { display:flex; align-items:center; gap:.75rem; padding:1rem 1.25rem; }
+    .announcement-toolbar .table-search { width:min(330px,100%); flex:0 1 330px; }
+    .announcement-filters { display:flex; align-items:center; gap:.5rem; }
+    .announcement-filters input { width:132px; min-width:132px; }
+    .announcement-date-to { color:var(--text-muted); font-size:.85rem; }
+    .announcement-toolbar > .btn { margin-left:auto; flex:0 0 auto; white-space:nowrap; }
+    .announcement-table { width:100%; min-width:0; table-layout:fixed; }
+    .announcement-table th:first-child,.announcement-table td:first-child { width:68px; text-align:center; }
+    .announcement-table th:nth-child(2),.announcement-table td:nth-child(2) { width:37%; }
+    .announcement-table th:nth-child(3),.announcement-table td:nth-child(3) { width:15%; }
+    .announcement-table th:nth-child(4),.announcement-table td:nth-child(4) { width:9%; }
+    .announcement-table th:nth-child(5),.announcement-table td:nth-child(5) { width:145px; white-space:nowrap; }
+    .announcement-table th:last-child,.announcement-table td:last-child { width:165px; text-align:center; }
+    .announcement-table td:last-child { white-space:nowrap; }
+    .announcement-table tbody td { overflow:hidden; }
+    .announcement-table-wrap { overflow-x:visible; }
+    .announcement-content { min-width:0; max-width:100%; overflow:hidden; cursor:pointer; }
+    .announcement-content strong { display:block; margin-bottom:.25rem; }
+    .announcement-content p { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; overflow-wrap:anywhere; color:var(--text-muted); font-size:.82rem; line-height:1.45; margin:0; }
+    .announcement-row { cursor:pointer; }
+    .announcement-row:focus-visible { outline:2px solid var(--color-accent); outline-offset:-2px; }
+    .announcement-title-link { display:block; width:100%; border:0; background:transparent; padding:0; color:var(--text-main); font:inherit; font-weight:700; text-align:left; white-space:normal; overflow-wrap:anywhere; line-height:1.35; cursor:pointer; }
+    .announcement-title-link:hover { color:var(--color-accent-hover); }
+    .announcement-sort { border:0; background:transparent; color:inherit; font:inherit; font-size:inherit; text-transform:inherit; padding:0; cursor:pointer; white-space:nowrap; }
+    .announcement-actions { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; gap:.5rem; white-space:nowrap; }
+    .announcement-actions .btn-icon { width:36px; height:36px; flex:0 0 36px; }
+    .announcement-details { max-width:850px; }
+    .announcement-details[role="dialog"] { outline:none; }
+    .announcement-detail-hero { padding:0 0 1rem; border-bottom:1px solid var(--border-color); margin-bottom:1rem; }
+    .announcement-detail-badges { display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin-bottom:.8rem; }
+    .announcement-detail-title { margin:0 0 .8rem; font-size:1.45rem; line-height:1.3; overflow-wrap:anywhere; }
+    .announcement-detail-byline { display:flex; flex-wrap:wrap; gap:.5rem 1rem; color:var(--text-muted); font-size:.82rem; }
+    .announcement-message-card { display:flex; align-items:flex-start; gap:.8rem; padding:1.1rem; border:1px solid var(--color-accent-border); border-left:4px solid var(--color-accent); border-radius:var(--radius-md); background:var(--color-accent-subtle); margin:1rem 0; }
+    .announcement-message-icon { color:var(--color-accent); font-size:1.1rem; padding-top:.1rem; }
+    .announcement-message-label { font-size:.73rem; font-weight:700; text-transform:uppercase; color:var(--color-accent-hover); }
+    .announcement-detail-description { white-space:pre-wrap; line-height:1.7; overflow-wrap:anywhere; margin:.35rem 0 0; color:var(--text-main); }
+    .announcement-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; margin:1rem 0; }
+    .announcement-detail-item { border:1px solid var(--border-color); background:var(--bg-surface-secondary); border-radius:var(--radius-sm); padding:.75rem; min-width:0; }
+    .announcement-detail-label { display:block; color:var(--text-muted); font-size:.72rem; text-transform:uppercase; margin-bottom:.3rem; }
+    .announcement-detail-item strong,.announcement-detail-item span { overflow-wrap:anywhere; }
+    .announcement-detail-links { display:grid; gap:.5rem; }
+    .announcement-pagination { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.25rem; }
+    @media(max-width:800px) { .announcement-toolbar { flex-wrap:wrap; } .announcement-toolbar > .btn { margin-left:auto; } .announcement-table,.announcement-table tbody,.announcement-table tr,.announcement-table td { display:block; width:100%; } .announcement-table thead,.announcement-table td:first-child { display:none; } .announcement-table tbody tr { padding:.65rem .85rem; border-bottom:1px solid var(--border-color); } .announcement-table tbody td { width:100% !important; white-space:normal; padding:.35rem 0; border:0; } .announcement-table tbody td:nth-child(n+3):not(:last-child)::before { content:attr(data-label) ": "; display:inline; color:var(--text-muted); font-size:.72rem; font-weight:700; text-transform:uppercase; margin-right:.3rem; } .announcement-table tbody td:last-child { padding-top:.5rem; } .announcement-table .announcement-empty-row td { display:block; } .announcement-content { width:100%; } .announcement-content p { margin-top:.2rem; } .announcement-actions { justify-content:flex-start; } }
+    @media(max-width:560px) { .announcement-toolbar { padding:.85rem; } .announcement-toolbar .table-search { flex-basis:100%; } .announcement-filters { width:100%; } .announcement-filters input { flex:1 1 0; min-width:0; width:0; } .announcement-pagination { flex-wrap:wrap; } .announcement-detail-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <a href="dashboard.html" class="brand-link">
+        <div class="brand-icon"><i class="fa-solid fa-dumbbell"></i></div>
+        <div class="brand-text">Gym<span>Flow</span></div>
+      </a>
+      <button class="topbar-toggle sidebar-toggle-btn d-none"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a></div>
+      <div class="nav-section-title">Organizations</div>
+      <div class="nav-item"><a href="gyms.html" class="nav-link"><i class="fa-solid fa-building"></i><span>Gym Directory</span></a></div>
+      <div class="nav-item"><a href="subscriptions.html" class="nav-link"><i class="fa-solid fa-receipt"></i><span>Subscriptions</span></a></div>
+      <div class="nav-item"><a href="plans.html" class="nav-link"><i class="fa-solid fa-tags"></i><span>SaaS Plans</span></a></div>
+      <div class="nav-section-title">Finance</div>
+      <div class="nav-item"><a href="billing.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span>Platform Billing</span></a></div>
+      <div class="nav-section-title">Platform Team</div>
+      <div class="nav-item"><a href="platform-users.html" class="nav-link"><i class="fa-solid fa-user-shield"></i><span>Platform Users</span></a></div>
+      <div class="nav-item"><a href="roles-permissions.html" class="nav-link"><i class="fa-solid fa-lock"></i><span>Roles & Matrix</span></a></div>
+      <div class="nav-item"><a href="announcements.html" class="nav-link active"><i class="fa-solid fa-bullhorn"></i><span>Announcements</span></a></div>
+      <div class="nav-section-title">Operations</div>
+      <div class="nav-item"><a href="support-tickets.html" class="nav-link"><i class="fa-solid fa-headset"></i><span>Support Tickets</span><span class="badge badge-danger nav-badge">3</span></a></div>
+      <div class="nav-item"><a href="audit-logs.html" class="nav-link"><i class="fa-solid fa-list-check"></i><span>Audit Logs</span></a></div>
+      <div class="nav-item"><a href="system-health.html" class="nav-link"><i class="fa-solid fa-heart-pulse"></i><span>System Health</span></a></div>
+      <div class="nav-item"><a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i><span>Platform Settings</span></a></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar avatar-sm"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" alt="Admin" class="current-user-avatar"></div>
+        <div class="sidebar-user-info"><span class="sidebar-user-name current-user-name">Alex Vance</span><span class="sidebar-user-role">Super Admin</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-left"><button class="topbar-toggle sidebar-toggle-btn"><i class="fa-solid fa-bars"></i></button></div>
+      <div class="topbar-right">
+        <span class="role-indicator super-admin"><i class="fa-solid fa-shield-halved"></i> Super Admin</span>
+        <button class="topbar-action-btn theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
+        <button class="topbar-action-btn" id="btn-notifications"><i class="fa-solid fa-bell"></i><span class="action-badge"></span></button>
+        <div class="dropdown">
+          <button class="topbar-user-btn" data-dropdown-toggle>
+            <div class="avatar avatar-sm"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" class="current-user-avatar" alt="Avatar"></div>
+            <div><div class="topbar-user-name current-user-name">Alex Vance</div><div class="topbar-user-role">Super Admin</div></div>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-subtle);"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a href="settings.html" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item text-danger btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-wrapper">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb">
+            <a href="dashboard.html">Super Admin</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Announcements</span>
+          </div>
+          <h1 class="page-title">SaaS Platform Announcements</h1>
+          <p class="page-subtitle">Broadcast maintenance alerts, system updates, and feature notices to all gym clubs.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-accent" id="btn-publish-announcement" onclick="openAnnouncementForm()"><i class="fa-solid fa-bullhorn"></i> Publish Announcement</button>
+        </div>
+      </div>
+
+      <section class="card announcement-table-card" aria-label="Platform announcements">
+        <div class="announcement-toolbar">
+          <div class="table-search"><div class="input-with-icon"><i class="fa-solid fa-magnifying-glass input-icon"></i><input type="search" id="announcement-search" class="form-control" placeholder="Search broadcasts..." aria-label="Search announcements"></div></div>
+          <div class="announcement-filters">
+            <input type="date" id="announcement-date-from" class="form-control" aria-label="Published from date">
+            <span class="announcement-date-to">to</span>
+            <input type="date" id="announcement-date-to" class="form-control" aria-label="Published to date">
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="exportAnnouncementsCsv()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        </div>
+        <div class="table-responsive announcement-table-wrap">
+          <table class="data-table announcement-table">
+            <thead><tr><th>S.N.</th><th><button type="button" class="announcement-sort" data-sort-announcement="title">Announcement <i class="fa-solid fa-sort text-muted"></i></button></th><th>Target Audience</th><th>Severity</th><th><button type="button" class="announcement-sort" data-sort-announcement="date">Published Date <i class="fa-solid fa-sort text-muted"></i></button></th><th>Actions</th></tr></thead>
+            <tbody id="announcements-tbody"></tbody>
+          </table>
+        </div>
+        <div class="table-pagination announcement-pagination" id="announcement-pagination"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Modal: Add Announcement -->
+<div class="modal-backdrop" id="modal-add-announcement">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title" id="announcement-modal-title"><i class="fa-solid fa-bullhorn text-accent"></i> Publish Announcement</h3>
+      <button type="button" class="modal-close" data-modal-close onclick="cancelAnnouncementForm()" aria-label="Close announcement form">&times;</button>
+    </div>
+    <form id="form-announcement" onsubmit="handleSaveAnnouncement(event)">
+      <input type="hidden" id="ann-id">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Announcement Title <span class="required">*</span></label>
+          <input type="text" id="ann-title" class="form-control" placeholder="e.g. Scheduled Database Maintenance" required>
+        </div>
+        <div class="grid-2" style="margin-bottom: 0;">
+          <div class="form-group">
+            <label class="form-label">Target Audience <span class="required">*</span></label>
+            <select id="ann-target" class="form-select" required>
+              <option value="All Gym Admins">All Gym Admins</option>
+              <option value="All Members">All Members</option>
+              <option value="Global Platform Users">Global Platform Users</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status <span class="required">*</span></label>
+            <select id="ann-status" class="form-select" required>
+              <option value="Published">Published (Instant)</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Severity</label>
+          <select id="ann-severity" class="form-select" required><option value="">Select severity</option><option value="Info">Info</option><option value="Success">Success</option><option value="Warning">Warning</option><option value="Critical">Critical</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message Content <span class="required">*</span></label>
+          <textarea id="ann-content" class="form-textarea" rows="4" placeholder="Enter the announcement message..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close onclick="cancelAnnouncementForm()">Cancel</button>
+        <button type="submit" class="btn btn-accent"><i class="fa-solid fa-paper-plane"></i> Broadcast Notice</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-announcement-details" onclick="if(event.target===this) closeAnnouncementDetails()">
+  <section class="modal modal-lg announcement-details" role="dialog" aria-modal="true" aria-labelledby="announcement-detail-heading" tabindex="-1">
+    <div class="modal-header">
+      <h2 class="modal-title"><i class="fa-solid fa-bullhorn text-accent"></i> Announcement Details</h2>
+      <button type="button" class="modal-close" data-modal-close aria-label="Close announcement details" onclick="closeAnnouncementDetails()">&times;</button>
+    </div>
+    <div class="modal-body" id="announcement-details-content"></div>
+    <div class="modal-footer" id="announcement-details-actions"></div>
+  </section>
+</div>
+
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/components.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/app.js"></script>
+
+<script>
+  let announcements = [];
+  let filteredAnnouncements = [];
+  let announcementPage = 1;
+  let announcementPageSize = 10;
+  let announcementSortKey = 'date';
+  let announcementSortAsc = false;
+  let lastAnnouncementTrigger = null;
+  let returnTriggerAfterEdit = null;
+  let reopenAnnouncementAfterEdit = false;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-publish-announcement').hidden = !canManageAnnouncements();
+    loadAnnouncements();
+    updateAnnouncementSortIndicators();
+    ['announcement-search', 'announcement-date-from', 'announcement-date-to'].forEach(id =>
+      document.getElementById(id).addEventListener('input', filterAnnouncements));
+    const formBackdrop = document.getElementById('modal-add-announcement');
+    formBackdrop.addEventListener('click', event => { if (event.target === formBackdrop && reopenAnnouncementAfterEdit) cancelAnnouncementForm(); });
+    const tbody = document.getElementById('announcements-tbody');
+    tbody.addEventListener('click', handleAnnouncementTableClick);
+    document.querySelector('.announcement-table thead').addEventListener('click', event => {
+      const button = event.target.closest('[data-sort-announcement]');
+      if (!button) return;
+      const key = button.dataset.sortAnnouncement;
+      if (announcementSortKey === key) announcementSortAsc = !announcementSortAsc;
+      else { announcementSortKey = key; announcementSortAsc = true; }
+      announcementPage = 1;
+      filterAnnouncements(true);
+      updateAnnouncementSortIndicators();
+    });
+    tbody.addEventListener('keydown', event => {
+      if ((event.key === 'Enter' || event.key === ' ') && event.target.closest('tr[data-announcement-id]') && !event.target.closest('button')) {
+        event.preventDefault();
+        openAnnouncementDetails(event.target.closest('tr[data-announcement-id]').dataset.announcementId, event.target);
+      }
+    });
+    document.addEventListener('keydown', handleAnnouncementDialogKeys);
+  });
+
+  function loadAnnouncements(preservePage = false) {
+    announcements = GymFlowDB.get('announcements') || [];
+    filterAnnouncements(preservePage);
+  }
+
+  function escapeAnnouncement(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  }
+
+  function filterAnnouncements(preservePage = false) {
+    const query = document.getElementById('announcement-search').value.trim().toLowerCase();
+    const from = document.getElementById('announcement-date-from').value;
+    const to = document.getElementById('announcement-date-to').value;
+    filteredAnnouncements = announcements.filter(item => {
+      const text = [item.title, item.content, item.targetAudience, item.target, item.author, item.category, item.type, item.severity, item.status].join(' ').toLowerCase();
+      const date = String(item.publishedAt || item.publicationDate || item.date || '').slice(0, 10);
+      return (!query || text.includes(query)) && (!from || date >= from) && (!to || date <= to);
+    }).sort((a, b) => {
+      const left = announcementSortKey === 'title' ? String(a.title || '') : String(a.publishedAt || a.publicationDate || a.date || '');
+      const right = announcementSortKey === 'title' ? String(b.title || '') : String(b.publishedAt || b.publicationDate || b.date || '');
+      return left.localeCompare(right, undefined, {numeric:true, sensitivity:'base'}) * (announcementSortAsc ? 1 : -1);
+    });
+    if (!preservePage) announcementPage = 1;
+    renderAnnouncements();
+  }
+
+  function renderAnnouncements() {
+    const tbody = document.getElementById('announcements-tbody');
+    const pageCount = Math.max(1, Math.ceil(filteredAnnouncements.length / announcementPageSize));
+    announcementPage = Math.min(Math.max(announcementPage, 1), pageCount);
+    const start = (announcementPage - 1) * announcementPageSize;
+    const pageRows = filteredAnnouncements.slice(start, start + announcementPageSize);
+    tbody.innerHTML = pageRows.length ? pageRows.map((a, index) => `
+      <tr class="announcement-row" data-announcement-id="${escapeAnnouncement(a.id)}" tabindex="0" aria-label="View details for ${escapeAnnouncement(a.title)}">
+        <td>${start + index + 1}</td>
+        <td data-label="Announcement"><div class="announcement-content"><button type="button" class="announcement-title-link" data-announcement-action="view">${escapeAnnouncement(a.title)}</button><p>${announcementPreview(a.content)}</p></div></td>
+        <td data-label="Target audience">${escapeAnnouncement(a.targetAudience || a.target || '—')}</td>
+        <td data-label="Severity">${a.severity ? `<span class="badge ${announcementSeverityClass(a.severity)}">${escapeAnnouncement(a.severity)}</span>` : '<span class="text-muted">—</span>'}</td>
+        <td data-label="Published date">${escapeAnnouncement(formatAnnouncementDate(a.publishedAt || a.publicationDate || a.date))}</td>
+        <td data-label="Actions"><div class="announcement-actions">
+          <button type="button" class="btn-icon btn-icon-sm" title="View details" aria-label="View details" data-announcement-action="view"><i class="fa-solid fa-eye"></i></button>
+          ${canManageAnnouncements() ? '<button type="button" class="btn-icon btn-icon-sm" title="Edit announcement" aria-label="Edit announcement" data-announcement-action="edit"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class="btn-icon btn-icon-sm text-danger" title="Delete announcement" aria-label="Delete announcement" data-announcement-action="delete"><i class="fa-solid fa-trash"></i></button>' : ''}
+        </div></td>
+      </tr>`).join('') : '<tr class="announcement-empty-row"><td colspan="6"><div class="empty-state" style="padding:2rem;text-align:center"><div class="empty-title">No announcements found</div><p class="text-muted text-sm">Try changing the search or published date range.</p></div></td></tr>';
+    TableHelper.renderPagination(document.getElementById('announcement-pagination'), filteredAnnouncements.length, announcementPage, announcementPageSize,
+      page => { announcementPage = page; renderAnnouncements(); },
+      size => { announcementPageSize = size; announcementPage = 1; renderAnnouncements(); });
+  }
+
+  function announcementSeverityClass(severity) {
+    return ({Critical:'badge-danger', Warning:'badge-warning', Success:'badge-success', Info:'badge-neutral', Important:'badge-warning', Maintenance:'badge-purple'})[severity] || 'badge-neutral';
+  }
+
+  function canManageAnnouncements() {
+    return Auth.getUser()?.role === 'superadmin';
+  }
+
+  function updateAnnouncementSortIndicators() {
+    document.querySelectorAll('[data-sort-announcement]').forEach(button => {
+      const active = button.dataset.sortAnnouncement === announcementSortKey;
+      button.setAttribute('aria-sort', active ? (announcementSortAsc ? 'ascending' : 'descending') : 'none');
+      button.querySelector('i').className = `fa-solid ${active ? (announcementSortAsc ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'} text-muted`;
+    });
+  }
+
+  function announcementPreview(value) {
+    const text = String(value || '').trim();
+    if (text.length <= 120) return escapeAnnouncement(text);
+    return `${escapeAnnouncement(text.slice(0, 117).trimEnd())}…`;
+  }
+
+  function formatAnnouncementDate(value) {
+    if (!value) return '—';
+    const raw = String(value);
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? raw : date.toLocaleString(undefined, { dateStyle:'medium', ...(raw.includes('T') ? { timeStyle:'short' } : {}) });
+  }
+
+  function handleAnnouncementTableClick(event) {
+    const row = event.target.closest('tr[data-announcement-id]');
+    if (!row) return;
+    const itemId = row.dataset.announcementId;
+    const action = event.target.closest('[data-announcement-action]')?.dataset.announcementAction;
+    if (action === 'edit') { event.stopPropagation(); editAnnouncement(itemId); return; }
+    if (action === 'delete') { event.stopPropagation(); deleteAnnouncement(itemId); return; }
+    if (action === 'view' || !event.target.closest('button')) openAnnouncementDetails(itemId, event.target.closest('button') || row);
+  }
+
+  function safeAnnouncementUrl(value) {
+    try {
+      const url = new URL(String(value), window.location.href);
+      return ['http:', 'https:', 'mailto:'].includes(url.protocol) ? url.href : '';
+    } catch (_) { return ''; }
+  }
+
+  function announcementField(label, value) {
+    if (value === undefined || value === null || value === '') return '';
+    const display = Array.isArray(value) || (typeof value === 'object') ? JSON.stringify(value, null, 2) : String(value);
+    return `<div class="announcement-detail-item"><span class="announcement-detail-label">${escapeAnnouncement(label)}</span><span>${escapeAnnouncement(display)}</span></div>`;
+  }
+
+  function renderAnnouncementDetails(item) {
+    const published = item.publishedAt || item.publicationDate || item.date;
+    const expiry = item.expiresAt || item.expiryDate || item.expirationDate;
+    const author = item.createdBy || item.author;
+    const gym = item.gymId ? GymFlowDB.getById('gyms', item.gymId) : null;
+    const extraKeys = Object.keys(item).filter(key => !['id','scope','gymId','title','content','target','targetAudience','severity','status','date','publishedAt','publicationDate','expiresAt','expiryDate','expirationDate','author','createdBy','updatedAt','lastUpdated','category','type','branches','targetBranches','recipients','attachments','links','link','url','image','imageUrl'].includes(key));
+    const extraFields = extraKeys.map(key => announcementField(key.replace(/([A-Z])/g, ' $1'), item[key])).join('');
+    const attachmentList = Array.isArray(item.attachments) ? item.attachments : item.attachments ? [item.attachments] : [];
+    const links = [...attachmentList, ...(Array.isArray(item.links) ? item.links : item.links ? [item.links] : [])];
+    if (item.link || item.url) links.push({ label: item.linkLabel || 'Related link', url: item.link || item.url });
+    const linkMarkup = links.map(entry => {
+      const href = safeAnnouncementUrl(typeof entry === 'string' ? entry : entry.url || entry.href);
+      if (!href) return '';
+      const label = typeof entry === 'string' ? entry : entry.label || entry.name || href;
+      return `<a class="btn btn-sm btn-outline" href="${escapeAnnouncement(href)}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${escapeAnnouncement(label)}</a>`;
+    }).join('');
+    const imageSource = item.imageUrl || (typeof item.image === 'string' ? item.image : item.image?.url);
+    const imageUrl = safeAnnouncementUrl(imageSource);
+    return `<article class="announcement-detail-hero">
+        <div class="announcement-detail-badges">
+          <span class="badge badge-purple"><i class="fa-solid fa-bullhorn"></i> Announcement</span>
+          ${item.status ? `<span class="badge ${item.status === 'Published' ? 'badge-success' : 'badge-neutral'}">${escapeAnnouncement(item.status)}</span>` : ''}
+          ${item.severity ? `<span class="badge ${announcementSeverityClass(item.severity)}">${escapeAnnouncement(item.severity)}</span>` : '<span class="text-muted text-xs">Severity not specified</span>'}
+        </div>
+        <h2 id="announcement-detail-heading" class="announcement-detail-title">${escapeAnnouncement(item.title)}</h2>
+        <div class="announcement-detail-byline">
+          ${published ? `<span><i class="fa-regular fa-calendar"></i> ${escapeAnnouncement(formatAnnouncementDate(published))}</span>` : ''}
+          ${author ? `<span><i class="fa-regular fa-user"></i> ${escapeAnnouncement(author)}</span>` : ''}
+          ${(item.targetAudience || item.target) ? `<span><i class="fa-solid fa-users"></i> ${escapeAnnouncement(item.targetAudience || item.target)}</span>` : ''}
+          ${(item.category || item.type) ? `<span><i class="fa-solid fa-tag"></i> ${escapeAnnouncement(item.category || item.type)}</span>` : ''}
+        </div>
+      </article>
+      <article class="announcement-message-card">
+        <i class="fa-solid fa-bullhorn announcement-message-icon" aria-hidden="true"></i>
+        <div><div class="announcement-message-label">Announcement</div><p class="announcement-detail-description">${escapeAnnouncement(item.content || 'No announcement message is stored.')}</p></div>
+      </article>
+      <section><h3>Publication Information</h3><div class="announcement-detail-grid">
+        ${published ? announcementField('Published on', formatAnnouncementDate(published)) : ''}
+        ${expiry ? announcementField('Expires on', formatAnnouncementDate(expiry)) : ''}
+        ${announcementField('Created by', author)}
+        ${(item.updatedAt || item.lastUpdated) ? announcementField('Last updated', formatAnnouncementDate(item.updatedAt || item.lastUpdated)) : ''}
+        ${gym ? announcementField('Target gym', gym.name || gym.id) : (item.gymId ? announcementField('Target gym ID', item.gymId) : '')}
+        ${announcementField('Target branches / recipients', item.targetBranches || item.branches || item.recipients)}
+        ${announcementField('Announcement scope', item.scope)}
+        ${extraFields}
+      </div></section>
+      ${imageUrl ? `<section><h3>Image</h3><img src="${escapeAnnouncement(imageUrl)}" alt="Announcement attachment" style="max-width:100%;height:auto;border-radius:var(--radius-md)"></section>` : ''}
+      ${linkMarkup ? `<section><h3>Attachments & Links</h3><div class="announcement-detail-links">${linkMarkup}</div></section>` : ''}`;
+  }
+
+  function openAnnouncementDetails(id, trigger = document.activeElement) {
+    const item = announcements.find(announcement => String(announcement.id) === String(id));
+    if (!item) return;
+    lastAnnouncementTrigger = trigger;
+    document.getElementById('announcement-details-content').innerHTML = renderAnnouncementDetails(item);
+    document.getElementById('announcement-details-actions').innerHTML = `
+      <button type="button" class="btn btn-secondary" onclick="closeAnnouncementDetails()">Close</button>
+      ${canManageAnnouncements() ? `<button type="button" class="btn btn-outline" onclick="editAnnouncement('${escapeAnnouncement(item.id)}', true)"><i class="fa-solid fa-pen-to-square"></i> Edit</button><button type="button" class="btn btn-danger" onclick="deleteAnnouncement('${escapeAnnouncement(item.id)}', true)"><i class="fa-solid fa-trash"></i> Delete</button>` : ''}`;
+    Modal.open('modal-announcement-details');
+    document.querySelector('#modal-announcement-details [role="dialog"]').focus();
+  }
+
+  function closeAnnouncementDetails(restoreFocus = true) {
+    Modal.close('modal-announcement-details');
+    if (restoreFocus && lastAnnouncementTrigger?.isConnected) lastAnnouncementTrigger.focus();
+    lastAnnouncementTrigger = null;
+  }
+
+  function handleAnnouncementDialogKeys(event) {
+    const backdrop = document.getElementById('modal-announcement-details');
+    if (!backdrop.classList.contains('active')) return;
+    if (event.key === 'Escape') { event.preventDefault(); closeAnnouncementDetails(); return; }
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(backdrop.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    const dialog = backdrop.querySelector('[role="dialog"]');
+    if (document.activeElement === dialog) { event.preventDefault(); (event.shiftKey ? last : first).focus(); }
+    else if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+
+  function openAnnouncementForm(item = null) {
+    if (!canManageAnnouncements()) return;
+    document.getElementById('form-announcement').reset();
+    document.getElementById('ann-id').value = item?.id || '';
+    document.getElementById('ann-title').value = item?.title || '';
+    const audienceSelect = document.getElementById('ann-target');
+    const audience = item?.targetAudience || item?.target || 'All Gym Admins';
+    if (!Array.from(audienceSelect.options).some(option => option.value === audience)) audienceSelect.add(new Option(audience, audience));
+    audienceSelect.value = audience;
+    document.getElementById('ann-status').value = item?.status || 'Published';
+    const severitySelect = document.getElementById('ann-severity');
+    const severity = item?.severity || '';
+    if (severity && !Array.from(severitySelect.options).some(option => option.value === severity)) severitySelect.add(new Option(severity, severity));
+    severitySelect.value = severity;
+    document.getElementById('ann-content').value = item?.content || '';
+    document.getElementById('announcement-modal-title').innerHTML = `<i class="fa-solid fa-bullhorn text-accent"></i> ${item ? 'Edit Announcement' : 'Publish Announcement'}`;
+    Modal.open('modal-add-announcement');
+    document.querySelector('#modal-add-announcement input:not([type="hidden"])')?.focus();
+  }
+
+  function editAnnouncement(id, fromDetails = false) {
+    if (!canManageAnnouncements()) return;
+    const item = announcements.find(announcement => String(announcement.id) === String(id));
+    if (!item) return;
+    reopenAnnouncementAfterEdit = fromDetails;
+    if (fromDetails) {
+      returnTriggerAfterEdit = lastAnnouncementTrigger;
+      closeAnnouncementDetails(false);
+    }
+    openAnnouncementForm(item);
+  }
+
+  function cancelAnnouncementForm() {
+    Modal.close('modal-add-announcement');
+    if (reopenAnnouncementAfterEdit) {
+      reopenAnnouncementAfterEdit = false;
+      openAnnouncementDetails(document.getElementById('ann-id').value, returnTriggerAfterEdit || document.activeElement);
+      returnTriggerAfterEdit = null;
+    }
+  }
+
+  function handleSaveAnnouncement(e) {
+    e.preventDefault();
+    if (!canManageAnnouncements()) return;
+    const id = document.getElementById('ann-id').value;
+    const existing = announcements.find(item => String(item.id) === String(id));
+    const audience = document.getElementById('ann-target').value;
+    const newAnn = {
+      ...(existing || {}),
+      id: id || `ann_${Date.now()}`,
+      scope: existing?.scope || 'platform',
+      title: document.getElementById('ann-title').value.trim(),
+      target: audience,
+      ...(existing && Object.prototype.hasOwnProperty.call(existing, 'targetAudience') ? { targetAudience: audience } : {}),
+      content: document.getElementById('ann-content').value.trim(),
+      severity: document.getElementById('ann-severity').value,
+      date: existing?.date || new Date().toISOString().split('T')[0],
+      status: document.getElementById('ann-status').value,
+      author: existing?.author || 'Super Admin'
+    };
+
+    if (existing) GymFlowDB.update('announcements', id, newAnn);
+    else GymFlowDB.insert('announcements', newAnn);
+    Modal.close('modal-add-announcement');
+    document.getElementById('form-announcement').reset();
+    Toast.success(existing ? 'Announcement updated.' : 'Announcement published.');
+    loadAnnouncements(Boolean(existing));
+    if (existing && reopenAnnouncementAfterEdit) {
+      reopenAnnouncementAfterEdit = false;
+      openAnnouncementDetails(id, findAnnouncementRow(id) || document.getElementById('announcement-search'));
+      returnTriggerAfterEdit = null;
+    }
+  }
+
+  function exportAnnouncementsCsv() {
+    const headers = ['S.No.', 'Announcement', 'Content', 'Target Audience', 'Severity', 'Status', 'Published', 'Author'];
+    const rows = filteredAnnouncements.map((item, index) => [index + 1, item.title, item.content, item.targetAudience || item.target, item.severity || 'Not set', item.status, item.publishedAt || item.publicationDate || item.date, item.author]);
+    TableHelper.exportToCsv('gymflow-platform-announcements.csv', headers, rows);
+  }
+
+  function findAnnouncementRow(id) {
+    return Array.from(document.querySelectorAll('#announcements-tbody tr[data-announcement-id]')).find(row => String(row.dataset.announcementId) === String(id)) || null;
+  }
+
+  function deleteAnnouncement(id, fromDetails = false) {
+    if (!canManageAnnouncements()) return;
+    Modal.confirm({
+      title: 'Delete Announcement?',
+      message: 'Are you sure you want to remove this announcement?',
+      confirmText: 'Delete',
+      confirmClass: 'btn-danger',
+      onConfirm: () => {
+        GymFlowDB.delete('announcements', id);
+        if (fromDetails) closeAnnouncementDetails(false);
+        Toast.success('Announcement deleted.');
+        loadAnnouncements(true);
+      }
+    });
+  }
+</script>
+</body>
+</html>

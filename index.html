@@ -1,0 +1,764 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymFlow — Modern Multi-Tenant SaaS Gym Management Platform</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+  <style>
+    /* Landing page specific layout */
+    .landing-header {
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 500;
+      transition: background-color var(--transition-base);
+    }
+    [data-theme="dark"] .landing-header {
+      background: rgba(19, 28, 49, 0.9);
+    }
+    .landing-nav {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.15rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .landing-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .landing-nav-links a {
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.925rem;
+      transition: color var(--transition-fast);
+    }
+    .landing-nav-links a:hover {
+      color: var(--color-accent);
+    }
+    .hero-section {
+      padding: 5rem 1.5rem 4rem;
+      text-align: center;
+      background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: var(--color-accent-subtle);
+      color: var(--color-accent);
+      border: 1px solid var(--color-accent-border);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    .hero-title {
+      font-size: clamp(2.25rem, 5vw, 3.75rem);
+      font-weight: 800;
+      line-height: 1.15;
+      max-width: 880px;
+      margin: 0 auto 1.25rem;
+      letter-spacing: -0.03em;
+    }
+    .hero-desc {
+      font-size: 1.15rem;
+      max-width: 650px;
+      margin: 0 auto 2.25rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .hero-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 3.5rem;
+    }
+    .preview-card {
+      max-width: 1100px;
+      margin: 0 auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18);
+      overflow: hidden;
+      background: var(--bg-surface);
+    }
+    .features-section, .roles-section, .pricing-section, .faq-section {
+      padding: 5rem 1.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .section-title {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .section-title h2 {
+      font-size: 2.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .section-title p {
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 1rem;
+      background: var(--bg-surface);
+      overflow: hidden;
+    }
+    .faq-question {
+      padding: 1.25rem 1.5rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .faq-answer {
+      padding: 0 1.5rem 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: none;
+      line-height: 1.6;
+    }
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+    .faq-item.active .faq-question i {
+      transform: rotate(180deg);
+    }
+    .footer {
+      background: var(--color-primary-dark);
+      color: #94a3b8;
+      padding: 4rem 1.5rem 2rem;
+      border-top: 1px solid var(--border-color);
+    }
+    .footer-grid {
+      max-width: 1280px;
+      margin: 0 auto 3rem;
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 3rem;
+    }
+    @media (max-width: 900px) {
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+    .footer a {
+      color: #94a3b8;
+      display: block;
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+      transition: color var(--transition-fast);
+    }
+    .footer a:hover {
+      color: var(--color-accent);
+    }
+    .live-pricing-grid { align-items:stretch; }
+    .live-plan-card { position:relative; display:flex; flex-direction:column; height:100%; transition:transform .2s ease, box-shadow .2s ease; }
+    .live-plan-card:hover { transform:translateY(-3px); box-shadow:0 16px 32px rgba(15,23,42,.1); }
+    .live-plan-card .card-body { display:flex; flex:1; flex-direction:column; }
+    .live-plan-badge { position:absolute; top:12px; right:14px; max-width:48%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .live-plan-price { margin:1rem 0 .25rem; color:var(--text-main); font-family:var(--font-heading); font-size:2.4rem; font-weight:800; line-height:1.1; }
+    .live-plan-price small { color:var(--text-muted); font-family:inherit; font-size:.9rem; font-weight:500; }
+    .live-plan-annual { min-height:2.4rem; margin-bottom:1rem; color:var(--text-muted); font-size:.8rem; }
+    .live-plan-savings { display:block; margin-top:3px; color:var(--color-accent); font-weight:700; }
+    .live-plan-limits { display:grid; gap:7px; margin:0 0 1.1rem; padding:0 0 1rem; border-bottom:1px solid var(--border-color); color:var(--text-muted); font-size:.8rem; list-style:none; }
+    .live-plan-features { display:grid; gap:7px; margin:0 0 1.5rem; padding:0; color:var(--text-muted); font-size:.82rem; list-style:none; }
+    .live-plan-features li { display:flex; align-items:flex-start; gap:7px; }
+    .live-plan-features i { margin-top:3px; color:var(--color-accent); }
+    .live-plan-card .btn { margin-top:auto; }
+    .pricing-empty { grid-column:1 / -1; padding:2rem; text-align:center; color:var(--text-muted); }
+    .billing-switcher { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; margin:-1.3rem 0 2rem; }
+    .billing-label { margin-right:4px; color:var(--text-main); font-size:.9rem; font-weight:700; }
+    .billing-option { padding:8px 14px; border:1px solid var(--border-color); border-radius:999px; background:var(--bg-surface); color:var(--text-muted); font:inherit; font-size:.85rem; cursor:pointer; transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease; }
+    .billing-option:hover { border-color:var(--color-accent); color:var(--color-accent); }
+    .billing-option.is-active { border-color:var(--color-accent); background:var(--color-accent); color:#fff; box-shadow:0 4px 12px rgba(16,185,129,.2); }
+    .billing-option:active { transform:scale(.97); }
+    .billing-savings-badge { padding:5px 8px; border-radius:6px; background:rgba(59,130,246,.1); color:#1d4ed8; font-size:.7rem; font-weight:800; text-transform:uppercase; }
+    .live-plan-annual { min-height:2.4rem; margin-bottom:1rem; color:var(--text-muted); font-size:.8rem; }
+    .plan-comparison { margin:4rem auto 0; }
+    .plan-comparison-heading { margin-bottom:1.2rem; text-align:center; }
+    .plan-comparison-heading h3 { margin-bottom:.4rem; font-size:1.65rem; }
+    .plan-comparison-heading p { margin:0; color:var(--text-muted); }
+    .plan-comparison-scroll { position:relative; max-height:min(68vh, 640px); overflow:auto; overscroll-behavior:contain; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-surface); scrollbar-gutter:stable; }
+    .plans-comparison-table { width:100%; min-width:720px; table-layout:fixed; border-collapse:separate; border-spacing:0; text-align:left; }
+    .plans-comparison-table th,.plans-comparison-table td { padding:12px 15px; border-bottom:1px solid var(--border-color); }
+    .plans-comparison-table thead th { position:sticky; top:0; z-index:5; background:var(--bg-surface); color:var(--text-main); font-size:.85rem; font-weight:800; }
+    .plans-comparison-table thead th:first-child,.plans-comparison-table tbody th[scope="row"] { position:sticky; left:0; background:var(--bg-surface); }
+    .plans-comparison-table thead th:first-child { z-index:7; }
+    .plans-comparison-table tbody th[scope="row"] { z-index:2; }
+    .plans-comparison-table tbody th { min-width:220px; color:var(--text-main); font-size:.82rem; font-weight:600; }
+    .plans-comparison-table td { min-width:125px; color:var(--text-muted); font-size:.82rem; text-align:center; }
+    .plans-comparison-table .compare-group th { position:static; padding:10px 15px; background:var(--bg-surface-secondary); color:var(--text-main); font-size:.75rem; letter-spacing:.04em; text-transform:uppercase; }
+    .plans-comparison-table .compare-plan-heading { text-align:center; }
+    .plans-comparison-table .compare-feature-cell { text-align:center !important; vertical-align:middle; }
+    .plans-comparison-table .compare-yes { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; margin:0 auto; color:var(--color-accent); font-size:1.05rem; }
+    .plans-comparison-table .compare-no { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; margin:0 auto; color:var(--text-subtle); }
+    @media (max-width:600px) { .billing-switcher { margin-top:-1rem; } .billing-label { width:100%; text-align:center; } .plan-comparison { margin-top:2.5rem; } }
+      /* Final comparison-table alignment overrides */
+    .plan-comparison-scroll { max-height:min(68vh, 640px); overflow:auto; }
+    .plans-comparison-table { width:100%; min-width:760px; table-layout:fixed; border-collapse:separate; border-spacing:0; }
+    .plans-comparison-table thead th:first-child { width:36%; text-align:left !important; }
+    .plans-comparison-table thead th.compare-plan-heading { text-align:center !important; }
+    .plans-comparison-table tbody th[scope="row"] { width:36%; min-width:0; text-align:left !important; }
+    .plans-comparison-table tbody td { text-align:center; vertical-align:middle; }
+    .plans-comparison-table .compare-group th { width:auto; text-align:left !important; }
+    .plans-comparison-table .compare-feature-cell { text-align:center !important; vertical-align:middle; }
+    .plans-comparison-table .compare-feature-cell > .compare-yes,
+    .plans-comparison-table .compare-feature-cell > .compare-no { display:grid; width:24px; height:24px; margin:0 auto; place-items:center; line-height:1; }
+    .plans-comparison-table .compare-feature-cell > .compare-yes { color:var(--color-accent); font-size:1.1rem; }
+    .plans-comparison-table .compare-feature-cell > .compare-no { color:var(--text-subtle); font-size:.9rem; }
+    .plans-comparison-table thead th { position:sticky; top:0; z-index:5; background:var(--bg-surface); }
+    .plans-comparison-table thead th:first-child { left:0; z-index:7; }
+    .plans-comparison-table tbody th[scope="row"] { position:sticky; left:0; z-index:2; background:var(--bg-surface); }
+    .plans-comparison-table tbody tr:not(.compare-group):hover th,
+    .plans-comparison-table tbody tr:not(.compare-group):hover td { background-color:var(--bg-surface-secondary); }
+      /* Flow the comparison table with the page instead of a nested scroll panel */
+    .plan-comparison-scroll { position:relative; max-height:none !important; overflow:visible !important; border:0; border-radius:0; background:transparent; scrollbar-gutter:auto; }
+    .plans-comparison-table { width:100%; min-width:0; table-layout:fixed; border-collapse:collapse; }
+    .plans-comparison-table thead th { position:sticky; top:76px; z-index:4; background:var(--bg-surface); }
+    .plans-comparison-table thead th:first-child { left:0; z-index:6; text-align:left !important; }
+    .plans-comparison-table thead th.compare-plan-heading { text-align:center !important; }
+    .plans-comparison-table tbody th[scope="row"] { width:36%; min-width:0; position:static; text-align:left !important; background:var(--bg-surface); }
+    .plans-comparison-table tbody td { text-align:center; vertical-align:middle; }
+    .plans-comparison-table .compare-feature-cell { text-align:center !important; vertical-align:middle; }
+    .plans-comparison-table .compare-feature-cell > .compare-yes,
+    .plans-comparison-table .compare-feature-cell > .compare-no { display:grid; width:24px; height:24px; margin:0 auto; place-items:center; line-height:1; }
+    .plans-comparison-table .compare-group th { position:static; text-align:left !important; }
+    @media (max-width:700px) {
+      .plan-comparison-scroll { overflow-x:auto !important; }
+      .plans-comparison-table { min-width:680px; }
+      .plans-comparison-table thead th { top:68px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Landing Topbar Header -->
+  <header class="landing-header">
+    <div class="landing-nav">
+      <a href="index.html" class="brand-link">
+        <div class="brand-icon"><i class="fa-solid fa-dumbbell"></i></div>
+        <div class="brand-text">Gym<span>Flow</span></div>
+      </a>
+      <div class="landing-nav-links">
+        <a href="#features">Features</a>
+        <a href="#roles">Solutions</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button class="topbar-action-btn theme-toggle-btn" title="Toggle Dark/Light Mode">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
+        <a href="register.html" class="btn btn-accent btn-sm">
+          <span>Start Free Trial</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-badge">
+      <i class="fa-solid fa-bolt"></i>
+      <span>Next-Gen Multi-Tenant Gym Architecture</span>
+    </div>
+    <h1 class="hero-title">
+      Scale Your Gym Empire with <span style="color: var(--color-accent);">One Powerful SaaS</span> Platform
+    </h1>
+    <p class="hero-desc">
+      GymFlow provides an end-to-end cloud ecosystem for fitness chains, independent studios, personal trainers, and members. Manage memberships, branches, real-time check-ins, automated billing, and workout routines.
+    </p>
+    <div class="hero-buttons">
+      <a href="register.html" class="btn btn-accent btn-lg">
+        <i class="fa-solid fa-rocket"></i>
+        <span>Register Your Gym</span>
+      </a>
+      <a href="login.html" class="btn btn-secondary btn-lg">
+        <i class="fa-solid fa-eye"></i>
+        <span>Explore Live Demo</span>
+      </a>
+      <a href="#roles" class="btn btn-outline btn-lg">
+        <i class="fa-solid fa-network-wired"></i>
+        <span>Compare 3 Roles</span>
+      </a>
+    </div>
+
+    <!-- Live Preview Mockup Card -->
+    <div class="preview-card">
+      <div style="background: var(--bg-surface-secondary); padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; gap: 0.4rem;">
+          <span style="width: 11px; height: 11px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+          <span style="width: 11px; height: 11px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
+          <span style="width: 11px; height: 11px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+        </div>
+        <!-- <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); background: var(--bg-surface); padding: 0.2rem 1.5rem; border-radius: var(--radius-full); border: 1px solid var(--border-color);">
+          gymflow.app/admin/dashboard.html
+        </div> -->
+        <!-- <div style="font-size: 0.75rem; color: var(--text-subtle);">v2.4 Active</div> -->
+      </div>
+      <div style="padding: 2rem; text-align: left;">
+        <div class="stats-grid" style="margin-bottom: 1.5rem;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Active Members</span>
+              <span class="stat-icon green"><i class="fa-solid fa-users"></i></span>
+            </div>
+            <div class="stat-value">420</div>
+            <div class="stat-meta">
+              <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> +12.4%</span>
+              <span>vs last month</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Today's Attendance</span>
+              <span class="stat-icon blue"><i class="fa-solid fa-id-card-clip"></i></span>
+            </div>
+            <div class="stat-value">128</div>
+            <div class="stat-meta">
+              <span class="stat-trend positive"><i class="fa-solid fa-circle-check"></i> 89.2%</span>
+              <span>peak morning flow</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Monthly Gross Revenue</span>
+              <span class="stat-icon green"><i class="fa-solid fa-sack-dollar"></i></span>
+            </div>
+            <div class="stat-value">â‚¹18,450</div>
+            <div class="stat-meta">
+              <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> +8.1%</span>
+              <span>recurring billing</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Active Trainers</span>
+              <span class="stat-icon purple"><i class="fa-solid fa-dumbbell"></i></span>
+            </div>
+            <div class="stat-value">5</div>
+            <div class="stat-meta">
+              <span class="text-accent font-semibold">100% capacity booked</span>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem 0 0.5rem;">
+          <a href="login.html" class="btn btn-accent">
+            <span>Launch Complete Interactive Dashboard</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <div class="section-title">
+      <h2>Everything Your Gym Needs Under One Roof</h2>
+      <p>Built with enterprise scalability and consumer-grade simplicity for managers, staff, and athletes.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card card-hover">
+        <div class="card-body">
+          <div class="stat-icon green mb-4"><i class="fa-solid fa-building-user"></i></div>
+          <h4 class="mb-2">Multi-Tenant & Multi-Branch</h4>
+          <p>Seamlessly isolate gym records with distinct databases, branding, and branch managers while overseeing consolidated analytics.</p>
+        </div>
+      </div>
+      <div class="card card-hover">
+        <div class="card-body">
+          <div class="stat-icon blue mb-4"><i class="fa-solid fa-qrcode"></i></div>
+          <h4 class="mb-2">Smart Attendance Tracking</h4>
+          <p>Real-time check-in and check-out logs with duplicate prevention, fast member lookup, and simulated QR-code verification.</p>
+        </div>
+      </div>
+      <div class="card card-hover">
+        <div class="card-body">
+          <div class="stat-icon purple mb-4"><i class="fa-solid fa-calendar-days"></i></div>
+          <h4 class="mb-2">Class Scheduling & Booking</h4>
+          <p>Publish timetables for Spin, Yoga, CrossFit, and Boxing. Members book seats online with capacity limits and automated waitlists.</p>
+        </div>
+      </div>
+      <div class="card card-hover">
+        <div class="card-body">
+          <div class="stat-icon amber mb-4"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+          <h4 class="mb-2">Automated Billing & Invoices</h4>
+          <p>Track membership fees, generate professional branded PDF invoices with tax breakdown, and record cash or card payments.</p>
+        </div>
+      </div>
+      <div class="card card-hover">
+        <div class="card-body">
+          <div class="stat-icon red mb-4"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+          <h4 class="mb-2">Equipment Maintenance</h4>
+          <p>Maintain equipment inventories, log repair tickets from Reported to Completed, and track warranty expirations.</p>
+        </div>
+      </div>
+      <div class="card card-hover">
+        <div class="card-body">
+          <div class="stat-icon green mb-4"><i class="fa-solid fa-mobile-screen-button"></i></div>
+          <h4 class="mb-2">Mobile Member Portal</h4>
+          <p>Members manage their subscriptions, review workout regimens, book classes, track body composition, and download receipts.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 Roles Architecture Section -->
+  <section class="roles-section" id="roles" style="background: var(--bg-surface); border-radius: var(--radius-xl); border: 1px solid var(--border-color);">
+    <div class="section-title">
+      <h2>Engineered for 3 Distinct User Roles</h2>
+      <p>Role-tailored interfaces and permission boundaries ensure everyone gets the exact tools they need.</p>
+    </div>
+    <div class="grid-3">
+      <!-- Super Admin -->
+      <div class="card" style="border-top: 4px solid var(--color-purple);">
+        <div class="card-body">
+          <div class="role-indicator super-admin mb-3">Role 1: SaaS Super Admin</div>
+          <h3 class="mb-2">Platform Operator</h3>
+          <p class="mb-4">Oversee the entire GymFlow ecosystem across all registered gym organizations worldwide.</p>
+          <ul style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+            <li><i class="fa-solid fa-check text-accent"></i> Manage 10+ Registered Gyms</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Configure SaaS Plans & Pricing</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Platform Billing & Revenue Analytics</li>
+            <li><i class="fa-solid fa-check text-accent"></i> System Health & Audit Logging</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Platform-wide Announcements</li>
+          </ul>
+          <a href="login.html" class="btn btn-secondary w-100" onclick="Auth.loginAs('superadmin')">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Open Super Admin Portal</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Gym Admin -->
+      <div class="card" style="border-top: 4px solid var(--color-electric);">
+        <div class="card-body">
+          <div class="role-indicator admin mb-3">Role 2: Gym Admin</div>
+          <h3 class="mb-2">Gym Owner & Manager</h3>
+          <p class="mb-4">Day-to-day command center for single or multi-branch fitness centers and health clubs.</p>
+          <ul style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+            <li><i class="fa-solid fa-check text-accent"></i> Member Onboarding & Profiles</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Real-time Check-In Desk</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Trainers & Class Scheduling</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Lead Management CRM</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Revenue, Expenses & Invoices</li>
+          </ul>
+          <a href="login.html" class="btn btn-electric w-100" onclick="Auth.loginAs('gymadmin')">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Open Gym Admin Portal</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Member -->
+      <div class="card" style="border-top: 4px solid var(--color-accent);">
+        <div class="card-body">
+          <div class="role-indicator member mb-3">Role 3: Member / Athlete</div>
+          <h3 class="mb-2">Gym Member</h3>
+          <p class="mb-4">Self-service mobile-friendly web application for members to track workouts and memberships.</p>
+          <ul style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+            <li><i class="fa-solid fa-check text-accent"></i> My Active Plan & Renewal Countdown</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Assigned Daily Workout Routine</li>
+            <li><i class="fa-solid fa-check text-accent"></i> 1-Click Class Booking</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Check-in History & Streak</li>
+            <li><i class="fa-solid fa-check text-accent"></i> Body Weight & Metric Logs</li>
+          </ul>
+          <a href="login.html" class="btn btn-accent w-100" onclick="Auth.loginAs('member')">
+            <i class="fa-solid fa-user"></i>
+            <span>Open Member Portal</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Overview Section -->
+  <section class="pricing-section" id="pricing">
+    <div class="section-title">
+      <h2>Transparent Pricing for GYM</h2>
+      <p>Choose the tier that matches your club size. Upgrade or cancel anytime with zero lock-in.</p>
+    </div>
+    <div class="billing-switcher" id="billing-switcher" role="group" aria-label="Billing frequency">
+      <span class="billing-label">Bill me:</span>
+      <button type="button" class="billing-option is-active" data-billing-cycle="monthly" aria-pressed="true">Monthly</button>
+      <button type="button" class="billing-option" data-billing-cycle="annual" aria-pressed="false">Annually</button>
+      <span id="billing-savings-badge" class="billing-savings-badge">Annual savings</span>
+    </div>
+    <div class="grid-3 live-pricing-grid" id="pricing-plans-container" aria-live="polite">
+      <div class="pricing-loading card"><div class="card-body">Loading available plans...</div></div>
+    </div>
+    <div class="plan-comparison" id="plan-comparison">
+      <div class="plan-comparison-heading">
+        <h3>Compare plan features</h3>
+        <p>See the limits and features included with each active plan.</p>
+      </div>
+      <div class="plan-comparison-scroll">
+        <table id="plans-comparison-table" class="plans-comparison-table"></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" id="faq">
+    <div class="section-title">
+      <h2>Frequently Asked Questions</h2>
+      <p>Have questions about how GymFlow operates? We have answers.</p>
+    </div>
+    <div style="max-width: 800px; margin: 0 auto;">
+      <div class="faq-item active">
+        <div class="faq-question">
+          <span>Is this frontend prototype connected to a real live database?</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          No. This is a pure frontend demonstration architecture. All changes, new members, registrations, and payment entries persist in your browser's LocalStorage using a structured mock database layer (GymFlowDB). No real banking or servers are contacted.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>How do I switch between Super Admin, Gym Admin, and Member roles?</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          You can click the one-click demo login buttons on the <a href="login.html" class="text-accent font-semibold">Login Page</a>, or use the floating "Switch Demo Role" widget at the bottom right corner of any dashboard page.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Can I export reports and invoices to CSV or print them?</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          Yes! All member tables, transaction tables, and reports support 1-click CSV download, and invoices support clean, browser-native print preview dialogs with mock tax and currency calculations.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Is the design responsive for tablets and mobile devices?</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          Absolutely. The entire navigation collapses into a mobile slide-out drawer, tables scroll smoothly horizontally with sticky identifiers, and cards adapt cleanly across all screen sizes.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-link mb-3" style="color: #ffffff;">
+          <div class="brand-icon"><i class="fa-solid fa-dumbbell"></i></div>
+          <div class="brand-text">Gym<span>Flow</span></div>
+        </div>
+        <p style="color: #94a3b8; font-size: 0.875rem; max-width: 320px;">
+          The all-in-one multi-tenant SaaS operating system designed for modern gym chains, athletic centers, and fitness entrepreneurs.
+        </p>
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+          <a href="#" class="btn-icon btn-icon-sm" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #fff;"><i class="fa-brands fa-twitter"></i></a>
+          <a href="#" class="btn-icon btn-icon-sm" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #fff;"><i class="fa-brands fa-linkedin"></i></a>
+          <a href="#" class="btn-icon btn-icon-sm" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #fff;"><i class="fa-brands fa-github"></i></a>
+        </div>
+      </div>
+      <div>
+        <h5 style="color: #fff; margin-bottom: 1.25rem;">Platform</h5>
+        <a href="#features">Features</a>
+        <a href="#roles">Solutions</a>
+        <a href="#pricing">Pricing Plans</a>
+        <a href="super-admin/dashboard.html">Super Admin Demo</a>
+      </div>
+      <div>
+        <h5 style="color: #fff; margin-bottom: 1.25rem;">Portals</h5>
+        <a href="admin/dashboard.html">Gym Admin Hub</a>
+        <a href="member/dashboard.html">Member Portal</a>
+        <a href="login.html">Sign In</a>
+        <a href="register.html">Register Organization</a>
+      </div>
+      <div>
+        <h5 style="color: #fff; margin-bottom: 1.25rem;">Legal & Support</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Security Overview</a>
+        <a href="#">support@gymflow.app</a>
+      </div>
+    </div>
+    <div style="max-width: 1280px; margin: 0 auto; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.8125rem;">
+      <div>&copy; 2026 GymFlow SaaS Inc. All rights reserved. Built for evaluation & prototyping.</div>
+      <div style="color: #64748b;">Multi-Tenant Gym Architecture Prototype</div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    let publicSaaSPlans = [];
+    let currentBillingCycle = 'monthly';
+
+    function escapePricingHTML(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[char]));
+    }
+
+    function getPublicPlanFeatures(value) {
+      if (typeof value === 'string') {
+        try { value = JSON.parse(value); } catch { value = []; }
+      }
+      return Array.isArray(value) ? [...new Set(value)] : [];
+    }
+
+    function getPublicPlanDiscount(plan) {
+      const totalMonthly = (Number(plan.monthlyPrice) || 0) * 12;
+      const annual = Number(plan.annualPrice) || 0;
+      if (plan.annualDiscountPercent !== undefined && plan.annualDiscountPercent !== null && plan.annualDiscountPercent !== '') {
+        return Math.max(0, Math.min(100, Number(plan.annualDiscountPercent) || 0));
+      }
+      return totalMonthly > 0 ? Math.max(0, Math.min(100, ((totalMonthly - annual) / totalMonthly) * 100)) : 0;
+    }
+
+    function renderPublicSaaSPlans() {
+      const container = document.getElementById('pricing-plans-container');
+      const table = document.getElementById('plans-comparison-table');
+      if (!container || !window.GymFlowDB) return;
+
+      const planPriority = plan => {
+        const name = String(plan.name || '').trim().toLowerCase();
+        if (name === 'free' || name.startsWith('free ')) return 0;
+        if (name === 'starter' || name.startsWith('starter ')) return 1;
+        return 2;
+      };
+      publicSaaSPlans = (GymFlowDB.get('saasPlans') || [])
+        .filter(plan => !plan.status || String(plan.status).toLowerCase() === 'active')
+        .sort((a, b) => planPriority(a) - planPriority(b));
+      const maxDiscount = publicSaaSPlans.reduce((max, plan) => Math.max(max, getPublicPlanDiscount(plan)), 0);
+      const savingsBadge = document.getElementById('billing-savings-badge');
+      if (savingsBadge) savingsBadge.textContent = maxDiscount > 0
+        ? `Save up to ${Math.round(maxDiscount)}% annually`
+        : 'Annual billing available';
+
+      if (!publicSaaSPlans.length) {
+        container.innerHTML = '<div class="card pricing-empty"><div class="card-body"><i class="fa-solid fa-tags"></i><p>No active subscription plans are available right now.</p></div></div>';
+        if (table) table.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = publicSaaSPlans.map(plan => {
+        const monthly = Number(plan.monthlyPrice) || 0;
+        const annual = Number(plan.annualPrice) || 0;
+        const annualSavings = Math.max(0, monthly * 12 - annual);
+        const discount = getPublicPlanDiscount(plan);
+        const features = getPublicPlanFeatures(plan.features);
+        const featureMarkup = features.length
+          ? features.map(feature => `<li><i class="fa-solid fa-check"></i><span>${escapePricingHTML(feature)}</span></li>`).join('')
+          : '<li><i class="fa-solid fa-check"></i><span>Plan features available on request</span></li>';
+        const registerUrl = `register.html?plan=${encodeURIComponent(plan.id)}`;
+        const displayPrice = currentBillingCycle === 'annual' ? annual : monthly;
+        const priceUnit = currentBillingCycle === 'annual' ? '/year' : '/month';
+        const billingNote = currentBillingCycle === 'annual'
+          ? `₹${monthly.toLocaleString('en-IN')}/month · billed annually`
+          : `₹${annual.toLocaleString('en-IN')} billed yearly`;
+
+        return `
+          <article class="card card-hover live-plan-card">
+            ${plan.badge ? `<span class="badge badge-accent live-plan-badge">${escapePricingHTML(plan.badge)}</span>` : ''}
+            <div class="card-body">
+              <h3 class="card-title">${escapePricingHTML(plan.name)}</h3>
+              <div class="live-plan-price">₹${displayPrice.toLocaleString('en-IN')}<small>${priceUnit}</small></div>
+              <div class="live-plan-annual">
+                ${billingNote}
+                ${annualSavings > 0 ? `<span class="live-plan-savings">Save ₹${annualSavings.toLocaleString('en-IN')} (${discount.toFixed(0)}% off yearly)</span>` : ''}
+              </div>
+              <ul class="live-plan-limits">
+                <li><i class="fa-solid fa-code-branch"></i> ${escapePricingHTML(plan.maxBranches ?? '—')} branches</li>
+                <li><i class="fa-solid fa-users"></i> ${Number(plan.maxMembers || 0).toLocaleString('en-IN')} members</li>
+                <li><i class="fa-solid fa-user-shield"></i> ${escapePricingHTML(plan.staffLimit ?? '—')} staff accounts</li>
+              </ul>
+              <ul class="live-plan-features">${featureMarkup}</ul>
+              <a href="${escapePricingHTML(registerUrl)}" class="btn btn-accent w-100">${monthly <= 0 ? 'Get Started Free' : 'Start Free Trial'}</a>
+            </div>
+          </article>`;
+      }).join('');
+
+      renderPlanComparisonTable(table);
+    }
+
+    function renderPlanComparisonTable(table) {
+      if (!table) return;
+      const features = [...new Set(publicSaaSPlans.flatMap(plan => getPublicPlanFeatures(plan.features)))];
+      const columnCount = publicSaaSPlans.length + 1;
+      const labelColumn = 36;
+      const planColumn = (100 - labelColumn) / publicSaaSPlans.length;
+      const columns = `<colgroup><col style="width:${labelColumn}%">${publicSaaSPlans.map(() => `<col style="width:${planColumn}%">`).join('')}</colgroup>`;
+      const header = `<thead><tr><th scope="col">Features & limits</th>${publicSaaSPlans.map(plan => `<th scope="col" class="compare-plan-heading">${escapePricingHTML(plan.name)}</th>`).join('')}</tr></thead>`;
+      const limitRows = [
+        ['Monthly price', plan => `₹${(Number(plan.monthlyPrice) || 0).toLocaleString('en-IN')} / month`],
+        ['Annual price', plan => `₹${(Number(plan.annualPrice) || 0).toLocaleString('en-IN')} / year`],
+        ['Branches', plan => plan.maxBranches ?? '—'],
+        ['Member limit', plan => Number(plan.maxMembers || 0).toLocaleString('en-IN')],
+        ['Staff accounts', plan => plan.staffLimit ?? '—'],
+
+      ];
+      const limitSection = `<tr class="compare-group"><th colspan="${columnCount}">Plan limits</th></tr>${limitRows.map(([label, value]) => `<tr><th scope="row">${label}</th>${publicSaaSPlans.map(plan => `<td>${escapePricingHTML(value(plan))}</td>`).join('')}</tr>`).join('')}`;
+      const featureSection = `<tr class="compare-group"><th colspan="${columnCount}">Included features</th></tr>${features.length ? features.map(feature => `<tr class="compare-feature-row"><th scope="row">${escapePricingHTML(feature)}</th>${publicSaaSPlans.map(plan => `<td class="compare-feature-cell">${getPublicPlanFeatures(plan.features).includes(feature) ? '<i class="fa-solid fa-circle-check compare-yes" aria-label="Included"></i>' : '<span class="compare-no" aria-label="Not included">—</span>'}</td>`).join('')}</tr>`).join('') : `<tr><th scope="row">No features configured yet</th>${publicSaaSPlans.map(() => '<td>—</td>').join('')}</tr>`}`;
+      table.innerHTML = `${columns}${header}<tbody>${limitSection}${featureSection}</tbody>`;
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPublicSaaSPlans();
+      document.querySelectorAll('[data-billing-cycle]').forEach(button => {
+        button.addEventListener('click', () => {
+          currentBillingCycle = button.dataset.billingCycle;
+          document.querySelectorAll('[data-billing-cycle]').forEach(option => {
+            const active = option === button;
+            option.classList.toggle('is-active', active);
+            option.setAttribute('aria-pressed', String(active));
+          });
+          renderPublicSaaSPlans();
+        });
+      });
+    });
+    window.addEventListener('gymflow:data-changed', renderPublicSaaSPlans);
+    window.addEventListener('storage', event => {
+      if (event.key === 'gymflow_saas_db') renderPublicSaaSPlans();
+    });
+    // FAQ Accordion interaction
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const item = q.parentElement;
+        item.classList.toggle('active');
+      });
+    });
+  </script>
+</body>
+</html>
