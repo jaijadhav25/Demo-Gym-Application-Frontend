@@ -170,9 +170,11 @@
 
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -270,7 +272,7 @@
               <p class="text-xs text-muted" style="margin: 0;">
                 <i class="fa-solid fa-calendar"></i> <strong>${App.formatDate(b.date)}</strong> at <strong>${b.time}</strong> &bull; 
                 <i class="fa-solid fa-user-ninja"></i> Instructor: <strong>${b.trainerName}</strong> &bull;
-                <i class="fa-solid fa-location-dot"></i> Studio A (Downtown)
+                <i class="fa-solid fa-location-dot"></i> ${b.room || 'Studio A'} (${b.branchName || 'Bandra Central'})
               </p>
             </div>
           </div>

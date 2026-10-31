@@ -376,9 +376,9 @@
               onchange="filterMemberPlans()"
             >
               <option value="">All Price Tiers</option>
-              <option value="0-50">Under ₹50</option>
-              <option value="50-150">₹50 - ₹150</option>
-              <option value="150+">₹150 & Above</option>
+              <option value="0-5000">Under ₹5,000</option>
+              <option value="5000-10000">₹5,000 - ₹10,000</option>
+              <option value="10000+">₹10,000 & Above</option>
             </select>
 
           </div>
@@ -579,9 +579,11 @@
 <!-- JavaScript Files -->
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -639,14 +641,16 @@
       const matchDuration = !duration || p.duration === duration;
 
       let matchPrice = true;
-      const price = Number(p.price) || 0;
+      const price = Currency.convert(Number(p.price) || 0, p.currency || 'INR').amount;
+      const range5000 = Currency.convert(5000, 'INR').amount;
+      const range10000 = Currency.convert(10000, 'INR').amount;
 
-      if (priceRange === '0-50') {
-        matchPrice = price < 50;
-      } else if (priceRange === '50-150') {
-        matchPrice = price >= 50 && price <= 150;
-      } else if (priceRange === '150+') {
-        matchPrice = price > 150;
+      if (priceRange === '0-5000') {
+        matchPrice = price < range5000;
+      } else if (priceRange === '5000-10000') {
+        matchPrice = price >= range5000 && price <= range10000;
+      } else if (priceRange === '10000+') {
+        matchPrice = price > range10000;
       }
 
       return matchQ && matchDuration && matchPrice;
@@ -656,11 +660,11 @@
     filteredPlans.sort((a, b) => {
 
       if (sortVal === 'price_asc') {
-        return (Number(a.price) || 0) - (Number(b.price) || 0);
+        return Currency.convert(Number(a.price) || 0, a.currency || 'INR').amount - Currency.convert(Number(b.price) || 0, b.currency || 'INR').amount;
       }
 
       if (sortVal === 'price_desc') {
-        return (Number(b.price) || 0) - (Number(a.price) || 0);
+        return Currency.convert(Number(b.price) || 0, b.currency || 'INR').amount - Currency.convert(Number(a.price) || 0, a.currency || 'INR').amount;
       }
 
       if (sortVal === 'duration_desc') {
@@ -756,7 +760,7 @@
             <div
               style="font-size: 2rem; font-weight: 800; color: var(--text-heading); margin-bottom: 1.25rem;"
             >
-              ₹${p.price}<span
+              ${App.formatCurrency(p.price, p.currency || 'INR')}<span
                 style="font-size: 0.9rem; font-weight: 500; color: var(--text-muted);"
               >/${p.duration.includes('Annual') || p.duration.includes('Year') ? 'yr' : 'mo'}</span>
             </div>
@@ -801,7 +805,7 @@
               <button
                 class="btn btn-primary"
                 style="width: 100%;"
-                onclick="openUpgradeModal('${p.id}', '${p.name}', ${p.price}, '${p.duration}')"
+                onclick="openUpgradeModal('${p.id}', '${p.name}', ${p.price}, '${p.duration}', '${p.currency || 'INR'}')"
               >
                 Select & Switch Plan
               </button>
@@ -815,14 +819,14 @@
     }).join('');
   }
 
-  function openUpgradeModal(id, name, price, duration) {
+  function openUpgradeModal(id, name, price, duration, currency = 'INR') {
 
     selectedPlanId = id;
 
     document.getElementById('modal-plan-name').textContent = name;
 
     document.getElementById('modal-plan-price').textContent =
-      `₹${price} / ${duration}`;
+      `${App.formatCurrency(price, currency)} / ${duration}`;
 
     Modal.open('modal-upgrade-plan');
   }
@@ -838,6 +842,8 @@
 
     if (plan) {
 
+      const upgradeInvoice = `IP-UPG-${Date.now()}`;
+
       GymFlowDB.update('members', memberId, {
         planId: plan.id,
         planName: plan.name
@@ -848,9 +854,11 @@
         id: `pay_${Date.now()}`,
         gymId: gymId,
         memberId: memberId,
-        memberName: 'Alex Morgan',
-        invoiceNumber: `INV-IP-${Math.floor(1000 + Math.random() * 9000)}`,
+        memberName: GymFlowDB.getById('members', memberId)?.name || Auth.getUser()?.name || 'Member',
+        invoiceNumber: upgradeInvoice,
+        invoiceNo: upgradeInvoice,
         amount: plan.price,
+        currency: plan.currency || 'INR',
         description: `Plan Switch to ${plan.name}`,
         method: 'Visa •••• 4242',
         status: 'Paid',

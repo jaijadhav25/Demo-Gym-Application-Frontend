@@ -114,7 +114,7 @@
             
             <div style="text-align: right;">
               <span class="badge badge-success" style="font-size: 0.85rem; padding: 0.4rem 1rem;"><i class="fa-solid fa-circle-check"></i> Status: Active</span>
-              <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 0.5rem;">Member ID: <strong style="color: #fff;">#MEM-101</strong></div>
+              <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 0.5rem;">Member ID: <strong style="color: #fff;" id="mem-member-id">#MEM-101</strong></div>
             </div>
           </div>
 
@@ -248,20 +248,20 @@
     </div>
     <form onsubmit="handleRenewMembership(event)">
       <div class="modal-body">
-        <p class="text-sm text-muted">Add another full 12 months of VIP access to your account. Your new expiration date will become <strong>May 1, 2027</strong>.</p>
+        <p class="text-sm text-muted">Extend your current membership by one plan term. Your new expiration date will become <strong id="renew-new-expiry">—</strong>.</p>
         
         <div style="background: var(--bg-hover); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span>Annual VIP All-Access (12 Months):</span>
-            <strong>₹650.00</strong>
+            <span id="renew-plan-label">Annual VIP All-Access (12 Months):</span>
+            <strong id="renew-plan-price">₹24,000.00</strong>
           </div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
             <span>Loyalty Member Discount (10%):</span>
-            <strong class="text-success">-₹65.00</strong>
+            <strong class="text-success" id="renew-discount">-₹2,400.00</strong>
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 1.1rem; border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
             <strong>Total Amount:</strong>
-            <strong class="text-accent">₹585.00</strong>
+            <strong class="text-accent" id="renew-total">₹21,600.00</strong>
           </div>
         </div>
 
@@ -275,7 +275,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
-        <button type="submit" class="btn btn-accent"><i class="fa-solid fa-lock"></i> Authorize & Renew (₹585.00)</button>
+        <button type="submit" class="btn btn-accent" id="renew-submit"><i class="fa-solid fa-lock"></i> Authorize & Renew (₹21,600.00)</button>
       </div>
     </form>
   </div>
@@ -317,9 +317,11 @@
 
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -333,9 +335,25 @@
     const memberId = Auth.getActiveMemberId();
     const mem = GymFlowDB.findById('members', memberId);
     if (mem) {
+      const plan = GymFlowDB.findById('gymPlans', mem.planId);
       if (mem.planName) document.getElementById('mem-plan-title').textContent = mem.planName;
       if (mem.startDate) document.getElementById('mem-start-date').textContent = App.formatDate(mem.startDate);
       if (mem.expiryDate) document.getElementById('mem-expiry-date').textContent = App.formatDate(mem.expiryDate);
+      document.getElementById('mem-member-id').textContent = `#${mem.id}`;
+      if (plan) {
+        const price = Number(plan.price) || 0;
+        const discount = Math.round(price * 0.1);
+        const amountDue = price - discount;
+        document.getElementById('renew-plan-label').textContent = `${plan.name} (${plan.duration || 'Membership renewal'}):`;
+        const planCurrency = plan.currency || 'INR';
+        document.getElementById('renew-plan-price').textContent = App.formatCurrency(price, planCurrency);
+        document.getElementById('renew-discount').textContent = `-${App.formatCurrency(discount, planCurrency)}`;
+        document.getElementById('renew-total').textContent = App.formatCurrency(amountDue, planCurrency);
+        document.getElementById('renew-submit').innerHTML = `<i class="fa-solid fa-lock"></i> Authorize & Renew (${App.formatCurrency(amountDue, planCurrency)})`;
+        const expiry = mem.expiryDate ? new Date(`${mem.expiryDate}T00:00:00`) : new Date();
+        expiry.setDate(expiry.getDate() + (Number(plan.durationDays) || 365));
+        document.getElementById('renew-new-expiry').textContent = App.formatDate(expiry.toISOString().slice(0, 10));
+      }
     }
   }
 
@@ -361,26 +379,30 @@
     const memberId = Auth.getActiveMemberId();
     const gymId = Auth.getTenantGymId();
 
-    // Extend member expiry by 1 year
+    // Extend member expiry by the current plan term
     const mem = GymFlowDB.findById('members', memberId);
-    let newExpiry = '2027-05-01';
+    const currentPlan = GymFlowDB.findById('gymPlans', mem?.planId);
+    let newExpiry = new Date().toISOString().split('T')[0];
     if (mem && mem.expiryDate) {
       const currentExp = new Date(mem.expiryDate);
-      currentExp.setFullYear(currentExp.getFullYear() + 1);
+      currentExp.setDate(currentExp.getDate() + (Number(currentPlan?.durationDays) || 365));
       newExpiry = currentExp.toISOString().split('T')[0];
     }
 
-    GymFlowDB.update('members', memberId, { expiryDate: newExpiry });
+    GymFlowDB.update('members', memberId, { expiryDate: newExpiry, status: 'Active' });
 
     // Insert payment record
+    const renewalInvoice = `IP-RENEW-${Date.now()}`;
     GymFlowDB.insert('payments', {
       id: `pay_${Date.now()}`,
       gymId: gymId,
       memberId: memberId,
-      memberName: 'Alex Morgan',
-      invoiceNumber: `INV-IP-${Math.floor(1000 + Math.random() * 9000)}`,
-      amount: 585.00,
-      description: 'Annual VIP Membership Extension (12 Months)',
+      memberName: GymFlowDB.getById('members', memberId)?.name || Auth.getUser()?.name || 'Member',
+      invoiceNumber: renewalInvoice,
+      invoiceNo: renewalInvoice,
+      amount: Math.round((Number(currentPlan?.price) || 24000) * 0.9),
+      currency: currentPlan?.currency || 'INR',
+      description: `${mem?.planName || 'Membership'} renewal`,
       method: 'Visa •••• 4242',
       status: 'Paid',
       date: new Date().toISOString().split('T')[0]

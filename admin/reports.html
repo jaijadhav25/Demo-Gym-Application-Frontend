@@ -530,6 +530,7 @@
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/charts.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -556,14 +557,8 @@
     periodLabel: 'Last 30 days'
   };
 
-  const moneyFormatter = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 2
-  });
-
-  function money(value) {
-    return moneyFormatter.format(Number(value) || 0);
+  function money(value, sourceCurrency = Currency.getCurrency()) {
+    return App.formatCurrency(Number(value) || 0, sourceCurrency);
   }
 
   function escapeHTML(value) {
@@ -706,6 +701,10 @@
     return toNumber(firstValue(record, [
       'amount', 'totalAmount', 'total_amount', 'price', 'cost', 'paidAmount', 'paid_amount'
     ], 0));
+  }
+
+  function getDisplayAmount(record) {
+    return Currency.convert(getAmount(record), record?.currency || 'INR').amount;
   }
 
   function getStatus(record) {
@@ -914,8 +913,8 @@
 
   function updateKPIs() {
     const successfulPayments = state.filteredPayments.filter(isSuccessfulPayment);
-    const revenue = successfulPayments.reduce((sum, item) => sum + getAmount(item), 0);
-    const expenses = state.filteredExpenses.reduce((sum, item) => sum + getAmount(item), 0);
+    const revenue = successfulPayments.reduce((sum, item) => sum + getDisplayAmount(item), 0);
+    const expenses = state.filteredExpenses.reduce((sum, item) => sum + getDisplayAmount(item), 0);
     const net = revenue - expenses;
     const margin = revenue > 0 ? (net / revenue) * 100 : 0;
     const occupancy = calculateOccupancy(state.filteredClasses);
@@ -957,14 +956,14 @@
       const date = getPaymentDate(payment);
       if (!date) return;
       const bucket = ensureMonth(date.slice(0, 7));
-      bucket.revenue += getAmount(payment);
+      bucket.revenue += getDisplayAmount(payment);
     });
 
     state.filteredExpenses.forEach((expense) => {
       const date = getExpenseDate(expense);
       if (!date) return;
       const bucket = ensureMonth(date.slice(0, 7));
-      bucket.expenses += getAmount(expense);
+      bucket.expenses += getDisplayAmount(expense);
     });
 
     // Keep an empty chart meaningful without inventing values.
@@ -1055,7 +1054,7 @@
           y: {
             beginAtZero: true,
             ticks: {
-              callback: (value) => '₹' + Number(value).toLocaleString('en-IN')
+              callback: (value) => App.formatCurrency(Number(value), Currency.getCurrency())
             }
           }
         }
@@ -1108,6 +1107,7 @@
         ], 'Payment'),
         status: getStatus(payment) || 'Not specified',
         amount: getAmount(payment),
+        currency: payment.currency || 'INR',
         branchId: getBranchId(payment)
       });
     });
@@ -1121,6 +1121,7 @@
         ], 'Expense'),
         status: String(firstValue(expense, ['status'], 'Recorded')),
         amount: getAmount(expense),
+        currency: expense.currency || 'INR',
         branchId: getBranchId(expense)
       });
     });
@@ -1147,7 +1148,7 @@
           <div class="report-note">${escapeHTML(getBranchName(row.branchId))}</div>
         </td>
         <td>${escapeHTML(row.status)}</td>
-        <td class="amount">${escapeHTML(money(row.amount))}</td>
+        <td class="amount">${escapeHTML(money(row.amount, row.currency || 'INR'))}</td>
       </tr>
     `).join('');
 
@@ -1344,6 +1345,8 @@
   // calls exportAnalyticsCsv().
   window.exportAnalyticsCsv = exportAnalyticsCsv;
 
+  window.addEventListener('gymflow:currency-changed', applyReportFilters);
+  window.addEventListener('gymflow:exchange-rates-updated', applyReportFilters);
   document.addEventListener('DOMContentLoaded', initialize);
 })();
 </script>

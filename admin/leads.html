@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -196,7 +197,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Phone Number <span class="required">*</span></label>
-            <input type="tel" id="ld-phone" class="form-control" placeholder="+1 (555) 777-8899" required>
+            <input type="tel" id="ld-phone" class="form-control" placeholder="Enter phone number" autocomplete="tel-national" required>
           </div>
         </div>
 
@@ -229,6 +230,8 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -330,7 +333,7 @@
         <tr>
           <td>
             <strong>${l.name}</strong>
-            <div class="text-xs text-muted">${l.email} &bull; ${l.phone}</div>
+            <div class="text-xs text-muted">${l.email} &bull; ${IntlPhoneInput.format(l.phone, l.phoneCountryCode)}</div>
           </td>
           <td><span class="badge badge-neutral">${l.interestedPlan}</span></td>
           <td>${l.source}</td>
@@ -359,12 +362,16 @@
   function handleSaveLead(e) {
     e.preventDefault();
     const gymId = Auth.getTenantGymId();
+    const phoneParts = IntlPhoneInput.getParts('ld-phone');
     const newLd = {
       id: `ld_${Date.now()}`,
       gymId: gymId,
       name: document.getElementById('ld-name').value,
       email: document.getElementById('ld-email').value,
-      phone: document.getElementById('ld-phone').value,
+      phone: phoneParts.phone,
+      phoneCountryCode: phoneParts.countryCode,
+      phoneCountryIso: phoneParts.countryIso,
+      phoneNationalNumber: phoneParts.nationalNumber,
       interestedPlan: document.getElementById('ld-plan').value,
       source: document.getElementById('ld-source').value,
       assignedStaff: document.getElementById('ld-staff').value,
@@ -399,6 +406,9 @@
           name: l.name,
           email: l.email,
           phone: l.phone,
+          phoneCountryCode: l.phoneCountryCode,
+          phoneCountryIso: l.phoneCountryIso,
+          phoneNationalNumber: l.phoneNationalNumber,
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
           planId: 'gplan_4',
           planName: l.interestedPlan || 'Annual VIP All-Access',

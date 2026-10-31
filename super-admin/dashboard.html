@@ -3,6 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const requested = params.get('data');
+      if (requested === 'demo' || requested === 'live') sessionStorage.setItem('gymflow_data_mode', requested);
+      else if (!sessionStorage.getItem('gymflow_data_mode')) sessionStorage.setItem('gymflow_data_mode', 'demo');
+    })();
+  </script>
   <title>Super Admin Dashboard — GymFlow SaaS</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +25,46 @@
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <style>
+    .super-dashboard-review-grid { align-items: start; }
+    .super-dashboard-review-grid > .card { min-width: 0; overflow: hidden; }
+    .super-dashboard-review-grid .saas-dashboard-table-scroll { width: 100%; overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+    .super-dashboard-review-grid .saas-dashboard-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+    .super-dashboard-review-grid .saas-dashboard-table th,
+    .super-dashboard-review-grid .saas-dashboard-table td { padding: 0.8rem 0.75rem; vertical-align: middle; white-space: nowrap; }
+    .super-dashboard-review-grid .saas-dashboard-table tbody tr { height: 58px; }
+    .super-dashboard-review-grid .saas-dashboard-table th:first-child,
+    .super-dashboard-review-grid .saas-dashboard-table td:first-child { width: 72px; min-width: 72px; text-align: center; }
+    .super-dashboard-review-grid .saas-dashboard-table--performance th:nth-child(2) { width: 27%; }
+    .super-dashboard-review-grid .saas-dashboard-table--performance th:nth-child(3) { width: 12%; text-align: right; }
+    .super-dashboard-review-grid .saas-dashboard-table--performance th:nth-child(4) { width: 22%; }
+    .super-dashboard-review-grid .saas-dashboard-table--performance th:nth-child(5) { width: 17%; text-align: right; }
+    .super-dashboard-review-grid .saas-dashboard-table--performance th:nth-child(6) { width: 15%; }
+    .super-dashboard-review-grid .saas-dashboard-table--review { min-width: 610px; }
+    .super-dashboard-review-grid .saas-dashboard-table--review th:nth-child(2) { width: 29%; }
+    .super-dashboard-review-grid .saas-dashboard-table--review th:nth-child(3) { width: 17%; }
+    .super-dashboard-review-grid .saas-dashboard-table--review th:nth-child(4) { width: 18%; }
+    .super-dashboard-review-grid .saas-dashboard-table--review th:nth-child(5) { width: 19%; }
+    .super-dashboard-review-grid .saas-dashboard-table--review th:nth-child(6) { width: 17%; text-align: center; }
+    .super-dashboard-review-grid .saas-dashboard-table--review td:last-child { text-align: center; }
+    .saas-dashboard-pagination { min-height: 56px; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; }
+    .saas-dashboard-pagination__group { display: flex; align-items: center; gap: 0.5rem; }
+    .saas-dashboard-pagination select { min-height: 34px; padding: 0.3rem 1.8rem 0.3rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-main); }
+    .saas-dashboard-pagination button { min-width: 34px; min-height: 34px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-main); cursor: pointer; }
+    .saas-dashboard-pagination button:disabled { opacity: 0.45; cursor: default; }
+    .saas-status-badge { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px; padding: 0.32rem 0.65rem; font-size: 0.72rem; font-weight: 700; text-transform: capitalize; }
+    .saas-status-badge::before { width: 6px; height: 6px; border-radius: 50%; background: currentColor; content: ''; }
+    .saas-status-badge--active { color: #047857; background: rgba(16,185,129,.12); }
+    .saas-status-badge--suspended { color: #b91c1c; background: rgba(239,68,68,.12); }
+    .saas-status-badge--pending { color: #b45309; background: rgba(245,158,11,.15); }
+    @media (max-width: 767px) {
+      .super-dashboard-review-grid { grid-template-columns: minmax(0, 1fr) !important; }
+      .super-dashboard-review-grid .saas-dashboard-table--performance { min-width: 720px; }
+      .saas-dashboard-pagination { align-items: flex-start; flex-direction: column; }
+      .saas-dashboard-pagination__group { width: 100%; justify-content: space-between; }
+    }
+  </style>
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -189,9 +237,10 @@
             <span class="breadcrumb-current">Platform Dashboard</span>
           </div>
           <h1 class="page-title">SaaS Platform Overview</h1>
-          <p class="page-subtitle">Real-time health, subscription revenue, and active gym organizations.</p>
+          <p class="page-subtitle">Platform registration, subscription, billing, and gym health overview.</p>
         </div>
         <div class="page-actions">
+          <button class="btn btn-sm btn-outline" id="dashboard-data-mode" title="Demo mode uses an isolated dataset; live mode uses existing GymFlow data." onclick="toggleDashboardDataMode()">Demo data</button>
           <a href="gyms.html" class="btn btn-secondary">
             <i class="fa-solid fa-building"></i> View All Gyms
           </a>
@@ -201,16 +250,16 @@
         </div>
       </div>
 
-      <!-- KPI Stat Cards Grid (9 metrics) -->
+      <!-- KPI Stat Cards -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-card-header">
             <span class="stat-label">Total Gyms</span>
             <span class="stat-icon green"><i class="fa-solid fa-building"></i></span>
           </div>
-          <div class="stat-value" id="kpi-total-gyms">10</div>
+          <div class="stat-value" id="kpi-total-gyms">—</div>
           <div class="stat-meta">
-            <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> +2 this month</span>
+            <span class="stat-trend positive" id="meta-new-gyms">Registered organizations</span>
           </div>
         </div>
 
@@ -219,20 +268,20 @@
             <span class="stat-label">Active Gyms</span>
             <span class="stat-icon blue"><i class="fa-solid fa-circle-check"></i></span>
           </div>
-          <div class="stat-value" id="kpi-active-gyms">7</div>
+          <div class="stat-value" id="kpi-active-gyms">—</div>
           <div class="stat-meta">
-            <span class="badge badge-success">70% paid retention</span>
+            <span class="badge badge-success" id="meta-active-rate">Active subscriptions</span>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-card-header">
-            <span class="stat-label">Free Trials</span>
+            <span class="stat-label">Pending Approvals</span>
             <span class="stat-icon purple"><i class="fa-solid fa-clock"></i></span>
           </div>
-          <div class="stat-value" id="kpi-trial-gyms">2</div>
+          <div class="stat-value" id="kpi-pending-approvals">—</div>
           <div class="stat-meta">
-            <span class="text-subtle">Expiring in 7 days</span>
+            <a href="gyms.html" class="text-subtle">Review registrations</a>
           </div>
         </div>
 
@@ -241,9 +290,9 @@
             <span class="stat-label">Suspended</span>
             <span class="stat-icon red"><i class="fa-solid fa-ban"></i></span>
           </div>
-          <div class="stat-value" id="kpi-suspended-gyms">1</div>
+          <div class="stat-value" id="kpi-suspended-gyms">—</div>
           <div class="stat-meta">
-            <span class="text-danger">Failed payment</span>
+            <span class="text-danger">Requires billing review</span>
           </div>
         </div>
 
@@ -252,29 +301,29 @@
             <span class="stat-label">Total Members</span>
             <span class="stat-icon green"><i class="fa-solid fa-users"></i></span>
           </div>
-          <div class="stat-value" id="kpi-total-members">3,895</div>
+          <div class="stat-value" id="kpi-total-members">—</div>
           <div class="stat-meta">
-            <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> +14.8% YoY</span>
+            <span class="stat-trend positive">All registered gym member records</span>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-card-header">
-            <span class="stat-label">Monthly MRR</span>
+            <span class="stat-label">Monthly Platform Revenue</span>
             <span class="stat-icon green"><i class="fa-solid fa-sack-dollar"></i></span>
           </div>
-          <div class="stat-value" id="kpi-mrr">₹1,180</div>
+          <div class="stat-value" id="kpi-mrr">—</div>
           <div class="stat-meta">
-            <span class="stat-trend positive"><i class="fa-solid fa-arrow-up"></i> +₹248 /mo</span>
+            <span class="stat-trend positive">Across active subscriptions</span>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-card-header">
-            <span class="stat-label">Renewals Due</span>
+            <span class="stat-label">Expiring Subscriptions</span>
             <span class="stat-icon amber"><i class="fa-solid fa-calendar-check"></i></span>
           </div>
-          <div class="stat-value">3</div>
+          <div class="stat-value" id="kpi-renewals-due">—</div>
           <div class="stat-meta">
             <span class="text-warning">Next 14 days</span>
           </div>
@@ -282,10 +331,10 @@
 
         <div class="stat-card">
           <div class="stat-card-header">
-            <span class="stat-label">Failed Payments</span>
+            <span class="stat-label">Pending Payments</span>
             <span class="stat-icon red"><i class="fa-solid fa-circle-exclamation"></i></span>
           </div>
-          <div class="stat-value">1</div>
+          <div class="stat-value" id="kpi-pending-payment-total">—</div>
           <div class="stat-meta">
             <a href="billing.html" class="text-danger font-semibold">View invoice</a>
           </div>
@@ -296,11 +345,31 @@
             <span class="stat-label">Open Tickets</span>
             <span class="stat-icon blue"><i class="fa-solid fa-headset"></i></span>
           </div>
-          <div class="stat-value" id="kpi-open-tickets">2</div>
+          <div class="stat-value" id="kpi-open-tickets">—</div>
           <div class="stat-meta">
             <a href="support-tickets.html" class="text-electric font-semibold">Resolve queue</a>
           </div>
         </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-label">Active Subscriptions</span>
+            <span class="stat-icon green"><i class="fa-solid fa-file-circle-check"></i></span>
+          </div>
+          <div class="stat-value" id="kpi-active-subscriptions">—</div>
+          <div class="stat-meta"><a href="subscriptions.html" class="text-electric font-semibold">Subscription overview</a></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin: 1rem 0;">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title"><i class="fa-solid fa-bell text-warning"></i> Subscription & Billing Alerts</h3>
+            <p class="card-subtitle">Renewals, registrations and billing activity from platform records</p>
+          </div>
+          <a href="billing.html" class="btn btn-sm btn-outline">Open Billing</a>
+        </div>
+        <div class="card-body" id="platform-registration-trend"><p class="text-muted">Loading platform alerts…</p></div>
       </div>
 
       <!-- Charts Section (2 Columns) -->
@@ -308,10 +377,10 @@
         <div class="card">
           <div class="card-header">
             <div>
-              <h3 class="card-title"><i class="fa-solid fa-chart-line text-accent"></i> Platform MRR Growth</h3>
-              <p class="card-subtitle">Monthly Recurring Revenue trajectory across all subscribed gyms</p>
+              <h3 class="card-title"><i class="fa-solid fa-chart-line text-accent"></i> Monthly Platform Revenue</h3>
+              <p class="card-subtitle">Paid platform billing transactions by month</p>
             </div>
-            <span class="badge badge-success">+24.5% vs Q1</span>
+            <span class="badge badge-success" id="meta-platform-revenue">Paid platform billings</span>
           </div>
           <div class="card-body">
             <div style="height: 280px; position: relative;">
@@ -324,7 +393,7 @@
           <div class="card-header">
             <div>
               <h3 class="card-title"><i class="fa-solid fa-chart-pie text-electric"></i> SaaS Plan Distribution</h3>
-              <p class="card-subtitle">Active gym distribution by tier</p>
+              <p class="card-subtitle" id="meta-plan-distribution">Gym subscriptions by plan</p>
             </div>
           </div>
           <div class="card-body">
@@ -333,6 +402,40 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1.75rem;">
+        <div class="card-header">
+          <div><h3 class="card-title"><i class="fa-solid fa-chart-column text-accent"></i> Gym Registration Trend</h3><p class="card-subtitle">New gym organizations by month</p></div>
+        </div>
+        <div class="card-body"><div style="height: 250px; position: relative;"><canvas id="chart-platform-registrations"></canvas></div></div>
+      </div>
+
+      <div class="grid-2-1 super-dashboard-review-grid">
+        <div class="card">
+          <div class="card-header"><div><h3 class="card-title"><i class="fa-solid fa-ranking-star text-accent"></i> Gym Performance Overview</h3><p class="card-subtitle">Member totals and subscription status across the platform</p></div></div>
+          <div class="saas-dashboard-table-scroll"><table class="data-table saas-dashboard-table saas-dashboard-table--performance">
+            <thead><tr><th>S. NO.</th><th>Gym</th><th>Members</th><th>Subscription</th><th>Monthly Fee</th><th>Status</th></tr></thead>
+            <tbody id="table-gym-performance"></tbody>
+          </table></div>
+          <div class="saas-dashboard-pagination" id="gym-performance-pagination"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div><h3 class="card-title"><i class="fa-solid fa-building-circle-exclamation text-warning"></i> Approvals & Suspensions</h3><p class="card-subtitle">Organizations requiring platform review</p></div></div>
+          <div class="saas-dashboard-table-scroll"><table class="data-table saas-dashboard-table saas-dashboard-table--review">
+            <thead><tr><th>S. NO.</th><th>Gym</th><th>Status</th><th>Plan</th><th>Registered</th><th>Action</th></tr></thead>
+            <tbody id="table-gym-review"></tbody>
+          </table></div>
+          <div class="saas-dashboard-pagination" id="gym-review-pagination"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1.75rem;">
+        <div class="card-header"><div><h3 class="card-title"><i class="fa-solid fa-money-check-dollar text-accent"></i> Platform Billing Transactions</h3><p class="card-subtitle">Recent paid, pending and failed subscription invoices</p></div><a href="billing.html" class="btn btn-sm btn-outline">All Billing</a></div>
+        <div class="table-responsive"><table class="data-table">
+          <thead><tr><th>S. NO.</th><th>Invoice</th><th>Gym</th><th>Plan</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody id="table-platform-billing"></tbody>
+        </table></div>
       </div>
 
       <!-- Tables and Activity Feeds -->
@@ -350,6 +453,7 @@
             <table class="data-table">
               <thead>
                 <tr>
+                  <th>S. NO.</th>
                   <th>Gym Organization</th>
                   <th>Owner</th>
                   <th>Plan</th>
@@ -369,7 +473,7 @@
         <div class="card">
           <div class="card-header">
             <div>
-              <h3 class="card-title"><i class="fa-solid fa-bolt text-warning"></i> Platform Activity Feed</h3>
+              <h3 class="card-title"><i class="fa-solid fa-bolt text-warning"></i> Recent Subscription & Platform Activity</h3>
               <p class="card-subtitle">Live system and security events</p>
             </div>
             <a href="audit-logs.html" class="btn btn-icon btn-sm" title="View Audit Logs"><i class="fa-solid fa-arrow-right"></i></a>
@@ -412,7 +516,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Phone <span class="required">*</span></label>
-            <input type="tel" id="add-gym-phone" class="form-control" placeholder="+1 (555) 789-0123" required>
+            <input type="tel" id="add-gym-phone" class="form-control" placeholder="Enter phone number" autocomplete="tel-national" required>
           </div>
         </div>
 
@@ -442,64 +546,178 @@
 <!-- Scripts -->
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/charts.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
+  const platformTableState = {
+    performance: { rows: [], page: 1, pageSize: 5, renderRow: null },
+    review: { rows: [], page: 1, pageSize: 5, renderRow: null }
+  };
+
   document.addEventListener('DOMContentLoaded', () => {
+    GymFlowDashboardDemoData.seed();
     loadDashboardData();
-    renderCharts();
+    updateDashboardDataModeButton();
+    updateGymPlanOptions();
+    window.addEventListener('gymflow:data-changed', loadDashboardData);
+    window.addEventListener('storage', loadDashboardData);
+    window.addEventListener('gymflow:currency-changed', loadDashboardData);
+    window.addEventListener('gymflow:exchange-rates-updated', loadDashboardData);
   });
+
+  function updateDashboardDataModeButton() {
+    const button = document.getElementById('dashboard-data-mode');
+    if (!button) return;
+    button.textContent = GymFlowDashboardDemoData.isEnabled() ? 'Demo data · Switch to live' : 'Live data · Switch to demo';
+  }
+
+  function toggleDashboardDataMode() {
+    sessionStorage.setItem('gymflow_data_mode', GymFlowDashboardDemoData.isEnabled() ? 'live' : 'demo');
+    location.reload();
+  }
+
+  function updateGymPlanOptions() {
+    const select = document.getElementById('add-gym-plan');
+    if (!select) return;
+    const prices = GymFlowDashboardDemoData.isEnabled()
+      ? ['Starter (₹7,500/mo)', 'Growth (₹15,000/mo)', 'Enterprise Pro (₹25,000/mo)']
+      : ['Starter (₹49/mo)', 'Growth (₹99/mo)', 'Enterprise Pro (₹199/mo)'];
+    Array.from(select.options).forEach((option, index) => { option.textContent = prices[index] || option.textContent; });
+  }
+
+  const platformEscape = (value) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+
+  function platformStatusBadge(status) {
+    const normalized = String(status || 'pending').toLowerCase();
+    const key = normalized === 'active' ? 'active' : normalized === 'suspended' ? 'suspended' : 'pending';
+    const label = key[0].toUpperCase() + key.slice(1);
+    return `<span class="saas-status-badge saas-status-badge--${key}">${label}</span>`;
+  }
+
+  function renderPlatformTable(key, rows, renderRow) {
+    const state = platformTableState[key];
+    state.rows = rows;
+    state.renderRow = renderRow;
+    const pageCount = Math.max(1, Math.ceil(rows.length / state.pageSize));
+    state.page = Math.min(Math.max(1, state.page), pageCount);
+    const start = (state.page - 1) * state.pageSize;
+    const pageRows = rows.slice(start, start + state.pageSize);
+    const bodyId = key === 'performance' ? 'table-gym-performance' : 'table-gym-review';
+    const paginationId = key === 'performance' ? 'gym-performance-pagination' : 'gym-review-pagination';
+    document.getElementById(bodyId).innerHTML = pageRows.length
+      ? pageRows.map((row, index) => renderRow(row, start + index + 1)).join('')
+      : `<tr><td colspan="6" class="text-center text-muted">${key === 'review' ? 'No approvals or suspended gyms.' : 'No gym records available.'}</td></tr>`;
+    const first = rows.length ? start + 1 : 0;
+    const last = Math.min(start + state.pageSize, rows.length);
+    document.getElementById(paginationId).innerHTML = `
+      <span>Showing ${first}–${last} of ${rows.length}</span>
+      <div class="saas-dashboard-pagination__group">
+        <label for="${key}-page-size">Rows</label>
+        <select id="${key}-page-size" aria-label="${key === 'performance' ? 'Performance' : 'Review'} records per page" onchange="setPlatformTablePageSize('${key}', this.value)">
+          ${[5, 10, 20].map(size => `<option value="${size}" ${state.pageSize === size ? 'selected' : ''}>${size} per page</option>`).join('')}
+        </select>
+        <button type="button" aria-label="Previous page" onclick="changePlatformTablePage('${key}', -1)" ${state.page <= 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>
+        <span>Page ${state.page} of ${pageCount}</span>
+        <button type="button" aria-label="Next page" onclick="changePlatformTablePage('${key}', 1)" ${state.page >= pageCount ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button>
+      </div>`;
+  }
+
+  function setPlatformTablePageSize(key, value) {
+    const state = platformTableState[key];
+    state.pageSize = Number(value) || 5;
+    state.page = 1;
+    renderPlatformTable(key, state.rows, state.renderRow);
+  }
+
+  function changePlatformTablePage(key, amount) {
+    const state = platformTableState[key];
+    state.page += amount;
+    renderPlatformTable(key, state.rows, state.renderRow);
+  }
 
   function loadDashboardData() {
     const gyms = GymFlowDB.get('gyms');
+    const platformBillings = GymFlowDB.get('platformBilling');
     const tickets = GymFlowDB.get('supportTickets', { scope: 'platform', status: 'Open' });
     const auditLogs = GymFlowDB.get('auditLogs');
-
-    // Update KPI values
     const totalGyms = gyms.length;
     const activeGyms = gyms.filter(g => g.status === 'active').length;
-    const trialGyms = gyms.filter(g => g.status === 'trial').length;
     const suspendedGyms = gyms.filter(g => g.status === 'suspended').length;
-    const totalMembers = gyms.reduce((acc, g) => acc + (g.membersCount || 0), 0);
-    const totalMrr = gyms.filter(g => g.status !== 'suspended').reduce((acc, g) => acc + (g.mrr || 0), 0);
+    const pendingGyms = gyms.filter(g => g.status === 'pending');
+    const activeSubscriptions = gyms.filter(gym => gym.status === 'active' && Number(gym.mrr) > 0);
+    const totalMembers = gyms.reduce((sum, gym) => sum + (Number(gym.membersCount) || 0), 0);
+    const today = new Date();
+    const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const renewalLimit = new Date(startOfToday);
+    renewalLimit.setDate(renewalLimit.getDate() + 14);
+    const dueRenewals = activeSubscriptions.filter(gym => {
+      if (!gym.renewalDate) return false;
+      const renewal = new Date(`${gym.renewalDate}T00:00:00`);
+      return !Number.isNaN(renewal.getTime()) && renewal >= startOfToday && renewal <= renewalLimit;
+    });
+    const expiringSubscriptions = dueRenewals;
+    const failedBillings = platformBillings.filter(billing => billing.status === 'Failed');
+    const currentMonthRevenue = platformBillings.filter(billing => billing.status === 'Paid' && billing.date?.slice(0, 7) === currentMonth).reduce((sum, billing) => sum + Currency.convert(Number(billing.amount) || 0, billing.currency || 'INR').amount, 0);
+    const registrationsThisMonth = gyms.filter(gym => gym.registrationDate?.slice(0, 7) === currentMonth).length;
+    const pendingPaymentTotal = platformBillings.filter(billing => billing.status === 'Pending').reduce((sum, billing) => sum + Currency.convert(Number(billing.amount) || 0, billing.currency || 'INR').amount, 0);
 
     document.getElementById('kpi-total-gyms').textContent = totalGyms;
     document.getElementById('kpi-active-gyms').textContent = activeGyms;
-    document.getElementById('kpi-trial-gyms').textContent = trialGyms;
+    document.getElementById('kpi-pending-approvals').textContent = pendingGyms.length;
     document.getElementById('kpi-suspended-gyms').textContent = suspendedGyms;
-    document.getElementById('kpi-total-members').textContent = totalMembers.toLocaleString();
-    document.getElementById('kpi-mrr').textContent = `₹${totalMrr.toLocaleString()}`;
+    document.getElementById('kpi-total-members').textContent = totalMembers.toLocaleString('en-IN');
+    document.getElementById('kpi-mrr').textContent = App.formatCurrency(currentMonthRevenue, Currency.getCurrency());
     document.getElementById('kpi-open-tickets').textContent = tickets.length;
+    document.getElementById('kpi-renewals-due').textContent = expiringSubscriptions.length;
+    document.getElementById('kpi-active-subscriptions').textContent = activeSubscriptions.length;
+    document.getElementById('kpi-pending-payment-total').textContent = App.formatCurrency(pendingPaymentTotal, Currency.getCurrency());
+    document.getElementById('meta-new-gyms').textContent = `${registrationsThisMonth} registered this month`;
+    document.getElementById('meta-active-rate').textContent = `${totalGyms ? Math.round(activeGyms / totalGyms * 100) : 0}% active`;
+    document.getElementById('meta-platform-revenue').textContent = `${App.formatCurrency(currentMonthRevenue, Currency.getCurrency())} paid this month`;
+    document.getElementById('meta-plan-distribution').textContent = `${activeSubscriptions.length} active subscriptions`;
+
+    const gymRegistrationTrend = document.getElementById('platform-registration-trend');
+    if (gymRegistrationTrend) {
+      const recentRenewals = dueRenewals.slice(0, 3).map(gym => `<li><strong>${platformEscape(gym.name)}</strong><span class="text-muted"> Renews ${platformEscape(gym.renewalDate)}</span></li>`).join('');
+      const failedItems = failedBillings.slice(0, 3).map(billing => `<li><strong>${platformEscape(billing.gymName || billing.gymId)}</strong><span class="text-muted"> ${platformEscape(billing.invoiceNo || 'Billing')} · ${App.formatCurrency(Number(billing.amount) || 0, billing.currency || 'INR')}</span></li>`).join('');
+      const pendingApprovalRows = pendingGyms.slice(0, 2).map(gym => `<li><strong>${platformEscape(gym.name)}</strong><span class="text-muted"> Awaiting approval · ${platformEscape(gym.city)}</span></li>`).join('');
+      gymRegistrationTrend.innerHTML = `<div class="alert alert-info"><strong>${registrationsThisMonth}</strong> gym registrations this month · <strong>${dueRenewals.length}</strong> subscriptions renewing in 14 days · <strong>${pendingGyms.length}</strong> approvals pending · <strong>${App.formatCurrency(pendingPaymentTotal, Currency.getCurrency())}</strong> payments outstanding.</div>${recentRenewals || failedItems || pendingApprovalRows ? `<ul class="platform-alert-list">${recentRenewals}${failedItems}${pendingApprovalRows}</ul>` : '<p class="text-muted">No subscription or billing alerts.</p>'}`;
+    }
 
     // Render Recent Gyms Table (First 5)
-    const recentGyms = gyms.slice(0, 5);
+    const recentGyms = [...gyms].sort((a, b) => (b.registrationDate || '').localeCompare(a.registrationDate || '')).slice(0, 5);
     const tbody = document.getElementById('table-recent-gyms');
-    tbody.innerHTML = recentGyms.map(gym => {
+    tbody.innerHTML = recentGyms.length ? recentGyms.map((gym, index) => {
       let statusBadge = 'badge-success';
-      if (gym.status === 'trial') statusBadge = 'badge-warning';
+      if (gym.status === 'pending') statusBadge = 'badge-warning';
       if (gym.status === 'suspended') statusBadge = 'badge-danger';
 
       return `
         <tr>
+          <td>${index + 1}</td>
           <td>
             <div class="cell-entity">
               <div class="avatar avatar-sm">
-                <img src="${gym.logo}" alt="${gym.name}">
+                <img src="${platformEscape(gym.logo)}" alt="${platformEscape(gym.name)}">
               </div>
               <div>
-                <strong>${gym.name}</strong>
-                <div class="text-xs text-muted">${gym.city}</div>
+                <strong>${platformEscape(gym.name)}</strong>
+                <div class="text-xs text-muted">${platformEscape(gym.city)}</div>
               </div>
             </div>
           </td>
-          <td>${gym.owner}</td>
-          <td><span class="badge badge-neutral">${gym.planName}</span></td>
-          <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${gym.status.toUpperCase()}</span></td>
-          <td class="font-bold">₹${gym.mrr}/mo</td>
+          <td>${platformEscape(gym.owner)}</td>
+          <td><span class="badge badge-neutral">${platformEscape(gym.planName)}</span></td>
+          <td><span class="badge ${statusBadge}"><span class="badge-dot"></span>${platformEscape(gym.status).toUpperCase()}</span></td>
+          <td class="font-bold">${App.formatCurrency(Number(gym.mrr) || 0, gym.currency || 'INR')}/mo</td>
           <td>
             <a href="gym-details.html?id=${gym.id}" class="btn btn-sm btn-outline" title="View Details">
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -507,38 +725,96 @@
           </td>
         </tr>
       `;
-    }).join('');
+    }).join('') : '<tr><td colspan="7" class="text-center text-muted">No gyms registered yet.</td></tr>';
 
     // Render Activity Feed
     const feed = document.getElementById('platform-activity-feed');
-    const recentLogs = auditLogs.slice(0, 5);
-    feed.innerHTML = recentLogs.map((log, idx) => {
+    const recentLogs = [...auditLogs].sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || '')).slice(0, 5);
+    feed.innerHTML = recentLogs.length ? recentLogs.map((log, idx) => {
       let dotColor = idx === 0 ? '' : (idx === 1 ? 'blue' : (idx === 2 ? 'purple' : 'amber'));
       return `
         <div class="timeline-item">
           <div class="timeline-dot ${dotColor}"></div>
           <div class="timeline-header">
-            <span class="timeline-title">${log.action}</span>
-            <span class="timeline-time">${log.timestamp.split(' ')[1]}</span>
+          <span class="timeline-title">${platformEscape(log.action)}</span>
+          <span class="timeline-time">${platformEscape((log.timestamp || '').split(' ')[1] || '')}</span>
           </div>
-          <p class="timeline-desc">${log.actor}: ${log.resource}</p>
+        <p class="timeline-desc">${platformEscape(log.actor)}: ${platformEscape(log.resource)}</p>
         </div>
       `;
-    }).join('');
+    }).join('') : '<p class="text-muted">No platform activity has been recorded.</p>';
+
+    const topGyms = [...gyms].sort((a, b) => (Number(b.membersCount) || 0) - (Number(a.membersCount) || 0));
+    renderPlatformTable('performance', topGyms, (gym, serial) => `
+      <tr>
+        <td>${serial}</td>
+        <td><strong title="${platformEscape(gym.name)}">${platformEscape(gym.name)}</strong></td>
+        <td style="text-align:right;">${(Number(gym.membersCount) || 0).toLocaleString('en-IN')}</td>
+        <td><span class="badge badge-neutral">${platformEscape(gym.planName || 'No subscription')}</span></td>
+        <td style="text-align:right;">${App.formatCurrency(Number(gym.mrr) || 0, gym.currency || 'INR')}/mo</td>
+        <td>${platformStatusBadge(gym.status)}</td>
+      </tr>`);
+
+    const reviewRows = [...pendingGyms, ...gyms.filter(gym => gym.status === 'suspended')].sort((a, b) => (b.registrationDate || '').localeCompare(a.registrationDate || ''));
+    renderPlatformTable('review', reviewRows, (gym, serial) => {
+      const registrationDate = gym.registrationDate ? new Date(`${gym.registrationDate}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      return `<tr>
+        <td>${serial}</td>
+        <td><strong title="${platformEscape(gym.name)}">${platformEscape(gym.name)}</strong></td>
+        <td>${platformStatusBadge(gym.status)}</td>
+        <td><span class="badge badge-neutral">${platformEscape(gym.planName || '—')}</span></td>
+        <td>${platformEscape(registrationDate)}</td>
+        <td><a href="gym-details.html?id=${encodeURIComponent(gym.id)}" class="btn btn-sm btn-primary"><i class="fa-solid fa-eye"></i> Review</a></td>
+      </tr>`;
+    });
+
+    const recentBillings = [...platformBillings].sort((a, b) => `${b.date || ''} ${b.id || ''}`.localeCompare(`${a.date || ''} ${a.id || ''}`)).slice(0, 12);
+    const billingBody = document.getElementById('table-platform-billing');
+    billingBody.innerHTML = recentBillings.length ? recentBillings.map((billing, index) => `
+      <tr><td>${index + 1}</td><td>${platformEscape(billing.invoiceNo || billing.id)}</td><td>${platformEscape(billing.gymName || billing.gymId)}</td><td>${platformEscape(billing.planName || '—')}</td><td>${platformEscape(billing.date || '—')}</td><td>${App.formatCurrency(Number(billing.amount) || 0, billing.currency || 'INR')}</td><td><span class="badge ${billing.status === 'Paid' ? 'badge-success' : billing.status === 'Pending' ? 'badge-warning' : 'badge-danger'}">${platformEscape(billing.status)}</span></td></tr>
+    `).join('') : '<tr><td colspan="7" class="text-center text-muted">No platform billing transactions.</td></tr>';
+
+    renderCharts();
   }
 
   function renderCharts() {
-    GymCharts.renderRevenueChart(
-      'chart-platform-revenue',
-      ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'],
-      [640, 720, 890, 940, 1060, 1180]
-    );
-
-    GymCharts.renderPlanDistributionChart(
-      'chart-plan-distribution',
-      ['Growth (₹99)', 'Enterprise (₹199)', 'Starter (₹49)'],
-      [5, 2, 3]
-    );
+    const billings = GymFlowDB.get('platformBilling');
+    const gyms = GymFlowDB.get('gyms');
+    const today = new Date();
+    const months = Array.from({ length: 6 }, (_, index) => new Date(today.getFullYear(), today.getMonth() - (5 - index), 1));
+    const labels = months.map(month => month.toLocaleDateString(undefined, { month: 'short', year: '2-digit' }));
+    const values = months.map(month => {
+      const key = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`;
+      return billings.filter(billing => billing.status === 'Paid' && billing.date?.slice(0, 7) === key).reduce((sum, billing) => sum + Currency.convert(Number(billing.amount) || 0, billing.currency || 'INR').amount, 0);
+    });
+    const planCounts = new Map();
+    gyms.filter(gym => gym.status === 'active' && Number(gym.mrr) > 0).forEach(gym => {
+      const plan = gym.planName || 'Unspecified plan';
+      planCounts.set(plan, (planCounts.get(plan) || 0) + 1);
+    });
+    const revenueCanvas = document.getElementById('chart-platform-revenue');
+    const planCanvas = document.getElementById('chart-plan-distribution');
+    const registrationCanvas = document.getElementById('chart-platform-registrations');
+    if (revenueCanvas && window.Chart?.getChart(revenueCanvas)) window.Chart.getChart(revenueCanvas).destroy();
+    if (planCanvas && window.Chart?.getChart(planCanvas)) window.Chart.getChart(planCanvas).destroy();
+    if (registrationCanvas && window.Chart?.getChart(registrationCanvas)) window.Chart.getChart(registrationCanvas).destroy();
+    const revenueChart = GymCharts.renderRevenueChart('chart-platform-revenue', labels, values);
+    if (revenueChart) {
+      revenueChart.options.scales.y.ticks.callback = value => App.formatCurrency(Number(value), Currency.getCurrency());
+      revenueChart.options.plugins.tooltip.callbacks.label = context => ` Revenue: ${App.formatCurrency(Number(context.parsed.y), Currency.getCurrency())}`;
+      revenueChart.update();
+    }
+    GymCharts.renderPlanDistributionChart('chart-plan-distribution', [...planCounts.keys()], [...planCounts.values()]);
+    const registrationValues = months.map(month => {
+      const key = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`;
+      return gyms.filter(gym => gym.registrationDate?.slice(0, 7) === key).length;
+    });
+    const registrationChart = GymCharts.renderAttendanceChart('chart-platform-registrations', labels, registrationValues);
+    if (registrationChart) {
+      registrationChart.data.datasets[0].label = 'Gym registrations';
+      registrationChart.options.scales.y.ticks.stepSize = 5;
+      registrationChart.update();
+    }
   }
 
   function handleAddGym(e) {
@@ -546,11 +822,16 @@
     const name = document.getElementById('add-gym-name').value;
     const owner = document.getElementById('add-gym-owner').value;
     const email = document.getElementById('add-gym-email').value;
-    const phone = document.getElementById('add-gym-phone').value;
+    const phoneParts = IntlPhoneInput.getParts('add-gym-phone');
+    const phone = phoneParts.phone;
     const city = document.getElementById('add-gym-city').value;
     const planId = document.getElementById('add-gym-plan').value;
 
-    const planMap = {
+    const planMap = GymFlowDashboardDemoData.isEnabled() ? {
+      'saas_starter': { name: 'Starter', mrr: 7500 },
+      'saas_growth': { name: 'Growth', mrr: 15000 },
+      'saas_enterprise': { name: 'Enterprise Pro', mrr: 25000 }
+    } : {
       'saas_starter': { name: 'Starter', mrr: 49 },
       'saas_growth': { name: 'Growth', mrr: 99 },
       'saas_enterprise': { name: 'Enterprise Pro', mrr: 199 }
@@ -564,6 +845,9 @@
       owner: owner,
       email: email,
       phone: phone,
+      phoneCountryCode: phoneParts.countryCode,
+      phoneCountryIso: phoneParts.countryIso,
+      phoneNationalNumber: phoneParts.nationalNumber,
       address: 'Main Facility Blvd',
       city: city,
       planId: planId,
@@ -572,6 +856,8 @@
       registrationDate: new Date().toISOString().split('T')[0],
       renewalDate: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
       mrr: planMap[planId].mrr,
+      subscriptionStatus: 'active',
+      expiringSoon: false,
       membersCount: 0,
       branchesCount: 1
     };

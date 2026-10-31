@@ -40,7 +40,7 @@ const GymCharts = {
       data: {
         labels: labels || ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'],
         datasets: [{
-          label: 'Revenue (₹)',
+          label: 'Revenue',
           data: data || [3200, 3900, 4800, 5200, 6100, 7450],
           borderColor: colors.accent,
           borderWidth: 2.5,
@@ -66,7 +66,7 @@ const GymCharts = {
             padding: 10,
             cornerRadius: 8,
             callbacks: {
-              label: (context) => ` Revenue: ₹${context.parsed.y.toLocaleString()}`
+              label: (context) => ` Revenue: ${App.formatCurrency(context.parsed.y, window.Currency?.getCurrency?.() || 'INR')}`
             }
           }
         },
@@ -80,7 +80,7 @@ const GymCharts = {
             ticks: {
               color: colors.textColor,
               font: { family: "'Plus Jakarta Sans', sans-serif" },
-              callback: (val) => `₹${val}`
+              callback: (val) => App.formatCurrency(val, window.Currency?.getCurrency?.() || 'INR')
             }
           }
         }
@@ -212,5 +212,12 @@ const GymCharts = {
     });
   }
 };
+
+window.addEventListener('gymflow:currency-changed', () => {
+  if (typeof Chart !== 'undefined') Object.values(Chart.instances || {}).forEach(chart => chart.update());
+});
+window.addEventListener('gymflow:exchange-rates-updated', () => {
+  if (typeof Chart !== 'undefined') Object.values(Chart.instances || {}).forEach(chart => chart.update());
+});
 
 window.GymCharts = GymCharts;

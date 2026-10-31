@@ -46,6 +46,7 @@
       white-space: nowrap;
     }
   </style>
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -317,7 +318,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Phone Number <span class="required">*</span></label>
-            <input type="tel" id="mem-phone" class="form-control" placeholder="+1 (555) 901-2345" required>
+            <input type="tel" id="mem-phone" class="form-control" placeholder="Enter phone number" autocomplete="tel-national" required>
           </div>
         </div>
 
@@ -400,7 +401,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Phone Number <span class="required">*</span></label>
-            <input type="tel" id="edit-mem-phone" class="form-control" required>
+            <input type="tel" id="edit-mem-phone" class="form-control" autocomplete="tel-national" required>
           </div>
         </div>
 
@@ -558,6 +559,8 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -911,7 +914,7 @@
 
           <!-- 2. Contact: Phone and Branch -->
           <td>
-            <div class="text-xs font-semibold">${m.phone}</div>
+            <div class="text-xs font-semibold">${IntlPhoneInput.format(m.phone, m.phoneCountryCode)}</div>
             <div class="text-xs text-muted"><i class="fa-solid fa-location-dot" style="font-size: 0.7rem;"></i> ${branchName}</div>
           </td>
 
@@ -1001,7 +1004,8 @@
     e.preventDefault();
     const gymId = Auth.getTenantGymId();
     const email = document.getElementById('mem-email').value.trim();
-    const phone = document.getElementById('mem-phone').value.trim();
+    const phoneParts = IntlPhoneInput.getParts('mem-phone');
+    const phone = phoneParts.phone;
 
     // Check duplicate email or phone in existing members
     const duplicate = membersList.find(m => m.email.toLowerCase() === email.toLowerCase());
@@ -1021,6 +1025,9 @@
       name: document.getElementById('mem-name').value.trim(),
       email: email,
       phone: phone,
+      phoneCountryCode: phoneParts.countryCode,
+      phoneCountryIso: phoneParts.countryIso,
+      phoneNationalNumber: phoneParts.nationalNumber,
       gender: document.getElementById('mem-gender').value,
       avatar: `https://images.unsplash.com/photo-${1534528741775 + (membersList.length % 20)}?w=100&h=100&fit=crop`,
       planId: planId,
@@ -1063,7 +1070,7 @@
     document.getElementById('edit-mem-name').value = m.name || '';
     document.getElementById('edit-mem-gender').value = m.gender || 'Male';
     document.getElementById('edit-mem-email').value = m.email || '';
-    document.getElementById('edit-mem-phone').value = m.phone || '';
+    IntlPhoneInput.setValue('edit-mem-phone', m.phone || '', m.phoneCountryCode, m.phoneCountryIso);
     document.getElementById('edit-mem-plan').value = m.planId || 'gplan_1';
     document.getElementById('edit-mem-branch').value = m.branchId || 'br_1';
     document.getElementById('edit-mem-start-date').value = m.startDate || '';
@@ -1081,11 +1088,15 @@
     const planId = document.getElementById('edit-mem-plan').value;
     const planObj = gymPlans.find(p => p.id === planId) || { name: 'Standard Plan' };
 
+    const phoneParts = IntlPhoneInput.getParts('edit-mem-phone');
     const updated = {
       name: document.getElementById('edit-mem-name').value.trim(),
       gender: document.getElementById('edit-mem-gender').value,
       email: document.getElementById('edit-mem-email').value.trim(),
-      phone: document.getElementById('edit-mem-phone').value.trim(),
+      phone: phoneParts.phone,
+      phoneCountryCode: phoneParts.countryCode,
+      phoneCountryIso: phoneParts.countryIso,
+      phoneNationalNumber: phoneParts.nationalNumber,
       branchId: document.getElementById('edit-mem-branch').value,
       planId: planId,
       planName: planObj.name,

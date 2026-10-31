@@ -34,6 +34,7 @@
       padding: 2.5rem;
     }
   </style>
+  <link rel="stylesheet" href="assets/css/international-phone-input.css">
 </head>
 <body class="register-page">
 
@@ -79,7 +80,7 @@
           <label class="form-label" for="reg-phone">Phone Number <span class="required">*</span></label>
           <div class="input-with-icon">
             <i class="fa-solid fa-phone input-icon"></i>
-            <input type="tel" id="reg-phone" class="form-control" placeholder="+1 (555) 000-0000" required>
+            <input type="tel" id="reg-phone" class="form-control" placeholder="Enter phone number" autocomplete="tel-national" required>
           </div>
         </div>
       </div>
@@ -155,6 +156,8 @@
   <script src="assets/js/components.js"></script>
   <script src="assets/js/validation.js"></script>
   <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/international-phone-input.js"></script>
+  <script src="assets/js/currency.js"></script>
   <script>
     // Preselect plan from URL param if present
     document.addEventListener('DOMContentLoaded', () => {
@@ -178,7 +181,8 @@
       const gymName = document.getElementById('reg-gym-name').value;
       const ownerName = document.getElementById('reg-owner-name').value;
       const email = document.getElementById('reg-email').value;
-      const phone = document.getElementById('reg-phone').value;
+      const phoneParts = IntlPhoneInput.getParts('reg-phone');
+      const phone = phoneParts.phone;
       const address = document.getElementById('reg-address').value;
       const city = document.getElementById('reg-city').value;
       const planId = document.getElementById('reg-plan').value;
@@ -197,6 +201,9 @@
         owner: ownerName,
         email: email,
         phone: phone,
+        phoneCountryCode: phoneParts.countryCode,
+        phoneCountryIso: phoneParts.countryIso,
+        phoneNationalNumber: phoneParts.nationalNumber,
         address: address,
         city: city,
         planId: planId,
@@ -220,6 +227,9 @@
         address: address,
         city: city,
         phone: phone,
+        phoneCountryCode: phoneParts.countryCode,
+        phoneCountryIso: phoneParts.countryIso,
+        phoneNationalNumber: phoneParts.nationalNumber,
         manager: ownerName,
         memberCount: 0,
         openingHours: 'Mon-Sun: 6:00 AM - 10:00 PM',

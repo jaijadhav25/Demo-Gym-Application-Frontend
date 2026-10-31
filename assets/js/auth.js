@@ -29,8 +29,8 @@ const DEMO_ACCOUNTS = {
   },
   member: {
     id: "mem_101",
-    name: "Alex Morgan",
-    email: "alex.morgan@example.com",
+    name: "Aarav Sharma",
+    email: "aarav.sharma@example.in",
     role: "member",
     roleLabel: "Gym Member",
     gymId: "gym_1",
@@ -68,7 +68,7 @@ const Auth = {
       this.setUser(DEMO_ACCOUNTS.superadmin, remember);
       return { success: true, user: DEMO_ACCOUNTS.superadmin, redirect: 'super-admin/dashboard.html' };
     }
-    if (email.includes('alex.morgan') || email === 'member' || email.includes('member')) {
+    if (email.includes('aarav.sharma') || email.includes('alex.morgan') || email === 'member' || email.includes('member')) {
       this.setUser(DEMO_ACCOUNTS.member, remember);
       return { success: true, user: DEMO_ACCOUNTS.member, redirect: 'member/dashboard.html' };
     }

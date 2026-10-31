@@ -117,7 +117,7 @@
           <div class="stat-info">
             <span class="stat-label">Current Weight</span>
             <span class="stat-value" id="kpi-prog-weight">81.3 kg</span>
-            <span class="stat-change text-success"><i class="fa-solid fa-arrow-down"></i> -3.2 kg overall</span>
+            <span class="stat-change text-success" id="kpi-prog-weight-change">Target: 75 kg</span>
           </div>
         </div>
 
@@ -126,7 +126,7 @@
           <div class="stat-info">
             <span class="stat-label">Body Fat %</span>
             <span class="stat-value" id="kpi-prog-fat">14.6%</span>
-            <span class="stat-change text-success"><i class="fa-solid fa-arrow-down"></i> -3.6% reduction</span>
+            <span class="stat-change text-success" id="kpi-prog-fat-change">Latest body composition</span>
           </div>
         </div>
 
@@ -135,7 +135,7 @@
           <div class="stat-info">
             <span class="stat-label">Chest Width</span>
             <span class="stat-value" id="kpi-prog-chest">107 cm</span>
-            <span class="stat-change text-success"><i class="fa-solid fa-arrow-up"></i> +3.0 cm gain</span>
+            <span class="stat-change text-success" id="kpi-prog-chest-change">Latest measurement</span>
           </div>
         </div>
 
@@ -144,7 +144,7 @@
           <div class="stat-info">
             <span class="stat-label">Waist Size</span>
             <span class="stat-value" id="kpi-prog-waist">82 cm</span>
-            <span class="stat-change text-success"><i class="fa-solid fa-arrow-down"></i> -6.0 cm trim</span>
+            <span class="stat-change text-success" id="kpi-prog-waist-change">Latest measurement</span>
           </div>
         </div>
       </div>
@@ -163,7 +163,6 @@
       </div>
 
       <!-- Measurement History Table -->
-      <div class="attendance-card card table-container">
       <div class="attendance-card card table-container">
         <div class="attendance-header card-header table-toolbar" style="gap: 0.75rem; align-items: center; flex-wrap: wrap;">
           <div>
@@ -263,10 +262,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/charts.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -318,10 +319,24 @@
 
   function updateProgressKPIs() {
     const latest = records[records.length - 1];
+    const previous = records[records.length - 2];
+    const target = GymFlowDB.getById('members', Auth.getActiveMemberId())?.targetWeightKg ?? latest?.targetWeightKg;
     document.getElementById('kpi-prog-weight').textContent = latest ? `${latest.weightKg ?? '--'} kg` : '--';
     document.getElementById('kpi-prog-fat').textContent = latest ? `${latest.bodyFatPct ?? '--'}%` : '--';
     document.getElementById('kpi-prog-chest').textContent = latest ? `${latest.chestCm ?? '--'} cm` : '--';
     document.getElementById('kpi-prog-waist').textContent = latest ? `${latest.waistCm ?? '--'} cm` : '--';
+    document.getElementById('kpi-prog-weight-change').textContent = latest
+      ? `Previous: ${previous?.weightKg ?? '—'} kg • Target: ${target ?? '—'} kg`
+      : 'No weight records yet';
+    document.getElementById('kpi-prog-fat-change').textContent = latest && previous?.bodyFatPct != null
+      ? `${(Number(latest.bodyFatPct) - Number(previous.bodyFatPct)).toFixed(1)}% since previous check-in`
+      : 'No previous body fat record';
+    document.getElementById('kpi-prog-chest-change').textContent = latest && previous?.chestCm != null
+      ? `${(Number(latest.chestCm) - Number(previous.chestCm)).toFixed(1)} cm since previous check-in`
+      : 'No previous chest measurement';
+    document.getElementById('kpi-prog-waist-change').textContent = latest && previous?.waistCm != null
+      ? `${(Number(latest.waistCm) - Number(previous.waistCm)).toFixed(1)} cm since previous check-in`
+      : 'No previous waist measurement';
   }
 
   function initProgressChart() {
@@ -383,13 +398,13 @@
 
     tbody.innerHTML = list.map((r, idx) => `
       <tr>
-        <td><strong>${App.formatDate(r.date)}</strong></td>
-        <td><strong>${r.weightKg ?? '--'} kg</strong></td>
-        <td><span class="badge badge-neutral">${r.bodyFatPct ?? '--'}%</span></td>
-        <td>${r.chestCm ?? '--'} cm</td>
-        <td>${r.waistCm ?? '--'} cm</td>
-        <td>${r.armsCm ?? '--'} cm</td>
-        <td style="text-align: right;">
+        <td data-label="Date"><strong>${App.formatDate(r.date)}</strong></td>
+        <td data-label="Weight"><strong>${r.weightKg ?? '--'} kg</strong></td>
+        <td data-label="Body fat"><span class="badge badge-neutral">${r.bodyFatPct ?? '--'}%</span></td>
+        <td data-label="Chest">${r.chestCm ?? '--'} cm</td>
+        <td data-label="Waist">${r.waistCm ?? '--'} cm</td>
+        <td data-label="Arms">${r.armsCm ?? '--'} cm</td>
+        <td data-label="Action" style="text-align: right;">
           <button class="btn btn-icon btn-icon-sm" onclick="deleteMeasurement(${idx})" title="Delete entry">
             <i class="fa-solid fa-trash text-danger"></i>
           </button>

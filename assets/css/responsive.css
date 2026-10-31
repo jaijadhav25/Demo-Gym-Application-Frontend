@@ -203,3 +203,465 @@
     justify-content: center;
   }
 }
+
+/* Member portal refinements. Keep these selectors scoped so the Admin portals
+   retain their existing layouts. */
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) {
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) .main-wrapper,
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper,
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) main,
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) .card,
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) .card-body {
+  min-width: 0;
+}
+
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive,
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive > table,
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper > table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) canvas,
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) img:not(.avatar img) {
+  max-width: 100%;
+}
+
+.dashboard-layout:has(.sidebar a[href="my-profile.html"]) canvas {
+  display: block;
+}
+
+@media (max-width: 992px) {
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .grid-2-1,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .grid-1-2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper [style*="grid-template-columns: 2fr 1fr"],
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper [style*="grid-template-columns: 1fr 1.6fr"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .sidebar {
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper {
+    padding: 1rem;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .topbar {
+    gap: .5rem;
+    padding-inline: .75rem;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .topbar-right {
+    gap: .4rem;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .role-indicator {
+    max-width: 116px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .card-header,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .card-footer {
+    flex-wrap: wrap;
+    gap: .75rem;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .form-grid,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .form-control,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .form-select,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) textarea {
+    max-width: 100%;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) [style*="minmax(310px"],
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) [style*="minmax(300px"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .modal-backdrop {
+    padding: .5rem;
+    align-items: flex-end;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 1rem);
+    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-sm);
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .modal-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper {
+    padding: .75rem;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .page-title {
+    font-size: 1.45rem;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .page-actions {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .page-actions .btn {
+    min-height: 42px;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-toolbar,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-header {
+    padding: 1rem;
+  }
+}
+
+/* Reference-led member mobile layouts */
+.member-payment-tabs {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  body:has(.dashboard-layout .sidebar a[href="my-profile.html"]).member-drawer-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  body:has(.dashboard-layout .sidebar a[href="my-profile.html"]) .sidebar-overlay {
+    display: block;
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  body:has(.dashboard-layout .sidebar a[href="my-profile.html"]) .sidebar-overlay.active {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .topbar-toggle {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    font-size: 1rem;
+    touch-action: manipulation;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .stats-grid,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .member-kpi-grid,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .kpi-summary-grid,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .billing-summary-grid,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .progress-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: .75rem !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .member-kpi-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .stats-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .kpi-summary-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .billing-summary-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .progress-kpi-grid > .stat-card {
+    min-width: 0;
+    min-height: 0;
+    padding: .85rem;
+    gap: .6rem;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .stats-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .kpi-summary-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .billing-summary-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .progress-kpi-grid > .stat-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .stats-grid .stat-icon,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .kpi-summary-grid .stat-icon,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .billing-summary-grid .stat-icon,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .progress-kpi-grid .stat-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    flex-basis: 36px;
+    font-size: .95rem;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .kpi-status {
+    padding: .2rem .35rem;
+    font-size: .6rem;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .stats-grid .stat-value,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .kpi-value {
+    font-size: clamp(1.05rem, 5vw, 1.4rem);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .stats-grid .stat-label,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .kpi-label {
+    font-size: .72rem;
+    line-height: 1.3;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #member-kpi-grid .kpi-card-top {
+    align-items: flex-start;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #member-kpi-grid .kpi-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .tabs-nav {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .tabs-nav .tab-btn {
+    min-height: 42px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #schedule-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .5rem;
+    overflow: visible;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #schedule-tabs .tab-btn {
+    min-width: 0;
+    padding: .55rem .35rem;
+    justify-content: center;
+    font-size: .75rem;
+    white-space: normal;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive > table,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper > table {
+    min-width: 850px;
+    width: max-content;
+    table-layout: auto;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive thead,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper thead {
+    display: table-header-group;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive tbody,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper tbody {
+    display: table-row-group;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive tr,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper tr {
+    display: table-row;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive th,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive td,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper th,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper td {
+    display: table-cell;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-responsive td::before,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-table-wrapper td::before {
+    content: none;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #member-payments-tbody td[data-label="Amount"] strong {
+    color: var(--color-accent);
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #member-payments-tbody td[data-label="Receipt"] .btn {
+    min-height: 40px;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #memberAttendanceChart,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #weightProgressChart {
+    width: 100% !important;
+    max-height: 260px;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #notifications-list > .card .card-body {
+    gap: .75rem !important;
+    padding: 1rem;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #notifications-list h4 {
+    font-size: .92rem !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #notifications-list .btn {
+    min-height: 38px;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-header > div:last-child,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-toolbar > div:last-child {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-header .attendance-search,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-toolbar .attendance-search {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .attendance-header .form-select,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .table-toolbar .form-select {
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .member-payment-tabs {
+    display: flex;
+    gap: .5rem;
+    padding: .75rem 1rem 0;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .member-payment-tabs .tab-btn {
+    flex: 1;
+    min-height: 42px;
+    justify-content: center;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .member-invoice-list[hidden],
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #member-transactions-view[hidden] {
+    display: none !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #receipt-content {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #receipt-content table {
+    table-layout: fixed;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #dashboard-bookings-list > div:not(.empty-state) {
+    align-items: stretch !important;
+    flex-direction: column;
+    gap: .65rem;
+    padding: .85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #dashboard-bookings-list > div:not(.empty-state) > div {
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #modal-upgrade-plan .modal {
+    max-height: calc(100dvh - 1rem);
+    margin: 0;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .card img {
+    height: auto;
+    object-fit: cover;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper > .card[style*="photo-1534438327276"] .card-body {
+    padding: 1.2rem !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper > .card[style*="photo-1534438327276"] .card-body > div {
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper > .card[style*="photo-1534438327276"] .card-body > div > div:last-child {
+    width: 100%;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper > .card[style*="photo-1534438327276"] .card-body > div > div:last-child .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper > .card[style*="linear-gradient(135deg, #0f172a"] .card-body {
+    padding: 1.2rem !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper > .card[style*="linear-gradient(135deg, #0f172a"] .card-body > div:first-child {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .content-wrapper > .card[style*="linear-gradient(135deg, #0f172a"] .card-body > div:first-child > div:nth-child(2) {
+    text-align: left !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) #schedule-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .member-kpi-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .stats-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .kpi-summary-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .billing-summary-grid > .stat-card,
+  .dashboard-layout:has(.sidebar a[href="my-profile.html"]) .progress-kpi-grid > .stat-card {
+    padding: .7rem;
+  }
+}

@@ -114,70 +114,33 @@
 
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
-  let memberAlerts = [
-    {
-      id: 'notif_1',
-      category: 'Classes',
-      title: 'Class Reminder: Morning HIIT Blast Tomorrow',
-      message: 'Your spot in Morning HIIT Blast with Sarah Connor is confirmed for tomorrow at 07:00 AM in Studio A. Bring hydration and workout towel.',
-      time: '2 hours ago',
-      unread: true,
-      icon: 'fa-calendar-check',
-      iconClass: 'blue'
-    },
-    {
-      id: 'notif_2',
-      category: 'Announcements',
-      title: 'Hydro-Massage Lounge Demo Today',
-      message: 'IronPulse has installed state-of-the-art water massage beds on the mezzanine floor. VIP members can test a free 15-minute recovery session today.',
-      time: '5 hours ago',
-      unread: true,
-      icon: 'fa-bullhorn',
-      iconClass: 'purple'
-    },
-    {
-      id: 'notif_3',
-      category: 'Classes',
-      title: 'New Workout Progression Assigned',
-      message: 'Coach David Miller updated your Hypertrophy 4-Day Routine with progressive overload weights for Week 4.',
-      time: 'Yesterday',
-      unread: false,
-      icon: 'fa-dumbbell',
-      iconClass: 'green'
-    },
-    {
-      id: 'notif_4',
-      category: 'Billing',
-      title: 'Payment Receipt: #INV-IP-8419 Confirmed',
-      message: 'Your annual VIP membership pass (₹650.00) payment processed successfully. Thank you for being a valued member.',
-      time: '3 days ago',
-      unread: false,
-      icon: 'fa-receipt',
-      iconClass: 'green'
-    },
-    {
-      id: 'notif_5',
-      category: 'Announcements',
-      title: 'Memorial Day Holiday Hours',
-      message: 'Downtown branch will operate from 08:00 AM to 04:00 PM on Memorial Day. 24/7 keycard access remains fully functional for VIP members.',
-      time: '1 week ago',
-      unread: false,
-      icon: 'fa-clock',
-      iconClass: 'orange'
-    }
-  ];
+  let memberAlerts = [];
 
   let activeCategory = 'All';
 
   document.addEventListener('DOMContentLoaded', () => {
+    loadMemberAlerts();
     renderAlerts();
   });
+
+  function loadMemberAlerts() {
+    const memberId = Auth.getActiveMemberId();
+    memberAlerts = GymFlowDB.get('memberNotifications', { memberId }).map(alert => ({
+      ...alert,
+      category: alert.category === 'Bookings' ? 'Classes' : alert.category,
+      time: alert.time || App.formatDate(alert.date),
+      icon: alert.category === 'Bookings' ? 'fa-calendar-check' : alert.category === 'Workout' ? 'fa-dumbbell' : alert.category === 'Billing' ? 'fa-receipt' : alert.category === 'Progress' ? 'fa-chart-line' : 'fa-bullhorn',
+      iconClass: alert.category === 'Bookings' ? 'blue' : alert.category === 'Billing' ? 'green' : alert.category === 'Workout' ? 'purple' : 'orange'
+    }));
+  }
 
   function setNotifCategory(category, btn) {
     activeCategory = category;
@@ -232,6 +195,8 @@
     const item = memberAlerts.find(x => x.id === id);
     if (item) {
       item.unread = false;
+      item.read = true;
+      GymFlowDB.update('memberNotifications', id, { unread: false, read: true });
       renderAlerts();
       Toast.info('Notification marked as read.');
     }
@@ -239,12 +204,17 @@
 
   function dismissAlert(id) {
     memberAlerts = memberAlerts.filter(x => x.id !== id);
+    GymFlowDB.delete('memberNotifications', id);
     renderAlerts();
     Toast.info('Alert dismissed.');
   }
 
   function markAllRead() {
-    memberAlerts.forEach(a => a.unread = false);
+    memberAlerts.forEach(a => {
+      a.unread = false;
+      a.read = true;
+      GymFlowDB.update('memberNotifications', a.id, { unread: false, read: true });
+    });
     renderAlerts();
     Toast.success('All notifications marked as read.');
   }

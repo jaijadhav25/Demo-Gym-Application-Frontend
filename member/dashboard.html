@@ -46,6 +46,28 @@
     .kpi-class-date-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: var(--radius-sm); color: var(--color-warning); background: var(--color-warning-bg); }
     .kpi-class-next { display: grid; gap: 0.1rem; }
     @media (max-width: 520px) { .kpi-progress-label { font-size: 0.62rem; } }
+    #member-dashboard-main-grid { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr) !important; align-items: start; }
+    #member-dashboard-main-grid > div { min-width: 0; }
+    #member-dashboard-main-grid .card { min-width: 0; max-width: 100%; }
+    #member-dashboard-main-grid .attendance-table-wrapper { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; }
+    #member-dashboard-main-grid .attendance-table-wrapper > table { width: max-content; min-width: 850px; }
+    #member-dashboard-main-grid .member-pass-card .card-header { min-width: 0; flex-wrap: wrap; gap: 0.5rem; }
+    #member-dashboard-main-grid .member-pass-card .card-body > div:last-child > div { min-width: 0; gap: 0.5rem; }
+    #member-dashboard-main-grid .member-pass-card .card-body > div:last-child > div > strong { min-width: 0; max-width: 68%; overflow-wrap: anywhere; text-align: right; }
+    #member-dashboard-main-grid .member-pass-card .card-footer { min-width: 0; }
+    #member-dashboard-main-grid .member-pass-card .card-footer .btn { min-width: 0; white-space: normal; justify-content: center; }
+    #member-dashboard-main-grid .card-header { min-width: 0; }
+    #member-dashboard-main-grid .card-title,
+    #member-dashboard-main-grid .card-header .text-xs { min-width: 0; overflow-wrap: anywhere; }
+    @media (max-width: 1100px) {
+      #member-dashboard-main-grid { grid-template-columns: minmax(0, 1fr) !important; }
+    }
+    @media (max-width: 520px) {
+      #member-dashboard-main-grid { gap: 1rem !important; }
+      #member-dashboard-main-grid .member-pass-card .card-body { padding: 1rem 0.85rem !important; }
+      #member-dashboard-main-grid .member-pass-card .card-footer { flex-wrap: nowrap; }
+      #member-dashboard-main-grid .member-pass-card .card-footer .btn { padding-inline: 0.45rem; font-size: 0.72rem; }
+    }
   </style>
 </head>
 <body>
@@ -123,9 +145,7 @@
             <div>
               <span class="badge" style="background: var(--accent-color); color: #000; font-weight: 700; margin-bottom: 0.75rem;">VIP ACTIVE MEMBER</span>
               <h1 style="color: #fff; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Welcome back, <span id="welcome-name">Alex</span>! 💪</h1>
-              <p style="color: rgba(255, 255, 255, 0.8); max-width: 580px; margin-bottom: 0; font-size: 0.95rem;">
-                IronPulse Fitness Club — Downtown Branch. You have an active workout streak of <strong style="color: var(--accent-color);">14 days</strong>! Keep crushing your goals.
-              </p>
+              <p id="dashboard-welcome-summary" style="color: rgba(255, 255, 255, 0.8); max-width: 580px; margin-bottom: 0; font-size: 0.95rem;">Loading your membership and attendance summary...</p>
             </div>
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
               <button class="btn btn-accent" id="btn-quick-checkin" onclick="handleQuickCheckIn()"><i class="fa-solid fa-qrcode"></i> Quick Check-In</button>
@@ -140,15 +160,15 @@
         <article class="member-kpi-card membership-card">
           <div class="kpi-card-top">
             <div class="kpi-icon green-icon"><i class="fa-solid fa-id-card"></i></div>
-            <span class="kpi-status status-active"><i class="fa-solid fa-circle-check"></i> Active</span>
+            <span class="kpi-status status-active" id="kpi-membership-status"><i class="fa-solid fa-circle-check"></i> Active</span>
           </div>
           <div class="kpi-card-content">
             <p class="kpi-label">Membership Validity</p>
-            <h3 class="kpi-value"><span id="kpi-days-remaining">192 Days</span></h3>
-            <p class="kpi-description" id="kpi-membership-plan">Annual VIP Pass</p>
+            <h3 class="kpi-value"><span id="kpi-days-remaining">-- Days</span></h3>
+            <p class="kpi-description" id="kpi-membership-plan">Membership details unavailable</p>
           </div>
-          <div class="kpi-progress-track"><div class="kpi-progress-fill green-progress" id="kpi-membership-progress" style="width: 70%"></div></div>
-          <div class="kpi-progress-label"><span>Membership duration</span><span id="kpi-membership-percent">70% remaining</span></div>
+          <div class="kpi-progress-track"><div class="kpi-progress-fill green-progress" id="kpi-membership-progress" style="width: 0%"></div></div>
+          <div class="kpi-progress-label"><span>Membership duration</span><span id="kpi-membership-percent">--</span></div>
         </article>
 
         <article class="member-kpi-card streak-card">
@@ -158,13 +178,13 @@
           </div>
           <div class="kpi-card-content">
             <p class="kpi-label">Monthly Attendance</p>
-            <h3 class="kpi-value"><span id="kpi-streak">14 Visits</span></h3>
-            <p class="kpi-description"><i class="fa-solid fa-arrow-trend-up"></i><span id="kpi-streak-message">Keep your streak going!</span></p>
+            <h3 class="kpi-value"><span id="kpi-streak">0 Visits</span></h3>
+            <p class="kpi-description"><i class="fa-solid fa-arrow-trend-up"></i><span id="kpi-streak-message">No visits recorded this month.</span></p>
           </div>
           <div class="kpi-mini-stats">
-            <div class="kpi-mini-stat"><span class="mini-stat-number" id="kpi-weekly-visits">4</span><span class="mini-stat-label">This week</span></div>
+            <div class="kpi-mini-stat"><span class="mini-stat-number" id="kpi-weekly-visits">0</span><span class="mini-stat-label">This week</span></div>
             <div class="kpi-mini-divider"></div>
-            <div class="kpi-mini-stat"><span class="mini-stat-number" id="kpi-monthly-goal">20</span><span class="mini-stat-label">Monthly goal</span></div>
+            <div class="kpi-mini-stat"><span class="mini-stat-number" id="kpi-monthly-goal" data-default-goal="20">20</span><span class="mini-stat-label">Monthly goal</span></div>
           </div>
         </article>
 
@@ -175,10 +195,10 @@
           </div>
           <div class="kpi-card-content">
             <p class="kpi-label">Current Weight</p>
-            <h3 class="kpi-value"><span id="kpi-current-weight">81.3 kg</span></h3>
-            <p class="kpi-description"><i class="fa-solid fa-chart-line"></i><span id="kpi-weight-change">Progress tracking</span></p>
+            <h3 class="kpi-value"><span id="kpi-current-weight">-- kg</span></h3>
+            <p class="kpi-description"><i class="fa-solid fa-chart-line"></i><span id="kpi-weight-change">No progress measurements</span></p>
           </div>
-          <div class="kpi-weight-footer"><span><i class="fa-solid fa-bullseye"></i> Target weight</span><strong><span id="kpi-target-weight">75</span> kg</strong></div>
+          <div class="kpi-weight-footer"><span><i class="fa-solid fa-bullseye"></i> Target weight</span><strong><span id="kpi-target-weight">--</span> kg</strong></div>
         </article>
 
         <article class="member-kpi-card classes-card">
@@ -188,18 +208,18 @@
           </div>
           <div class="kpi-card-content">
             <p class="kpi-label">Upcoming Classes</p>
-            <h3 class="kpi-value"><span id="kpi-classes-count">2 Booked</span></h3>
+            <h3 class="kpi-value"><span id="kpi-classes-count">0 Booked</span></h3>
             <p class="kpi-description"><i class="fa-regular fa-clock"></i>Your next session</p>
           </div>
           <div class="kpi-class-footer">
             <div class="kpi-class-date-icon"><i class="fa-solid fa-calendar-day"></i></div>
-            <div class="kpi-class-next"><strong id="kpi-next-class">Tomorrow</strong><span id="kpi-next-class-time">07:00 AM</span></div>
+            <div class="kpi-class-next"><strong id="kpi-next-class">No class booked</strong><span id="kpi-next-class-time">—</span></div>
           </div>
         </article>
       </section>
 
       <!-- Two-Column Main Grid -->
-      <div class="grid-2-1" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+      <div class="grid-2-1" id="member-dashboard-main-grid" style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 1.5rem; margin-bottom: 1.5rem;">
         
         <!-- Left: Today's Workout & Upcoming Classes -->
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
@@ -209,54 +229,36 @@
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <h3 class="card-title"><i class="fa-solid fa-dumbbell text-accent"></i> Today's Workout Focus</h3>
-                <span class="text-xs text-muted">Assigned by Coach David Miller &bull; 4-Day Hypertrophy Split</span>
+                <span class="text-xs text-muted" id="dashboard-workout-details">Loading assigned workout...</span>
               </div>
               <a href="workout-plan.html" class="btn btn-sm btn-outline">Full Plan <i class="fa-solid fa-arrow-right"></i></a>
             </div>
             <div class="card-body">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem 1rem; background: var(--bg-hover); border-radius: var(--radius-md);">
                 <div>
-                  <h4 style="font-size: 1rem; margin-bottom: 0.2rem;">Push Day (Chest, Shoulders & Triceps)</h4>
-                  <span class="text-xs text-muted">Target: 4 Exercises &bull; Approx. 55 mins</span>
+                  <h4 id="dashboard-workout-day" style="font-size: 1rem; margin-bottom: 0.2rem;">Today's Session</h4>
+                  <span class="text-xs text-muted" id="dashboard-workout-count">Loading exercises...</span>
                 </div>
-                <span class="badge badge-success">3 / 4 Done</span>
+                <span class="badge badge-success" id="dashboard-workout-completion">0 / 0 Done</span>
               </div>
 
               <div class="table-container attendance-table-wrapper table-responsive">
                 <table class="table data-table attendance-table">
                   <thead>
                     <tr>
-                      <th>Status</th>
-                      <th>Exercise</th>
-                      <th>Sets & Reps</th>
+                      <th style="width: 72px; text-align: center;">S. NO.</th>
+                      <th style="width: 70px; text-align: center;">Done</th>
+                      <th>Exercise Name</th>
+                      <th>Target Sets</th>
+                      <th>Reps</th>
                       <th>Target Load</th>
+                      <th>Rest</th>
+                      <th>Coach Notes</th>
+                      <th style="text-align: right;">Form Tips</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Done</span></td>
-                      <td><strong>Barbell Bench Press</strong></td>
-                      <td>4 sets &times; 8 reps</td>
-                      <td>185 lbs</td>
-                    </tr>
-                    <tr>
-                      <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Done</span></td>
-                      <td><strong>Incline Dumbbell Press</strong></td>
-                      <td>3 sets &times; 10-12 reps</td>
-                      <td>65 lbs</td>
-                    </tr>
-                    <tr>
-                      <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Done</span></td>
-                      <td><strong>Military Overhead Press</strong></td>
-                      <td>3 sets &times; 8-10 reps</td>
-                      <td>115 lbs</td>
-                    </tr>
-                    <tr>
-                      <td><span class="badge badge-warning"><i class="fa-solid fa-hourglass"></i> Pending</span></td>
-                      <td><strong>Tricep Rope Pushdowns</strong></td>
-                      <td>4 sets &times; 12-15 reps</td>
-                      <td>55 lbs</td>
-                    </tr>
+                  <tbody id="dashboard-workout-exercises">
+                    <tr><td colspan="9" class="text-muted">Loading today's workout...</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -279,17 +281,17 @@
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
           
           <!-- Digital Member Pass Card -->
-          <div class="card" style="border: 2px solid var(--accent-color); background: var(--bg-surface);">
+          <div class="card member-pass-card" style="border: 2px solid var(--accent-color); background: var(--bg-surface);">
             <div class="card-header" style="border-bottom: 1px dashed var(--border-color); display: flex; justify-content: space-between; align-items: center;">
               <span class="badge badge-accent">DIGITAL GYM PASS</span>
-              <span class="text-xs text-muted">ID: #MEM-101</span>
+              <span class="text-xs text-muted" id="member-pass-id">ID: #MEM-101</span>
             </div>
             <div class="card-body" style="text-align: center; padding: 1.5rem 1rem;">
               <div class="avatar avatar-lg" style="margin: 0 auto 0.75rem; width: 72px; height: 72px; border: 3px solid var(--accent-color);">
                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" class="current-user-avatar" alt="Member Avatar">
               </div>
               <h3 style="margin-bottom: 0.25rem;" class="current-user-name">Alex Morgan</h3>
-              <p class="text-xs text-muted" style="margin-bottom: 1rem;">IronPulse Fitness &bull; Downtown Branch</p>
+              <p class="text-xs text-muted" id="member-pass-branch" style="margin-bottom: 1rem;">IronPulse Fitness &bull; Mumbai Branch</p>
 
               <!-- Simulated Barcode/QR -->
               <div style="background: #fff; padding: 0.75rem; border-radius: var(--radius-sm); display: inline-block; margin-bottom: 1rem; border: 1px solid var(--border-color);">
@@ -300,11 +302,11 @@
               <div style="background: var(--bg-hover); padding: 0.75rem; border-radius: var(--radius-md); text-align: left; font-size: 0.8125rem;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
                   <span class="text-muted">Plan:</span>
-                  <strong>Annual VIP All-Access</strong>
+                  <strong id="member-pass-plan">Annual VIP All-Access</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
                   <span class="text-muted">Valid Through:</span>
-                  <strong class="text-success">May 1, 2026</strong>
+                  <strong class="text-success" id="member-pass-expiry">—</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                   <span class="text-muted">Access:</span>
@@ -323,21 +325,17 @@
             <div class="card-header">
               <h3 class="card-title"><i class="fa-solid fa-bullhorn text-accent"></i> Club Announcements</h3>
             </div>
-            <div class="card-body" style="padding: 0;">
-              <div style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                  <strong style="font-size: 0.85rem;">Free Hydro-Massage Demo</strong>
-                  <span class="text-xs text-muted">Today</span>
-                </div>
-                <p class="text-xs text-muted" style="margin: 0;">Try out the brand new Hydro-Massage bed on the recovery mezzanine between 4 PM and 8 PM.</p>
-              </div>
-              <div style="padding: 1rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                  <strong style="font-size: 0.85rem;">Powerlifting Seminar</strong>
-                  <span class="text-xs text-muted">Saturday</span>
-                </div>
-                <p class="text-xs text-muted" style="margin: 0;">Guest coach seminar on squat biomechanics at 10:00 AM. Free for VIP members.</p>
-              </div>
+            <div class="card-body" id="dashboard-announcements" style="padding: 0;">
+              <div style="padding: 1rem;">Loading announcements...</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left text-accent"></i> Recent Activity</h3>
+            </div>
+            <div class="card-body" id="dashboard-recent-activity" style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <span class="text-sm text-muted">Loading recent activity...</span>
             </div>
           </div>
 
@@ -347,64 +345,361 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="dashboard-modal-tip">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fa-solid fa-circle-info text-accent"></i> Exercise Coaching Notes</h3>
+      <button type="button" class="modal-close" data-modal-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <h3 id="dashboard-tip-exercise-name" style="margin-bottom: 0.5rem;"></h3>
+      <div id="dashboard-tip-notes" style="background: var(--bg-hover); padding: 1rem; border-radius: var(--radius-md); font-size: 0.85rem; white-space: pre-line;"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-modal-close>Got It</button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     loadMemberDashboard();
+    window.addEventListener('gymflow:data-changed', refreshDashboardSections);
+    window.addEventListener('storage', event => {
+      if (!event.key || event.key === 'gymflow_saas_db') refreshDashboardSections();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshDashboardSections();
+    });
   });
 
   function loadMemberDashboard() {
     const memberId = Auth.getActiveMemberId();
-    const member = GymFlowDB.findById('members', memberId);
+    const member = GymFlowDB.getById('members', memberId);
 
     if (member) {
       document.getElementById('welcome-name').textContent = member.name.split(' ')[0];
-      
-      // Calculate remaining days
-      if (member.expiryDate) {
-        const diff = Math.ceil((new Date(member.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
-        document.getElementById('kpi-days-remaining').textContent = `${diff > 0 ? diff : 0} Days`;
-      }
+      document.getElementById('dashboard-welcome-summary').innerHTML = `${App.escapeHtml(member.gymName || 'IronPulse Fitness Club')} — ${App.escapeHtml(member.branchName || 'Mumbai Branch')}. Your membership is ${App.escapeHtml(member.status || 'active').toLowerCase()} and your attendance is up to date.`;
+      document.getElementById('member-pass-id').textContent = `ID: #${member.id}`;
+      document.getElementById('member-pass-plan').textContent = member.planName || 'Membership plan';
+      document.getElementById('member-pass-expiry').textContent = member.expiryDate ? App.formatDate(member.expiryDate) : 'Not set';
+      document.getElementById('member-pass-branch').textContent = `${member.gymName || 'IronPulse Fitness Club'} • ${member.branchName || 'Mumbai Branch'}`;
     }
 
-    // Load recent upcoming bookings
-    const bookings = GymFlowDB.get('classBookings', { memberId: memberId, status: 'Confirmed' });
-    document.getElementById('kpi-classes-count').textContent = `${bookings.length} Booked`;
+    refreshDashboardSections();
+  }
+
+  function refreshDashboardSections() {
+    if (!document.getElementById('dashboard-workout-exercises')) return;
+    renderDashboardSummaryCards();
+    renderDashboardWorkout();
+    renderDashboardBookings();
+    renderDashboardAnnouncements();
+    renderDashboardRecentActivity();
+  }
+
+  function getDashboardToday() {
+    const today = new Date();
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return {
+      date: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`,
+      dayName: dayNames[today.getDay()]
+    };
+  }
+
+  function renderDashboardSummaryCards() {
+    const memberId = Auth.getActiveMemberId();
+    const member = GymFlowDB.getById('members', memberId);
+    const { date: today } = getDashboardToday();
+    const dayStart = new Date(`${today}T00:00:00`);
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    const membershipStatus = document.getElementById('kpi-membership-status');
+    if (member) {
+      document.getElementById('kpi-membership-plan').textContent = member.planName || 'Membership plan';
+      const expiryDate = member.expiryDate ? new Date(`${member.expiryDate}T00:00:00`) : null;
+      const startDate = member.startDate ? new Date(`${member.startDate}T00:00:00`) : null;
+      const daysRemaining = expiryDate && !Number.isNaN(expiryDate.getTime())
+        ? Math.max(0, Math.ceil((expiryDate - dayStart) / dayMs))
+        : null;
+      document.getElementById('kpi-days-remaining').textContent = daysRemaining === null ? '-- Days' : `${daysRemaining} Days`;
+
+      let status = member.status || 'Unknown';
+      if (expiryDate && !Number.isNaN(expiryDate.getTime()) && expiryDate < dayStart) status = 'Expired';
+      const isActive = String(status).toLowerCase() === 'active';
+      membershipStatus.className = `kpi-status ${isActive ? 'status-active' : 'status-orange'}`;
+      membershipStatus.innerHTML = `<i class="fa-solid ${isActive ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${App.escapeHtml(status)}`;
+
+      if (expiryDate && startDate && expiryDate > startDate && !Number.isNaN(startDate.getTime())) {
+        const duration = expiryDate - startDate;
+        const remainingPercent = Math.min(100, Math.max(0, Math.round(((expiryDate - dayStart) / duration) * 100)));
+        document.getElementById('kpi-membership-progress').style.width = `${remainingPercent}%`;
+        document.getElementById('kpi-membership-percent').textContent = `${remainingPercent}% remaining`;
+      } else {
+        document.getElementById('kpi-membership-progress').style.width = '0%';
+        document.getElementById('kpi-membership-percent').textContent = 'Dates unavailable';
+      }
+    } else {
+      document.getElementById('kpi-membership-plan').textContent = 'Membership details unavailable';
+      document.getElementById('kpi-days-remaining').textContent = '-- Days';
+      document.getElementById('kpi-membership-progress').style.width = '0%';
+      document.getElementById('kpi-membership-percent').textContent = 'Dates unavailable';
+      membershipStatus.className = 'kpi-status';
+      membershipStatus.textContent = 'Unknown';
+    }
+
+    const attendance = GymFlowDB.get('attendance', { memberId }) || [];
+    const monthKey = today.slice(0, 7);
+    const monthVisits = attendance.filter(record => String(record.date || '').slice(0, 7) === monthKey).length;
+    const weekdayFromMonday = (dayStart.getDay() + 6) % 7;
+    const weekStart = new Date(dayStart.getTime() - weekdayFromMonday * dayMs);
+    const weekStartKey = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
+    const weekVisits = attendance.filter(record => record.date >= weekStartKey && record.date <= today).length;
+    const monthlyGoalElement = document.getElementById('kpi-monthly-goal');
+    const monthlyGoal = Number(member?.monthlyAttendanceGoal ?? member?.attendanceGoal ?? monthlyGoalElement.dataset.defaultGoal);
+    document.getElementById('kpi-streak').textContent = `${monthVisits} Visits`;
+    document.getElementById('kpi-weekly-visits').textContent = String(weekVisits);
+    monthlyGoalElement.textContent = Number.isFinite(monthlyGoal) ? String(monthlyGoal) : '—';
+    document.getElementById('kpi-streak-message').textContent = !monthVisits
+      ? 'No visits recorded this month.'
+      : Number.isFinite(monthlyGoal) && monthVisits >= monthlyGoal
+        ? 'Monthly goal reached.'
+        : Number.isFinite(monthlyGoal)
+          ? `${Math.max(0, monthlyGoal - monthVisits)} more to reach your monthly goal.`
+          : 'Attendance updated this month.';
+
+    const progress = (GymFlowDB.get('progressRecords', { memberId }) || [])
+      .map(record => ({ ...record, weightKg: record.weightKg ?? record.weight }))
+      .filter(record => record.weightKg !== null && record.weightKg !== undefined && Number.isFinite(Number(record.weightKg)))
+      .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+    const latest = progress[progress.length - 1];
+    const previous = progress[progress.length - 2];
+    document.getElementById('kpi-current-weight').textContent = latest ? `${latest.weightKg} kg` : '-- kg';
+    if (latest && previous) {
+      const change = Number(latest.weightKg) - Number(previous.weightKg);
+      const direction = change < 0 ? 'down' : change > 0 ? 'up' : 'unchanged';
+      document.getElementById('kpi-weight-change').textContent = direction === 'unchanged'
+        ? 'No change since previous check-in'
+        : `${Math.abs(change).toFixed(1)} kg ${direction} since previous check-in`;
+    } else {
+      document.getElementById('kpi-weight-change').textContent = latest ? 'Latest progress check-in' : 'No progress measurements';
+    }
+    const targetWeight = member?.targetWeightKg ?? member?.targetWeight ?? latest?.targetWeightKg ?? latest?.targetWeight;
+    document.getElementById('kpi-target-weight').textContent = targetWeight === undefined || targetWeight === null || targetWeight === '' ? '--' : String(targetWeight);
+  }
+
+  function renderDashboardAnnouncements() {
+    const container = document.getElementById('dashboard-announcements');
+    if (!container) return;
+    const announcements = GymFlowDB.get('announcements', { gymId: Auth.getTenantGymId() })
+      .filter(item => !item.scope || item.scope === 'gym')
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+      .slice(0, 3);
+    container.innerHTML = announcements.length ? announcements.map((item, index) => `
+      <div style="padding: 1rem; ${index < announcements.length - 1 ? 'border-bottom: 1px solid var(--border-color);' : ''}">
+        <div style="display: flex; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.25rem;">
+          <strong style="font-size: 0.85rem;">${App.escapeHtml(item.title || 'Gym announcement')}</strong>
+          <span class="text-xs text-muted">${item.date ? App.formatDate(item.date) : ''}</span>
+        </div>
+        <p class="text-xs text-muted" style="margin: 0;">${App.escapeHtml(item.content || item.description || '')}</p>
+      </div>`).join('') : '<div style="padding: 1rem;" class="text-sm text-muted">There are no current club announcements.</div>';
+  }
+
+  function renderDashboardRecentActivity() {
+    const container = document.getElementById('dashboard-recent-activity');
+    if (!container) return;
+    const memberId = Auth.getActiveMemberId();
+    const entries = [
+      ...GymFlowDB.get('attendance', { memberId }).map(item => ({ date: item.date, time: item.checkInTime, icon: 'fa-right-to-bracket', label: `Checked in at ${item.branchName || 'IronPulse Fitness Club'}`, detail: item.status || 'Attendance recorded' })),
+      ...GymFlowDB.get('classBookings', { memberId }).map(item => ({ date: item.bookingDate || item.date, time: '', icon: 'fa-calendar-check', label: `${item.status === 'Cancelled' ? 'Cancelled' : item.status === 'Attended' ? 'Attended' : 'Booked'} ${item.className || 'fitness class'}`, detail: `${item.trainerName || 'Gym instructor'} • ${App.formatDate(item.date)}` })),
+      ...GymFlowDB.get('payments', { memberId }).map(item => ({ date: item.date, time: '', icon: 'fa-receipt', label: `${item.status || 'Payment'} · ${item.description || 'Member payment'}`, detail: `${App.formatCurrency(item.amount, item.currency || 'INR')} • ${item.invoiceNumber || item.invoiceNo || ''}` }))
+    ];
+    const { date: today } = getDashboardToday();
+    const { todayPlan } = getDashboardWorkoutContext();
+    (todayPlan?.exercises || []).filter(item => item.completed).forEach(item => entries.push({ date: today, time: '', icon: 'fa-dumbbell', label: `Completed ${item.name}`, detail: 'Today’s workout' }));
+    entries.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.time || '').localeCompare(String(a.time || '')));
+    container.innerHTML = entries.length ? entries.slice(0, 5).map(item => `
+      <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+        <span class="stat-icon green" style="width: 34px; height: 34px; min-width: 34px; font-size: 0.85rem;"><i class="fa-solid ${item.icon}"></i></span>
+        <div style="min-width: 0; flex: 1;">
+          <strong class="text-sm">${App.escapeHtml(item.label)}</strong>
+          <div class="text-xs text-muted">${App.escapeHtml(item.detail)}${item.date ? ` · ${App.formatDate(item.date)}` : ''}</div>
+        </div>
+      </div>`).join('') : '<p class="text-sm text-muted" style="margin: 0;">Your recent check-ins, bookings, and payments will appear here.</p>';
+  }
+
+  function renderDashboardWorkout() {
+    const context = getDashboardWorkoutContext();
+    const { plan, dayName, todayPlan, dayIndex } = context;
+    const details = document.getElementById('dashboard-workout-details');
+    const dayTitle = document.getElementById('dashboard-workout-day');
+    const countLabel = document.getElementById('dashboard-workout-count');
+    const completion = document.getElementById('dashboard-workout-completion');
+    const tbody = document.getElementById('dashboard-workout-exercises');
+
+    if (!plan) {
+      details.textContent = 'No active workout plan assigned';
+      dayTitle.textContent = 'No workout plan assigned';
+      countLabel.textContent = 'Your coach has not assigned a workout yet.';
+      completion.className = 'badge badge-neutral';
+      completion.textContent = 'No Plan';
+      tbody.innerHTML = '<tr><td colspan="9" class="text-muted">No workout plan is available yet.</td></tr>';
+      return;
+    }
+
+    const exercises = Array.isArray(todayPlan?.exercises) ? todayPlan.exercises : [];
+    const schedule = Array.isArray(plan.weeklySchedule) ? plan.weeklySchedule : [];
+    const workoutDays = schedule.filter(day => Array.isArray(day.exercises) && day.exercises.length > 0).length;
+    const split = plan.workoutSplit || plan.split || `${workoutDays}-Day Split`;
+    const coach = plan.trainerName || plan.coachName || 'Coach not assigned';
+    const planName = plan.title || plan.name || 'Workout Plan';
+    const activeDayName = todayPlan?.focus || todayPlan?.day || dayName;
+    const completedCount = exercises.filter(exercise => {
+      const exerciseStatus = String(exercise.status || '').toLowerCase();
+      return Boolean(exercise.completed) || ['done', 'complete', 'completed'].includes(exerciseStatus);
+    }).length;
+
+    details.textContent = `${coach} • ${planName} • ${split}`;
+    dayTitle.textContent = activeDayName;
+    countLabel.textContent = `Target: ${exercises.length} ${exercises.length === 1 ? 'Exercise' : 'Exercises'}`;
+    completion.className = `badge ${exercises.length && completedCount === exercises.length ? 'badge-success' : 'badge-warning'}`;
+    completion.textContent = `${completedCount} / ${exercises.length} Done`;
+
+    if (!exercises.length) {
+      tbody.innerHTML = `<tr><td colspan="9" class="text-muted">No exercises scheduled for ${App.escapeHtml(dayName)}.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = exercises.map((exercise, index) => {
+      const sets = exercise.sets ?? exercise.targetSets ?? '—';
+      const reps = exercise.reps ?? exercise.targetReps ?? '—';
+      const load = exercise.weight || exercise.targetLoad || '—';
+      const rest = exercise.restInterval || exercise.rest || '—';
+      const notes = exercise.notes || exercise.coachNotes || '—';
+      return `
+        <tr style="${exercise.completed ? 'background: rgba(16, 185, 129, 0.05);' : ''}">
+          <td style="text-align: center;">${index + 1}</td>
+          <td style="text-align: center;"><input type="checkbox" class="form-check-input" ${exercise.completed ? 'checked' : ''} onchange="toggleDashboardExercise(${index}, this.checked)" style="width: 20px; height: 20px; cursor: pointer;"></td>
+          <td><strong style="${exercise.completed ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${App.escapeHtml(exercise.name || exercise.exerciseName || 'Exercise')}</strong></td>
+          <td>${App.escapeHtml(String(sets))} sets</td>
+          <td>${App.escapeHtml(String(reps))} reps</td>
+          <td><span class="badge badge-neutral">${App.escapeHtml(String(load))}</span></td>
+          <td>${App.escapeHtml(String(rest))}</td>
+          <td>${App.escapeHtml(String(notes))}</td>
+          <td style="text-align: right;"><button class="btn btn-xs btn-outline" onclick="showDashboardFormTip(${index})"><i class="fa-solid fa-circle-question"></i> Tip</button></td>
+        </tr>`;
+    }).join('');
+  }
+
+  function getDashboardWorkoutContext() {
+    const memberId = Auth.getActiveMemberId();
+    const gymId = Auth.getTenantGymId();
+    const plans = (GymFlowDB.get('workoutPlans', { memberId }) || [])
+      .filter(plan => !gymId || String(plan.gymId) === String(gymId));
+    const plan = plans.find(item => !item.status || String(item.status).toLowerCase() === 'active');
+    const { dayName } = getDashboardToday();
+    const schedule = Array.isArray(plan?.weeklySchedule) ? plan.weeklySchedule : [];
+    let dayIndex = schedule.findIndex(day => new RegExp(`^${dayName}\\b`, 'i').test(String(day.day || '')));
+    if (dayIndex < 0) {
+      const dayNumber = ((new Date().getDay() + 6) % 7) + 1;
+      dayIndex = schedule.findIndex(day => {
+        const match = String(day.day || '').match(/^Day\s*(\d+)/i);
+        return match && Number(match[1]) === dayNumber;
+      });
+    }
+    return { plan, dayName, dayIndex, todayPlan: dayIndex >= 0 ? schedule[dayIndex] : null };
+  }
+
+  function toggleDashboardExercise(exerciseIndex, isChecked) {
+    const { plan, dayIndex } = getDashboardWorkoutContext();
+    if (!plan || dayIndex < 0 || !plan.weeklySchedule[dayIndex]?.exercises?.[exerciseIndex]) return;
+    plan.weeklySchedule[dayIndex].exercises[exerciseIndex].completed = isChecked;
+    const updated = GymFlowDB.update('workoutPlans', plan.id, plan);
+    if (!updated) refreshDashboardSections();
+  }
+
+  function showDashboardFormTip(exerciseIndex) {
+    const { todayPlan } = getDashboardWorkoutContext();
+    const exercise = todayPlan?.exercises?.[exerciseIndex];
+    if (!exercise) return;
+    document.getElementById('dashboard-tip-exercise-name').textContent = exercise.name || exercise.exerciseName || 'Exercise';
+    document.getElementById('dashboard-tip-notes').textContent = exercise.notes || exercise.coachNotes || exercise.formTips || 'No coaching notes are available for this exercise.';
+    Modal.open('dashboard-modal-tip');
+  }
+
+  function renderDashboardBookings() {
+    const memberId = Auth.getActiveMemberId();
+    const { date: today } = getDashboardToday();
+    const bookings = GymFlowDB.get('classBookings', { memberId }) || [];
+    const isInactiveBooking = booking => ['cancelled', 'canceled', 'attended', 'completed'].includes(String(booking.status || '').toLowerCase());
+    const isUpcomingBooking = booking => booking.date >= today && !isInactiveBooking(booking);
+
+    const sortedBookings = bookings.slice().sort((a, b) => {
+      const aUpcoming = isUpcomingBooking(a);
+      const bUpcoming = isUpcomingBooking(b);
+      if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
+      if (aUpcoming) return String(a.date).localeCompare(String(b.date));
+      return String(b.date || '').localeCompare(String(a.date || ''));
+    });
+    const upcomingBookings = sortedBookings.filter(isUpcomingBooking);
+    document.getElementById('kpi-classes-count').textContent = `${upcomingBookings.length} Booked`;
+    document.getElementById('kpi-next-class').textContent = upcomingBookings.length
+      ? App.formatDate(upcomingBookings[0].date)
+      : 'No class booked';
+    document.getElementById('kpi-next-class-time').textContent = upcomingBookings[0]?.time || '—';
 
     const container = document.getElementById('dashboard-bookings-list');
-    if (bookings.length === 0) {
+    if (!sortedBookings.length) {
       container.innerHTML = `
         <div class="empty-state" style="padding: 2rem 1rem; text-align: center;">
           <i class="fa-solid fa-calendar-xmark" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 0.5rem;"></i>
-          <p class="text-muted text-sm">No upcoming classes booked.</p>
+          <p class="text-muted text-sm">No class bookings found.</p>
           <a href="classes.html" class="btn btn-sm btn-accent">Browse Class Timetable</a>
-        </div>
-      `;
-    } else {
-      container.innerHTML = bookings.slice(0, 3).map(b => `
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = sortedBookings.map(booking => {
+      const status = String(booking.status || 'Unknown');
+      const normalizedStatus = status.toLowerCase();
+      const badgeClass = ['confirmed', 'booked'].includes(normalizedStatus)
+        ? 'badge-success'
+        : ['attended', 'completed'].includes(normalizedStatus)
+          ? 'badge-info'
+          : ['cancelled', 'canceled'].includes(normalizedStatus)
+            ? 'badge-danger'
+            : 'badge-warning';
+      const className = App.escapeHtml(booking.className || booking.name || 'Class');
+      const instructor = App.escapeHtml(booking.trainerName || booking.instructorName || 'Instructor not assigned');
+      const bookingDate = App.escapeHtml(App.formatDate(booking.date));
+      const bookingTime = App.escapeHtml(booking.time || 'Time not set');
+      return `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 0; border-bottom: 1px solid var(--border-color);">
           <div style="display: flex; gap: 0.85rem; align-items: center;">
             <div class="stat-icon blue" style="width: 40px; height: 40px; font-size: 1rem;"><i class="fa-solid fa-person-running"></i></div>
             <div>
-              <strong style="font-size: 0.9rem; display: block;">${b.className}</strong>
-              <span class="text-xs text-muted"><i class="fa-solid fa-calendar"></i> ${b.date} &bull; <i class="fa-solid fa-clock"></i> ${b.time} &bull; ${b.trainerName}</span>
+              <strong style="font-size: 0.9rem; display: block;">${className}</strong>
+              <span class="text-xs text-muted"><i class="fa-solid fa-calendar"></i> ${bookingDate} &bull; <i class="fa-solid fa-clock"></i> ${bookingTime} &bull; ${instructor}</span>
             </div>
           </div>
-          <span class="badge badge-success">Confirmed</span>
-        </div>
-      `).join('');
-    }
+          <span class="badge ${badgeClass}">${App.escapeHtml(status)}</span>
+        </div>`;
+    }).join('');
   }
 
   function handleQuickCheckIn() {
     const memberId = Auth.getActiveMemberId();
     const gymId = Auth.getTenantGymId();
+    const member = GymFlowDB.getById('members', memberId);
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const dateStr = now.toISOString().split('T')[0];
@@ -421,9 +716,9 @@
       id: `att_${Date.now()}`,
       gymId: gymId,
       branchId: 'br_1',
-      branchName: 'Downtown Flagship',
+      branchName: member?.branchName || 'Bandra Central',
       memberId: memberId,
-      memberName: 'Alex Morgan',
+      memberName: member?.name || Auth.getUser()?.name || 'Member',
       date: dateStr,
       checkInTime: timeStr,
       checkOutTime: null,

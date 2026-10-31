@@ -3,10 +3,11 @@
    =================================================================== */
 
 const App = {
-  formatCurrency(amount) {
+  formatCurrency(amount, sourceCurrency = 'INR') {
+    if (window.Currency) return Currency.format(amount, sourceCurrency);
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR',
+      currency: sourceCurrency || 'INR',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount || 0);
@@ -70,6 +71,10 @@ const App = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (/\/member\//i.test(window.location.pathname) && window.GymFlowDB && window.Auth) {
+    const member = GymFlowDB.getById('members', Auth.getActiveMemberId());
+    if (member?.name) document.querySelectorAll('.current-user-name').forEach(node => { node.textContent = member.name; });
+  }
   App.initQuickRoleSwitcher();
 });
 

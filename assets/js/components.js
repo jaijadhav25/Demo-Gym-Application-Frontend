@@ -248,6 +248,7 @@ const PrintHelper = {
     const refundAmount = Math.min(originalAmount, Math.max(0, Number(paymentRecord.refundAmount) || 0));
     const refunded = ['Refunded', 'Partially Refunded', 'Partial'].includes(paymentRecord.refundStatus) && refundAmount > 0;
     const remainingAmount = Math.max(0, originalAmount - refundAmount);
+    const transactionCurrency = paymentRecord.currency || 'INR';
 
     modal.innerHTML = `
       <div class="modal modal-lg">
@@ -304,8 +305,8 @@ const PrintHelper = {
                     <div style="font-size: 0.8rem; color: #64748b;">Standard 30-day recurring term</div>
                   </td>
                   <td style="text-align: center;">1</td>
-                  <td style="text-align: right;">₹${subtotal}</td>
-                  <td style="text-align: right;">₹${subtotal}</td>
+                  <td style="text-align: right;">${App.formatCurrency(subtotal, transactionCurrency)}</td>
+                  <td style="text-align: right;">${App.formatCurrency(subtotal, transactionCurrency)}</td>
                 </tr>
               </tbody>
             </table>
@@ -314,32 +315,33 @@ const PrintHelper = {
               <div style="width: 250px; font-size: 0.875rem;">
                 <div style="display: flex; justify-content: space-between; padding: 0.35rem 0;">
                   <span style="color: #64748b;">Subtotal:</span>
-                  <span>₹${subtotal}</span>
+                  <span>${App.formatCurrency(subtotal, transactionCurrency)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; padding: 0.35rem 0;">
                   <span style="color: #64748b;">Taxes (8.25%):</span>
-                  <span>₹${taxAmount}</span>
+                  <span>${App.formatCurrency(taxAmount, transactionCurrency)}</span>
                 </div>
                 ${refunded ? `
                 <div style="display: flex; justify-content: space-between; padding: 0.35rem 0;">
                   <span style="color: #64748b;">Original invoice amount:</span>
-                  <span>₹${originalAmount.toFixed(2)}</span>
+                  <span>${App.formatCurrency(originalAmount, transactionCurrency)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; padding: 0.35rem 0; color: #b45309;">
                   <span>Refunded amount:</span>
-                  <span>−₹${refundAmount.toFixed(2)}</span>
+                  <span>−${App.formatCurrency(refundAmount, transactionCurrency)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; padding: 0.35rem 0;">
                   <span style="color: #64748b;">${remainingAmount === 0 ? 'Remaining payable balance:' : 'Remaining amount paid:'}</span>
-                  <span>₹${remainingAmount.toFixed(2)}</span>
+                  <span>${App.formatCurrency(remainingAmount, transactionCurrency)}</span>
                 </div>
                 <div style="padding: 0.35rem 0; color: #64748b; font-size: 0.8rem;">
                   Refund date: ${paymentRecord.refundDate || '—'}${paymentRecord.refundReferenceId ? `<br>Refund reference: ${paymentRecord.refundReferenceId}` : ''}
                 </div>` : ''}
                 <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-top: 2px solid #e2e8f0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">
                   <span>${refunded ? 'Original invoice total:' : 'Grand Total:'}</span>
-                  <span style="color: #10b981;">₹${originalAmount.toFixed(2)}</span>
+                  <span style="color: #10b981;">${App.formatCurrency(originalAmount, transactionCurrency)}</span>
                 </div>
+                ${transactionCurrency !== Currency.getCurrency() ? `<div data-currency-ignore style="padding: 0.35rem 0; color: #64748b; font-size: 0.8rem;">Actual charged: ${Currency.formatOriginal(originalAmount, transactionCurrency)} (${transactionCurrency})</div>` : ''}
               </div>
             </div>
 

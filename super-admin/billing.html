@@ -201,6 +201,7 @@
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/charts.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -279,7 +280,7 @@
         <td><strong>${t.gymName}</strong></td>
         <td><span class="badge badge-neutral">${t.planName}</span></td>
         <td class="text-xs text-muted">${t.date}</td>
-        <td><strong>₹${(Number(t.amount) || 0).toFixed(2)}</strong></td>
+        <td><strong>${App.formatCurrency(Number(t.amount) || 0, t.currency || 'INR')}</strong></td>
         <td class="text-xs text-muted">${t.method}</td>
         <td><span class="badge ${t.status === 'Paid' ? 'badge-success' : 'badge-danger'}">${t.status}</span></td>
         <td><span class="badge ${t.refundStatus === 'Refunded' ? 'badge-warning' : 'badge-neutral'}">${t.refundStatus || 'None'}</span></td>
@@ -352,7 +353,7 @@
   }
 
   function exportBillingCsv() {
-    const headers = ['Invoice #', 'Gym Name', 'Plan', 'Date', 'Amount (₹)', 'Method', 'Status', 'Refund Status'];
+    const headers = ['Invoice #', 'Gym Name', 'Plan', 'Date', `Amount (${Currency.getCurrency()})`, 'Method', 'Status', 'Refund Status'];
     const rows = txList.map(t => [t.invoiceNo, t.gymName, t.planName, t.date, t.amount, t.method, t.status, t.refundStatus]);
     TableHelper.exportToCsv('gymflow-platform-billing.csv', headers, rows);
   }

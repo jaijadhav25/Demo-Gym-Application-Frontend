@@ -130,12 +130,7 @@
               <div class="grid-2" style="margin-bottom: 0;">
                 <div class="form-group">
                   <label class="form-label">Default Billing Currency</label>
-                  <select class="form-select" id="set-currency">
-                    <option value="INR" selected>INR — Indian Rupee (₹)</option>
-                    <option value="USD">USD — United States Dollar ($)</option>
-                    <option value="EUR">EUR — Euro (€)</option>
-                    <option value="GBP">GBP — British Pound (£)</option>
-                    <option value="CAD">CAD — Canadian Dollar (C$)</option>
+                  <select class="form-select" id="set-currency" data-currency-selector aria-label="Default billing currency">
                   </select>
                 </div>
                 <div class="form-group">
@@ -208,6 +203,7 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -218,6 +214,7 @@
 
   function saveFinanceSettings(e) {
     e.preventDefault();
+    Currency.setCurrency(document.getElementById('set-currency').value);
     Toast.success('Currency and locale settings updated.');
   }
 

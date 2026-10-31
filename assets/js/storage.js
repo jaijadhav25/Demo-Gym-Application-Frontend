@@ -4,6 +4,7 @@
    =================================================================== */
 
 const DB_KEY = 'gymflow_saas_db';
+const DEMO_DB_KEY = 'gymflow_admin_dashboard_demo_db';
 
 class StorageManager {
   constructor() {
@@ -12,8 +13,8 @@ class StorageManager {
 
   init() {
     try {
-      const existing = localStorage.getItem(DB_KEY);
-      if (!existing) {
+      const existing = localStorage.getItem(this._activeKey());
+      if (!existing && !this.isDemoMode()) {
         this.resetToDefaults();
       }
     } catch (e) {
@@ -22,9 +23,28 @@ class StorageManager {
     }
   }
 
+  isDemoMode() {
+    try {
+      const rolePath = window.location.pathname.replace(/\\/g, '/');
+      const isDemoPortal = /\/(admin|super-admin|member)\//i.test(rolePath);
+      if (!isDemoPortal) return false;
+      let mode = sessionStorage.getItem('gymflow_data_mode');
+      if (!mode) {
+        mode = 'demo';
+        sessionStorage.setItem('gymflow_data_mode', mode);
+      }
+      return mode === 'demo';
+    }
+    catch (e) { return false; }
+  }
+
+  _activeKey() {
+    return this.isDemoMode() ? DEMO_DB_KEY : DB_KEY;
+  }
+
   _getDb() {
     try {
-      const data = localStorage.getItem(DB_KEY);
+      const data = localStorage.getItem(this._activeKey());
       return data ? JSON.parse(data) : (this._memoryDb || INITIAL_MOCK_DATA);
     } catch (e) {
       return this._memoryDb || INITIAL_MOCK_DATA;
@@ -33,7 +53,7 @@ class StorageManager {
 
   _saveDb(db) {
     try {
-      localStorage.setItem(DB_KEY, JSON.stringify(db));
+      localStorage.setItem(this._activeKey(), JSON.stringify(db));
     } catch (e) {
       console.warn('Error saving to LocalStorage', e);
       this._memoryDb = db;
@@ -44,12 +64,47 @@ class StorageManager {
 
   resetToDefaults() {
     try {
-      localStorage.setItem(DB_KEY, JSON.stringify(INITIAL_MOCK_DATA));
+      localStorage.setItem(this._activeKey(), JSON.stringify(INITIAL_MOCK_DATA));
     } catch (e) {
       this._memoryDb = JSON.parse(JSON.stringify(INITIAL_MOCK_DATA));
     }
     window.dispatchEvent(new CustomEvent('gymflow:data-changed', { detail: { reset: true } }));
     return true;
+  }
+
+  seedDemoData(data) {
+    if (!this.isDemoMode()) return false;
+    try {
+      const existingRaw = localStorage.getItem(DEMO_DB_KEY);
+      if (existingRaw) {
+        const existing = JSON.parse(existingRaw);
+        if ((Number(existing._dashboardDemoVersion) || 0) >= (Number(data._dashboardDemoVersion) || 0)) return false;
+        // Upgrade only seeded demo records; preserve records created by the user.
+        Object.keys(data).forEach(collection => {
+          if (!Array.isArray(data[collection]) || !Array.isArray(existing[collection])) return;
+          const seededIds = new Set(data[collection].filter(item => item?.id != null).map(item => String(item.id)));
+          const userRecords = existing[collection].filter(item => !item?.demoRecord && !seededIds.has(String(item.id)) && !(collection === 'progressRecords' && item.memberId === 'mem_101' && !item.id));
+          const oldUnchangedDemo = existing[collection].filter(item => item?.demoRecord && !seededIds.has(String(item.id)) && !(collection === 'members' && item.id === 'demo_mem_00001'));
+          existing[collection] = [...data[collection], ...oldUnchangedDemo, ...userRecords];
+        });
+        Object.keys(data).forEach(key => { if (!Array.isArray(data[key])) existing[key] = data[key]; });
+        localStorage.setItem(DEMO_DB_KEY, JSON.stringify(existing));
+        this._memoryDb = existing;
+        window.dispatchEvent(new CustomEvent('gymflow:data-changed', { detail: { seed: 'dashboard-demo-upgrade' } }));
+        return true;
+      }
+      localStorage.setItem(DEMO_DB_KEY, JSON.stringify(data));
+      this._memoryDb = data;
+    } catch (e) {
+      this._memoryDb = data;
+    }
+    window.dispatchEvent(new CustomEvent('gymflow:data-changed', { detail: { seed: 'dashboard-demo' } }));
+    return true;
+  }
+
+  hasDemoData() {
+    try { return Boolean(localStorage.getItem(DEMO_DB_KEY)); }
+    catch (e) { return Boolean(this._memoryDb?._dashboardDemoVersion); }
   }
 
   // Get entire collection or filter with a predicate/query object
@@ -71,6 +126,10 @@ class StorageManager {
   getById(collection, id) {
     const items = this.get(collection);
     return items.find(item => String(item.id) === String(id)) || null;
+  }
+
+  findById(collection, id) {
+    return this.getById(collection, id);
   }
 
   insert(collection, item) {
@@ -140,7 +199,7 @@ class StorageManager {
       // Keep audit logs trimmed
       if (db.auditLogs.length > 50) db.auditLogs.pop();
       try {
-        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        localStorage.setItem(this._activeKey(), JSON.stringify(db));
       } catch (e) {}
     } catch (e) {}
   }

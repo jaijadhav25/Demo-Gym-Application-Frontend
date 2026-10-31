@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -269,6 +270,8 @@
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/charts.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -296,7 +299,7 @@
     document.getElementById('detail-avatar').src = member.avatar;
     document.getElementById('detail-name').textContent = member.name;
     document.getElementById('detail-email').textContent = member.email;
-    document.getElementById('detail-phone').textContent = member.phone;
+    document.getElementById('detail-phone').textContent = IntlPhoneInput.format(member.phone, member.phoneCountryCode);
     document.getElementById('detail-emergency').textContent = member.emergencyContact || 'None provided';
     document.getElementById('detail-goal').textContent = member.fitnessGoal || 'General Wellness';
     document.getElementById('detail-dob').textContent = member.dob || '1995-05-12';
@@ -336,7 +339,7 @@
           <td><strong>${p.invoiceNo}</strong></td>
           <td>${p.description}</td>
           <td class="text-xs text-muted">${p.date}</td>
-          <td><strong>₹${p.amount.toFixed(2)}</strong></td>
+          <td><strong>${App.formatCurrency(p.amount, p.currency || 'INR')}</strong></td>
           <td class="text-xs text-muted">${p.method}</td>
           <td><span class="badge badge-success">${p.status}</span></td>
           <td>
@@ -392,7 +395,7 @@
   function openRenewModal() {
     Modal.confirm({
       title: 'Renew Membership?',
-      message: `Extend ${member.name}'s membership by 1 month for ₹49.00?`,
+      message: `Extend ${member.name}'s membership by 1 month for ${App.formatCurrency(49)}?`,
       confirmText: 'Renew Now',
       confirmClass: 'btn-accent',
       onConfirm: () => {

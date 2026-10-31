@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -318,6 +319,8 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -357,7 +360,7 @@
 
     // Stats
     document.getElementById('stat-plan-name').textContent = currentGym.planName;
-    document.getElementById('stat-mrr').textContent = `₹${currentGym.mrr} / month`;
+    document.getElementById('stat-mrr').textContent = `${App.formatCurrency(currentGym.mrr, currentGym.currency || 'INR')} / month`;
     document.getElementById('stat-members-count').textContent = currentGym.membersCount || 0;
     document.getElementById('stat-branches-count').textContent = currentGym.branchesCount || 1;
     document.getElementById('stat-renewal-date').textContent = currentGym.renewalDate || '2026-05-15';
@@ -373,7 +376,7 @@
 
     document.getElementById('detail-owner-name').textContent = currentGym.owner;
     document.getElementById('detail-owner-email').textContent = currentGym.email;
-    document.getElementById('detail-owner-phone').textContent = currentGym.phone;
+    document.getElementById('detail-owner-phone').textContent = IntlPhoneInput.format(currentGym.phone, currentGym.phoneCountryCode);
 
     // Branches Tab
     const branches = GymFlowDB.get('branches', { gymId: currentGym.id });
@@ -390,7 +393,7 @@
           <td><strong>${br.name}</strong></td>
           <td class="text-xs text-muted">${br.address}</td>
           <td>${br.manager}</td>
-          <td class="text-xs text-muted">${br.phone}</td>
+          <td class="text-xs text-muted">${IntlPhoneInput.format(br.phone, br.phoneCountryCode)}</td>
           <td><strong>${br.memberCount}</strong></td>
           <td><span class="badge badge-success">Active</span></td>
         </tr>
@@ -410,7 +413,7 @@
           <td><strong>${tx.invoiceNo}</strong></td>
           <td><span class="badge badge-neutral">${tx.planName}</span></td>
           <td class="text-xs text-muted">${tx.date}</td>
-          <td><strong>₹${tx.amount.toFixed(2)}</strong></td>
+          <td><strong>${App.formatCurrency(tx.amount, tx.currency || 'INR')}</strong></td>
           <td class="text-xs text-muted">${tx.method}</td>
           <td><span class="badge ${tx.status === 'Paid' ? 'badge-success' : 'badge-danger'}">${tx.status}</span></td>
           <td>

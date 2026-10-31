@@ -198,7 +198,7 @@
 
         <div class="grid-3" style="margin-bottom: 0;">
           <div class="form-group">
-            <label class="form-label">Amount (₹) <span class="required">*</span></label>
+            <label class="form-label">Amount (<span data-current-currency-symbol>₹</span>) <span class="required">*</span></label>
             <input type="number" id="pay-amount" class="form-control" value="49.00" step="0.01" min="1" required>
           </div>
           <div class="form-group">
@@ -232,6 +232,7 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -241,6 +242,8 @@
     loadPayments();
     populateMemberSelect();
   });
+  window.addEventListener('gymflow:currency-changed', loadPayments);
+  window.addEventListener('gymflow:exchange-rates-updated', loadPayments);
 
   function populateMemberSelect() {
     const gymId = Auth.getTenantGymId();
@@ -322,7 +325,7 @@
           <td><strong>${p.invoiceNo}</strong></td>
           <td><strong>${p.memberName}</strong></td>
           <td class="text-xs text-muted">${p.description}</td>
-          <td><strong>₹${Number(p.amount).toFixed(2)}</strong></td>
+          <td><strong>${App.formatCurrency(Number(p.amount), p.currency || 'INR')}</strong></td>
           <td class="text-xs text-muted">${p.date}</td>
           <td><span class="badge badge-neutral">${p.method}</span></td>
           <td><span class="badge ${badge}"><span class="badge-dot"></span>${p.status}</span></td>
@@ -350,6 +353,7 @@
       invoiceNo: `INV-${Date.now().toString().slice(-6)}`,
       description: document.getElementById('pay-desc').value,
       amount: Number(document.getElementById('pay-amount').value),
+      currency: Currency.getCurrency(),
       date: new Date().toISOString().split('T')[0],
       method: document.getElementById('pay-method').value,
       status: document.getElementById('pay-status').value
@@ -357,12 +361,12 @@
 
     GymFlowDB.insert('payments', newPay);
     Modal.close('modal-record-payment');
-    Toast.success(`Payment of ₹${newPay.amount.toFixed(2)} recorded.`);
+    Toast.success(`Payment of ${App.formatCurrency(newPay.amount, newPay.currency)} recorded.`);
     loadPayments();
   }
 
   function exportPaymentsCsv() {
-    const headers = ['Invoice #', 'Member Name', 'Description', 'Amount (₹)', 'Date', 'Method', 'Status'];
+    const headers = ['Invoice #', 'Member Name', 'Description', `Amount (${Currency.getCurrency()})`, 'Date', 'Method', 'Status'];
     const rows = payments.map(p => [p.invoiceNo, p.memberName, p.description, p.amount, p.date, p.method, p.status]);
     TableHelper.exportToCsv('gymflow-payments.csv', headers, rows);
   }

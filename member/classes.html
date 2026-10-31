@@ -163,9 +163,11 @@
 
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -288,7 +290,7 @@
             <div style="background: var(--bg-hover); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.8125rem; display: flex; flex-direction: column; gap: 0.35rem;">
               <div><i class="fa-solid fa-calendar-day text-accent"></i> <strong>${c.dayOfWeek || 'Weekday'}</strong> (${c.date || 'Weekly'})</div>
               <div><i class="fa-solid fa-clock text-accent"></i> <strong>${c.time}</strong> &bull; ${c.duration || '50 mins'}</div>
-              <div><i class="fa-solid fa-location-dot text-accent"></i> ${c.room || 'Studio A'} &bull; Downtown Branch</div>
+              <div><i class="fa-solid fa-location-dot text-accent"></i> ${c.room || 'Studio A'} &bull; ${c.branchName || 'Mumbai Branch'}</div>
             </div>
           </div>
 
@@ -331,10 +333,12 @@
       id: `bk_${Date.now()}`,
       gymId: gymId,
       memberId: memberId,
-      memberName: 'Alex Morgan',
+      memberName: GymFlowDB.getById('members', memberId)?.name || Auth.getUser()?.name || 'Member',
       classId: cls.id,
       className: cls.name,
       trainerName: cls.trainerName,
+      room: cls.room,
+      branchName: cls.branchName,
       date: cls.date || '2026-04-28',
       time: cls.time,
       bookingDate: new Date().toISOString().split('T')[0],

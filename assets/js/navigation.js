@@ -52,6 +52,7 @@ const Navigation = {
   initSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const toggleBtns = document.querySelectorAll('.sidebar-toggle-btn');
+    const memberPortal = Boolean(sidebar?.querySelector('a[href="my-profile.html"]'));
     let overlay = document.querySelector('.sidebar-overlay');
 
     if (!overlay && sidebar) {
@@ -67,6 +68,10 @@ const Navigation = {
     }
 
     toggleBtns.forEach(btn => {
+      if (memberPortal) {
+        btn.setAttribute('aria-label', 'Toggle member navigation');
+        btn.setAttribute('aria-expanded', 'false');
+      }
       btn.onclick = (e) => {
         e.preventDefault();
         if (!sidebar) return;
@@ -75,6 +80,10 @@ const Navigation = {
           // Mobile drawer mode
           const isOpen = sidebar.classList.toggle('mobile-open');
           if (overlay) overlay.classList.toggle('active', isOpen);
+          if (memberPortal) {
+            toggleBtns.forEach(toggle => toggle.setAttribute('aria-expanded', String(isOpen)));
+            document.body.classList.toggle('member-drawer-open', isOpen);
+          }
         } else {
           // Desktop collapse
           const collapsed = sidebar.classList.toggle('collapsed');
@@ -87,7 +96,38 @@ const Navigation = {
       overlay.onclick = () => {
         if (sidebar) sidebar.classList.remove('mobile-open');
         overlay.classList.remove('active');
+        if (memberPortal) {
+          toggleBtns.forEach(toggle => toggle.setAttribute('aria-expanded', 'false'));
+          document.body.classList.remove('member-drawer-open');
+        }
       };
+    }
+
+    if (memberPortal && sidebar) {
+      sidebar.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth > 768) return;
+          sidebar.classList.remove('mobile-open');
+          overlay?.classList.remove('active');
+          toggleBtns.forEach(toggle => toggle.setAttribute('aria-expanded', 'false'));
+          document.body.classList.remove('member-drawer-open');
+        });
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape' || !sidebar.classList.contains('mobile-open')) return;
+        sidebar.classList.remove('mobile-open');
+        overlay?.classList.remove('active');
+        toggleBtns.forEach(toggle => toggle.setAttribute('aria-expanded', 'false'));
+        document.body.classList.remove('member-drawer-open');
+        toggleBtns[0]?.focus();
+      });
+      window.addEventListener('resize', () => {
+        if (window.innerWidth <= 768) return;
+        sidebar.classList.remove('mobile-open');
+        overlay?.classList.remove('active');
+        toggleBtns.forEach(toggle => toggle.setAttribute('aria-expanded', 'false'));
+        document.body.classList.remove('member-drawer-open');
+      });
     }
   },
 

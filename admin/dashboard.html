@@ -3,6 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const requested = params.get('data');
+      if (requested === 'demo' || requested === 'live') sessionStorage.setItem('gymflow_data_mode', requested);
+      else if (!sessionStorage.getItem('gymflow_data_mode')) sessionStorage.setItem('gymflow_data_mode', 'demo');
+    })();
+  </script>
   <title>Gym Admin Dashboard — IronPulse Fitness</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -108,9 +116,10 @@
             <span class="breadcrumb-current">Executive Dashboard</span>
           </div>
           <h1 class="page-title">Gym Operations Command Center</h1>
-          <p class="page-subtitle">Live occupancy, member counts, check-in flows, and cashflow overview for IronPulse.</p>
+          <p class="page-subtitle">Member counts, check-in flows, and cashflow overview for IronPulse.</p>
         </div>
         <div class="page-actions">
+          <button class="btn btn-sm btn-outline" id="dashboard-data-mode" title="Demo mode uses an isolated dataset; live mode uses existing GymFlow data." onclick="toggleDashboardDataMode()">Demo data</button>
           <a href="attendance.html" class="btn btn-primary"><i class="fa-solid fa-id-card-clip"></i> Open Check-In Desk</a>
           <a href="members.html" class="btn btn-accent"><i class="fa-solid fa-user-plus"></i> New Member</a>
         </div>
@@ -123,8 +132,8 @@
             <span class="stat-label">Total Members</span>
             <span class="stat-icon green"><i class="fa-solid fa-users"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-total-members">20</div>
-          <div class="stat-meta"><span class="stat-trend positive">+3 this week</span></div>
+          <div class="stat-value" id="kpi-gym-total-members">—</div>
+          <div class="stat-meta"><span class="stat-trend positive" id="meta-gym-new-members">New this month</span></div>
         </div>
 
         <div class="stat-card">
@@ -132,8 +141,8 @@
             <span class="stat-label">Active Memberships</span>
             <span class="stat-icon blue"><i class="fa-solid fa-circle-check"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-active-members">15</div>
-          <div class="stat-meta"><span class="badge badge-success">75% active rate</span></div>
+          <div class="stat-value" id="kpi-gym-active-members">—</div>
+          <div class="stat-meta"><span class="badge badge-success" id="meta-gym-active-rate">Active rate</span></div>
         </div>
 
         <div class="stat-card">
@@ -141,7 +150,7 @@
             <span class="stat-label">Expiring Soon</span>
             <span class="stat-icon amber"><i class="fa-solid fa-clock"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-expiring-members">3</div>
+          <div class="stat-value" id="kpi-gym-expiring-members">—</div>
           <div class="stat-meta"><a href="members.html?tab=lifecycle" class="text-warning font-semibold">Review Lifecycle</a></div>
         </div>
 
@@ -150,7 +159,7 @@
             <span class="stat-label">Expired</span>
             <span class="stat-icon red"><i class="fa-solid fa-user-xmark"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-expired-members">2</div>
+          <div class="stat-value" id="kpi-gym-expired-members">—</div>
           <div class="stat-meta"><span class="text-danger">Follow up needed</span></div>
         </div>
 
@@ -159,7 +168,7 @@
             <span class="stat-label">Today's Attendance</span>
             <span class="stat-icon green"><i class="fa-solid fa-id-card-clip"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-today-attendance">6</div>
+          <div class="stat-value" id="kpi-gym-today-attendance">—</div>
           <div class="stat-meta"><span class="badge badge-success">Live check-ins</span></div>
         </div>
 
@@ -168,8 +177,8 @@
             <span class="stat-label">Monthly Revenue</span>
             <span class="stat-icon green"><i class="fa-solid fa-sack-dollar"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-monthly-revenue">₹3,124</div>
-          <div class="stat-meta"><span class="stat-trend positive">+11% vs last month</span></div>
+          <div class="stat-value" id="kpi-gym-monthly-revenue">—</div>
+          <div class="stat-meta"><span class="stat-trend positive" id="meta-gym-revenue-change">Compared with last month</span></div>
         </div>
 
         <div class="stat-card">
@@ -177,7 +186,7 @@
             <span class="stat-label">Pending Payments</span>
             <span class="stat-icon amber"><i class="fa-solid fa-hourglass-half"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-pending-payments">2</div>
+          <div class="stat-value" id="kpi-gym-pending-payments">—</div>
           <div class="stat-meta"><a href="payments.html" class="text-warning font-semibold">Review invoices</a></div>
         </div>
 
@@ -186,8 +195,17 @@
             <span class="stat-label">Active Trainers</span>
             <span class="stat-icon purple"><i class="fa-solid fa-dumbbell"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-trainers">5</div>
-          <div class="stat-meta"><span class="text-muted">Avg rating 4.9 &starf;</span></div>
+          <div class="stat-value" id="kpi-gym-trainers">—</div>
+          <div class="stat-meta"><span class="text-muted" id="meta-gym-trainer-rating">Average trainer rating</span></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-label">Assigned Workout Plans</span>
+            <span class="stat-icon purple"><i class="fa-solid fa-dumbbell"></i></span>
+          </div>
+          <div class="stat-value" id="kpi-gym-workout-plans">—</div>
+          <div class="stat-meta"><a href="workout-plans.html" class="text-electric font-semibold">Manage Plans</a></div>
         </div>
 
         <div class="stat-card">
@@ -195,7 +213,7 @@
             <span class="stat-label">CRM New Leads</span>
             <span class="stat-icon blue"><i class="fa-solid fa-funnel-dollar"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-leads">5</div>
+          <div class="stat-value" id="kpi-gym-leads">—</div>
           <div class="stat-meta"><a href="leads.html" class="text-electric font-semibold">View Pipeline</a></div>
         </div>
 
@@ -204,8 +222,8 @@
             <span class="stat-label">Maintenance Alerts</span>
             <span class="stat-icon red"><i class="fa-solid fa-screwdriver-wrench"></i></span>
           </div>
-          <div class="stat-value" id="kpi-gym-maintenance">2</div>
-          <div class="stat-meta"><a href="maintenance.html" class="text-danger font-semibold">1 High Priority</a></div>
+          <div class="stat-value" id="kpi-gym-maintenance">—</div>
+          <div class="stat-meta"><a href="maintenance.html" class="text-danger font-semibold" id="meta-gym-maintenance-high">High priority items</a></div>
         </div>
       </div>
 
@@ -215,7 +233,7 @@
           <div class="card-header">
             <div>
               <h3 class="card-title"><i class="fa-solid fa-chart-column text-electric"></i> Weekly Member Attendance Flow</h3>
-              <p class="card-subtitle">Daily check-ins across Downtown Flagship & North Austin branches</p>
+              <p class="card-subtitle">Daily check-ins recorded at this gym over the last seven days</p>
             </div>
             <a href="attendance.html" class="btn btn-sm btn-outline">Full Log</a>
           </div>
@@ -265,6 +283,7 @@
             <table class="data-table">
               <thead>
                 <tr>
+                  <th>S. NO.</th>
                   <th class="sortable" onclick="sortDashboardMembers('name')" style="cursor: pointer;">
                     Member <i class="fa-solid fa-sort text-muted" id="sort-icon-dash-name"></i>
                   </th>
@@ -292,10 +311,45 @@
             <a href="classes.html" class="btn btn-sm btn-outline">All Classes</a>
           </div>
           <div class="card-body" style="padding: 1rem;">
+            <div id="dashboard-gym-alerts" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem;"></div>
             <div id="dashboard-today-classes" style="display: flex; flex-direction: column; gap: 0.75rem;">
               <!-- Injected via JS -->
             </div>
+            <h4 style="margin: 1rem 0 0.5rem;">Recent Activity</h4>
+            <div id="dashboard-recent-activity" style="display: flex; flex-direction: column; gap: 0.6rem;"></div>
           </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1rem;">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title"><i class="fa-solid fa-chart-line text-accent"></i> Monthly Paid Revenue</h3>
+            <p class="card-subtitle">Paid member transactions recorded over the last six months</p>
+          </div>
+        </div>
+        <div class="card-body"><div style="height: 240px; position: relative;"><canvas id="chart-gym-revenue"></canvas></div></div>
+      </div>
+
+      <div class="grid-2-1">
+        <div class="card">
+          <div class="card-header">
+            <div><h3 class="card-title"><i class="fa-solid fa-receipt text-accent"></i> Recent Payments</h3><p class="card-subtitle">Latest recorded member transactions</p></div>
+            <a href="payments.html" class="btn btn-sm btn-outline">All Payments</a>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead><tr><th>S. NO.</th><th>Invoice</th><th>Member</th><th>Date</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+              <tbody id="dashboard-recent-payments"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div><h3 class="card-title"><i class="fa-solid fa-bullhorn text-warning"></i> Announcements</h3><p class="card-subtitle">Published gym updates</p></div>
+            <a href="notifications.html" class="btn btn-sm btn-outline">Notifications</a>
+          </div>
+          <div class="card-body" id="dashboard-announcements" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
         </div>
       </div>
     </main>
@@ -304,16 +358,80 @@
 
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/charts.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    GymFlowDashboardDemoData.seed();
     loadGymDashboard();
+    updateDashboardDataModeButton();
+    window.addEventListener('gymflow:data-changed', loadGymDashboard);
+    window.addEventListener('storage', loadGymDashboard);
+    window.addEventListener('gymflow:currency-changed', loadGymDashboard);
+    window.addEventListener('gymflow:exchange-rates-updated', loadGymDashboard);
   });
+
+  function updateDashboardDataModeButton() {
+    const button = document.getElementById('dashboard-data-mode');
+    if (!button) return;
+    button.textContent = GymFlowDashboardDemoData.isEnabled() ? 'Demo data · Switch to live' : 'Live data · Switch to demo';
+  }
+
+  function toggleDashboardDataMode() {
+    sessionStorage.setItem('gymflow_data_mode', GymFlowDashboardDemoData.isEnabled() ? 'live' : 'demo');
+    location.reload();
+  }
+
+  const dashboardDate = (value) => {
+    if (!value) return null;
+    const date = new Date(`${value}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
+  const dashboardEscape = (value) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+
+  function renderGymCharts(attendance, members, payments) {
+    const today = new Date();
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (6 - index));
+      const key = date.toLocaleDateString('en-CA');
+      return { key, label: date.toLocaleDateString(undefined, { weekday: 'short' }) };
+    });
+    const monthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthEntries = Array.from({ length: 6 }, (_, index) => {
+      const date = new Date(today.getFullYear(), today.getMonth() - (5 - index), 1);
+      return { key: monthKey(date), label: date.toLocaleDateString(undefined, { month: 'short' }) };
+    });
+    const attendanceValues = days.map(day => attendance.filter(item => item.date === day.key).length);
+    const monthlyRevenue = monthEntries.map(month => payments.filter(payment => payment.status === 'Paid' && payment.date?.slice(0, 7) === month.key).reduce((sum, payment) => sum + Currency.convert(Number(payment.amount) || 0, payment.currency || 'INR').amount, 0));
+    const plans = new Map();
+    members.forEach(member => {
+      const label = member.planName || 'Unspecified plan';
+      plans.set(label, (plans.get(label) || 0) + 1);
+    });
+    const attendanceCanvas = document.getElementById('chart-gym-attendance');
+    const planCanvas = document.getElementById('chart-gym-plans');
+    const revenueCanvas = document.getElementById('chart-gym-revenue');
+    if (attendanceCanvas && window.Chart?.getChart(attendanceCanvas)) window.Chart.getChart(attendanceCanvas).destroy();
+    if (planCanvas && window.Chart?.getChart(planCanvas)) window.Chart.getChart(planCanvas).destroy();
+    if (revenueCanvas && window.Chart?.getChart(revenueCanvas)) window.Chart.getChart(revenueCanvas).destroy();
+    GymCharts.renderAttendanceChart('chart-gym-attendance', days.map(day => day.label), attendanceValues);
+    GymCharts.renderPlanDistributionChart('chart-gym-plans', [...plans.keys()], [...plans.values()]);
+    const revenueChart = GymCharts.renderRevenueChart('chart-gym-revenue', monthEntries.map(month => month.label), monthlyRevenue);
+    if (revenueChart) {
+      revenueChart.options.scales.y.ticks.callback = value => App.formatCurrency(Number(value), Currency.getCurrency());
+      revenueChart.options.plugins.tooltip.callbacks.label = context => ` Revenue: ${App.formatCurrency(Number(context.parsed.y), Currency.getCurrency())}`;
+      revenueChart.update();
+    }
+    return { monthEntries, monthlyRevenue };
+  }
 
   function loadGymDashboard() {
     const gymId = Auth.getTenantGymId();
@@ -323,42 +441,110 @@
     const trainers = GymFlowDB.get('trainers', { gymId: gymId });
     const leads = GymFlowDB.get('leads', { gymId: gymId });
     const maint = GymFlowDB.get('maintenance', { gymId: gymId, status: 'In Progress' });
-    const classes = GymFlowDB.get('classes', { gymId: gymId });
+    const bookings = GymFlowDB.get('classBookings', { gymId: gymId });
+    const today = new Date();
+    const todayKey = today.toLocaleDateString('en-CA');
+    const inThirtyDays = new Date(today);
+    inThirtyDays.setDate(today.getDate() + 30);
+    const lifecycle = member => {
+      const expiry = dashboardDate(member.expiryDate);
+      if (!expiry) return member.status || 'Unknown';
+      if (expiry < new Date(today.getFullYear(), today.getMonth(), today.getDate())) return 'Expired';
+      return expiry <= inThirtyDays ? 'Expiring' : 'Active';
+    };
+    const currentMembers = members.map(member => ({ ...member, status: lifecycle(member) }));
 
     // KPIs
     document.getElementById('kpi-gym-total-members').textContent = members.length;
-    document.getElementById('kpi-gym-active-members').textContent = members.filter(m => m.status === 'Active').length;
-    document.getElementById('kpi-gym-expiring-members').textContent = members.filter(m => m.status === 'Expiring').length;
-    document.getElementById('kpi-gym-expired-members').textContent = members.filter(m => m.status === 'Expired').length;
-    document.getElementById('kpi-gym-today-attendance').textContent = attendance.filter(a => a.date === '2026-04-21').length;
+    document.getElementById('kpi-gym-active-members').textContent = currentMembers.filter(m => m.status === 'Active').length;
+    document.getElementById('kpi-gym-expiring-members').textContent = currentMembers.filter(m => m.status === 'Expiring').length;
+    document.getElementById('kpi-gym-expired-members').textContent = currentMembers.filter(m => m.status === 'Expired').length;
+    document.getElementById('kpi-gym-today-attendance').textContent = attendance.filter(a => a.date === todayKey).length;
     
-    const paidTotal = payments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
-    document.getElementById('kpi-gym-monthly-revenue').textContent = `₹${paidTotal.toLocaleString()}`;
-    document.getElementById('kpi-gym-pending-payments').textContent = payments.filter(p => p.status === 'Pending').length;
-    document.getElementById('kpi-gym-trainers').textContent = trainers.length;
+    const currentMonth = today.toLocaleDateString('en-CA').slice(0, 7);
+    const paidTotal = payments.filter(p => p.status === 'Paid' && p.date?.slice(0, 7) === currentMonth).reduce((acc, p) => acc + Currency.convert(Number(p.amount) || 0, p.currency || 'INR').amount, 0);
+    document.getElementById('kpi-gym-monthly-revenue').textContent = App.formatCurrency(paidTotal, Currency.getCurrency());
+    const pendingPaymentTotal = payments.filter(p => p.status === 'Pending').reduce((sum, payment) => sum + Currency.convert(Number(payment.amount) || 0, payment.currency || 'INR').amount, 0);
+    document.getElementById('kpi-gym-pending-payments').textContent = App.formatCurrency(pendingPaymentTotal, Currency.getCurrency());
+    document.getElementById('kpi-gym-trainers').textContent = trainers.filter(trainer => trainer.status === 'active').length;
+    const workoutPlans = GymFlowDB.get('workoutPlans', { gymId: gymId });
+    document.getElementById('kpi-gym-workout-plans').textContent = workoutPlans.length;
     document.getElementById('kpi-gym-leads').textContent = leads.length;
     document.getElementById('kpi-gym-maintenance').textContent = maint.length;
 
-    // Charts
-    GymCharts.renderAttendanceChart('chart-gym-attendance', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], [84, 112, 128, 95, 102, 145, 68]);
-    GymCharts.renderPlanDistributionChart('chart-gym-plans', ['Annual VIP', 'Semi-Annual', 'Quarterly Pass', 'Standard Monthly', 'PT Elite'], [6, 4, 3, 5, 2]);
+    const newMembersThisMonth = members.filter(member => member.startDate?.slice(0, 7) === currentMonth).length;
+    document.getElementById('meta-gym-new-members').textContent = `+${newMembersThisMonth} this month`;
+    document.getElementById('meta-gym-active-rate').textContent = `${members.length ? Math.round(currentMembers.filter(member => member.status === 'Active').length / members.length * 100) : 0}% active rate`;
+    const previousMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const previousMonthKey = `${previousMonthDate.getFullYear()}-${String(previousMonthDate.getMonth() + 1).padStart(2, '0')}`;
+    const previousRevenue = payments.filter(payment => payment.status === 'Paid' && payment.date?.slice(0, 7) === previousMonthKey).reduce((sum, payment) => sum + Currency.convert(Number(payment.amount) || 0, payment.currency || 'INR').amount, 0);
+    const revenueChange = previousRevenue ? Math.round((paidTotal - previousRevenue) / previousRevenue * 100) : null;
+    document.getElementById('meta-gym-revenue-change').textContent = revenueChange === null ? 'No prior-month paid revenue' : `${revenueChange >= 0 ? '+' : ''}${revenueChange}% vs last month`;
+    const ratedTrainers = trainers.filter(trainer => trainer.status === 'active' && Number.isFinite(Number(trainer.rating)));
+    const trainerRating = ratedTrainers.length ? ratedTrainers.reduce((sum, trainer) => sum + Number(trainer.rating), 0) / ratedTrainers.length : null;
+    document.getElementById('meta-gym-trainer-rating').textContent = trainerRating === null ? 'No trainer ratings recorded' : `Avg rating ${trainerRating.toFixed(1)} ★`;
+    document.getElementById('meta-gym-maintenance-high').textContent = `${maint.filter(item => item.priority === 'High').length} High Priority`;
 
-    window._dashMembers = members;
+    const chartData = renderGymCharts(attendance, members, payments);
+    document.getElementById('kpi-gym-monthly-revenue').title = `${chartData.monthEntries.map((month, index) => `${month.label}: ${App.formatCurrency(chartData.monthlyRevenue[index], Currency.getCurrency())}`).join(' · ')}`;
+
+    window._dashMembers = currentMembers;
     filterDashboardMembers();
 
-    // Today's classes
+    // Upcoming classes are derived from confirmed member bookings and deduplicated by class session.
     const classContainer = document.getElementById('dashboard-today-classes');
-    classContainer.innerHTML = classes.slice(0, 4).map(c => `
+    const upcomingBookings = bookings.filter(booking => booking.status !== 'Cancelled' && booking.date >= todayKey)
+      .sort((a, b) => `${a.date} ${a.time || ''}`.localeCompare(`${b.date} ${b.time || ''}`));
+    const alerts = document.getElementById('dashboard-gym-alerts');
+    const expiringCount = currentMembers.filter(member => member.status === 'Expiring').length;
+    const nextExpirations = currentMembers.filter(member => member.status === 'Expiring').sort((a, b) => (a.expiryDate || '').localeCompare(b.expiryDate || '')).slice(0, 4);
+    const pendingCount = payments.filter(payment => payment.status === 'Pending').length;
+    const upcomingCount = upcomingBookings.length;
+    alerts.innerHTML = [
+      expiringCount ? `<div class="badge badge-warning" style="white-space: normal; text-align: left;">${expiringCount} membership${expiringCount === 1 ? '' : 's'} expiring within 30 days · <a href="members.html?tab=lifecycle">Review</a></div>` : '',
+      ...nextExpirations.map(member => `<div class="text-xs text-muted">${dashboardEscape(member.name)} · expires ${dashboardEscape(member.expiryDate)}</div>`),
+      pendingCount ? `<div class="badge badge-warning" style="white-space: normal; text-align: left;">${pendingCount} pending payment${pendingCount === 1 ? '' : 's'} · <a href="payments.html">Review payments</a></div>` : '',
+      upcomingCount ? `<div class="text-xs text-muted">${upcomingCount} upcoming class booking${upcomingCount === 1 ? '' : 's'} on record</div>` : ''
+    ].filter(Boolean).join('');
+    const sessions = [...new Map(upcomingBookings.map(booking => [`${booking.classId || booking.className}|${booking.date}|${booking.time}`, booking])).values()].slice(0, 4);
+    classContainer.innerHTML = sessions.length ? sessions.map(c => `
       <div style="background: var(--bg-surface-secondary); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div style="font-weight: 700; font-size: 0.875rem;">${c.name}</div>
-          <div class="text-xs text-muted"><i class="fa-solid fa-clock"></i> ${c.time} (${c.duration}) &bull; ${c.trainerName}</div>
+          <div style="font-weight: 700; font-size: 0.875rem;">${dashboardEscape(c.className || 'Class')}</div>
+          <div class="text-xs text-muted"><i class="fa-solid fa-calendar"></i> ${dashboardEscape(c.date)} · ${dashboardEscape(c.time || 'Time TBD')} &bull; ${dashboardEscape(c.trainerName || 'Instructor TBD')}</div>
         </div>
         <div style="text-align: right;">
-          <span class="badge ${c.bookedCount >= c.capacity ? 'badge-danger' : 'badge-success'}">${c.bookedCount}/${c.capacity} Booked</span>
+          <span class="badge ${c.status === 'Attended' ? 'badge-neutral' : 'badge-success'}">${dashboardEscape(c.status || 'Booked')}</span>
         </div>
       </div>
-    `).join('');
+    `).join('') : '<p class="text-muted">No upcoming class bookings.</p>';
+
+    const recentPayments = [...payments].sort((a, b) => `${b.date || ''} ${b.id || ''}`.localeCompare(`${a.date || ''} ${a.id || ''}`)).slice(0, 8);
+    const paymentBody = document.getElementById('dashboard-recent-payments');
+    paymentBody.innerHTML = recentPayments.length ? recentPayments.map((payment, index) => `
+      <tr><td>${index + 1}</td><td>${dashboardEscape(payment.invoiceNo || payment.id)}</td><td>${dashboardEscape(payment.memberName || 'Member')}</td><td>${dashboardEscape(payment.date || '—')}</td><td>${App.formatCurrency(Number(payment.amount) || 0, payment.currency || 'INR')}</td><td>${dashboardEscape(payment.method || '—')}</td><td><span class="badge ${payment.status === 'Paid' ? 'badge-success' : payment.status === 'Pending' ? 'badge-warning' : 'badge-danger'}">${dashboardEscape(payment.status || 'Unknown')}</span></td></tr>
+    `).join('') : '<tr><td colspan="7" class="text-center text-muted">No payment transactions found.</td></tr>';
+
+    const announcements = GymFlowDB.get('announcements').filter(item => item.scope === 'gym' && item.gymId === gymId && item.status === 'Published').sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 4);
+    document.getElementById('dashboard-announcements').innerHTML = announcements.length ? announcements.map(item => `
+      <article style="padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+        <strong>${dashboardEscape(item.title)}</strong><div class="text-xs text-muted" style="margin-top: 0.35rem;">${dashboardEscape(item.date)} · ${dashboardEscape(item.author || 'Gym Team')}</div>
+        <p class="text-xs" style="margin: 0.45rem 0 0;">${dashboardEscape(item.content)}</p>
+      </article>
+    `).join('') : '<p class="text-muted">No published announcements.</p>';
+
+    const recentActivity = [
+      ...attendance.map(item => ({ date: item.date || '', time: item.checkInTime || '', label: `${item.memberName || 'Member'} checked in`, detail: item.date || '' })),
+      ...payments.map(item => ({ date: item.date || '', time: '', label: `${item.memberName || 'Member'} payment ${String(item.status || '').toLowerCase()}`, detail: App.formatCurrency(Number(item.amount) || 0, item.currency || 'INR') })),
+      ...bookings.map(item => ({ date: item.bookingDate || item.date || '', time: '', label: `${item.memberName || 'Member'} booked ${item.className || 'a class'}`, detail: item.status || '' }))
+    ].sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)).slice(0, 5);
+    const activityContainer = document.getElementById('dashboard-recent-activity');
+    activityContainer.innerHTML = recentActivity.length ? recentActivity.map(activity => `
+      <div style="display: flex; justify-content: space-between; gap: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+        <span class="text-xs">${dashboardEscape(activity.label)}</span>
+        <span class="text-xs text-muted">${dashboardEscape(activity.detail)}</span>
+      </div>
+    `).join('') : '<p class="text-muted">No recent attendance, payment, or booking activity.</p>';
   }
 
   let dashSortKey = 'startDate';
@@ -382,17 +568,18 @@
     const recent = filtered.slice(0, 6);
     const tbody = document.getElementById('dashboard-recent-members');
     if (!recent.length) {
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding: 1.5rem;">No members match search.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted" style="padding: 1.5rem;">No members match search.</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = recent.map(m => {
+    tbody.innerHTML = recent.map((m, index) => {
       let badge = 'badge-success';
       if (m.status === 'Expiring') badge = 'badge-warning';
       if (m.status === 'Expired') badge = 'badge-danger';
 
       return `
         <tr>
+          <td>${index + 1}</td>
           <td>
             <div class="cell-entity">
               <div class="avatar avatar-sm"><img src="${m.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'}" alt="${m.name}"></div>
@@ -402,7 +589,7 @@
               </div>
             </div>
           </td>
-          <td><span class="badge badge-neutral">${m.planName}</span></td>
+          <td><span class="badge badge-neutral">${dashboardEscape(m.planName || '—')}</span></td>
           <td class="text-xs text-muted">${m.startDate}</td>
           <td class="text-xs text-muted">${m.expiryDate}</td>
           <td><span class="badge ${badge}"><span class="badge-dot"></span>${m.status}</span></td>

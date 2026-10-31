@@ -137,6 +137,7 @@
             <table class="attendance-table data-table table">
               <thead>
                 <tr>
+                  <th style="width: 72px; text-align: center;">S. NO.</th>
                   <th style="width: 70px; text-align: center;">Done</th>
                   <th>Exercise Name</th>
                   <th>Target Sets</th>
@@ -189,9 +190,11 @@
 
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -273,24 +276,25 @@
 
     const tbody = document.getElementById('exercise-list-tbody');
     if (day.isRestDay || !day.exercises.length) {
-      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state" style="padding:2rem;text-align:center"><div class="empty-icon"><i class="fa-solid fa-bed"></i></div><div class="empty-title">Rest and recovery day</div><p class="text-muted text-sm">No exercises are scheduled for today.</p></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state" style="padding:2rem;text-align:center"><div class="empty-icon"><i class="fa-solid fa-bed"></i></div><div class="empty-title">Rest and recovery day</div><p class="text-muted text-sm">No exercises are scheduled for today.</p></div></td></tr>';
       updateProgress();
       return;
     }
     tbody.innerHTML = day.exercises.map((ex, exIdx) => `
       <tr style="${ex.completed ? 'background: rgba(16, 185, 129, 0.05);' : ''}">
-        <td style="text-align: center;">
+        <td data-label="S. NO." style="text-align: center;">${exIdx + 1}</td>
+        <td data-label="Done" style="text-align: center;">
           <input type="checkbox" class="form-check-input" ${ex.completed ? 'checked' : ''} onchange="toggleExercise(${exIdx}, this.checked)" style="width: 20px; height: 20px; cursor: pointer;">
         </td>
-        <td>
+        <td data-label="Exercise">
           <strong style="${ex.completed ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${ex.name}</strong>
         </td>
-        <td>${ex.sets} sets</td>
-        <td>${ex.reps} reps</td>
-        <td><span class="badge badge-neutral">${ex.weight || 'Bodyweight'}</span></td>
-        <td>${ex.restInterval || '—'}</td>
-        <td>${ex.notes || '—'}</td>
-        <td style="text-align: right;">
+        <td data-label="Sets">${ex.sets} sets</td>
+        <td data-label="Reps">${ex.reps} reps</td>
+        <td data-label="Target load"><span class="badge badge-neutral">${ex.weight || 'Bodyweight'}</span></td>
+        <td data-label="Rest">${ex.restInterval || '—'}</td>
+        <td data-label="Coach notes">${ex.notes || '—'}</td>
+        <td data-label="Form tips" style="text-align: right;">
           <button class="btn btn-xs btn-outline" onclick="showFormTip('${ex.name}')"><i class="fa-solid fa-circle-question"></i> Tip</button>
         </td>
       </tr>

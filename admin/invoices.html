@@ -633,6 +633,7 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -661,13 +662,8 @@
     }
   });
 
-  function money(value) {
-    return (Number(value) || 0).toLocaleString('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+  function money(value, currency = 'INR') {
+    return App.formatCurrency(Number(value) || 0, currency);
   }
 
   function safe(value) {
@@ -752,7 +748,7 @@
 
           <div class="invoice-list-top">
             <span>${safe(invoice.invoiceNo || invoice.id || 'Invoice')}</span>
-            <span>${money(invoice.amount)}</span>
+            <span>${money(invoice.amount, invoice.currency || 'INR')}</span>
           </div>
 
           <div class="invoice-list-name">${safe(invoice.memberName || 'Member')}</div>
@@ -794,6 +790,7 @@
 
     const invoice = selectedInvoice;
     const amount = Number(invoice.amount) || 0;
+    const transactionCurrency = invoice.currency || 'INR';
 
     /*
       Demo tax calculation: 8.25% of the total amount.
@@ -865,8 +862,8 @@
               <div class="muted">Membership and fitness services</div>
             </td>
             <td class="text-center">1</td>
-            <td class="text-right">${money(subtotal)}</td>
-            <td class="text-right">${money(subtotal)}</td>
+            <td class="text-right">${money(subtotal, transactionCurrency)}</td>
+            <td class="text-right">${money(subtotal, transactionCurrency)}</td>
           </tr>
         </tbody>
       </table>
@@ -874,17 +871,18 @@
       <div class="invoice-totals">
         <div class="total-row">
           <span class="muted">Subtotal</span>
-          <span>${money(subtotal)}</span>
+          <span>${money(subtotal, transactionCurrency)}</span>
         </div>
         <div class="total-row">
           <span class="muted">Tax (8.25% included)</span>
-          <span>${money(tax)}</span>
+          <span>${money(tax, transactionCurrency)}</span>
         </div>
         <div class="total-row grand-total">
           <span>Total</span>
-          <span>${money(amount)}</span>
+          <span>${money(amount, transactionCurrency)}</span>
         </div>
       </div>
+      ${transactionCurrency !== Currency.getCurrency() ? `<p class="text-xs text-muted" data-currency-ignore style="text-align:right">Actual charged: ${Currency.formatOriginal(amount, transactionCurrency)} (${safe(transactionCurrency)})</p>` : ''}
 
       <div class="invoice-footer">
         <strong>Thank you for choosing IronPulse Fitness Club!</strong>
@@ -894,6 +892,9 @@
       </div>
     `;
   }
+
+  window.addEventListener('gymflow:currency-changed', filterInvoices);
+  window.addEventListener('gymflow:exchange-rates-updated', filterInvoices);
 
   function printSelectedInvoice() {
     if (!selectedInvoice) {

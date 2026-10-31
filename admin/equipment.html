@@ -137,8 +137,6 @@
           <table class="data-table">
             <thead>
               <tr>
-            <thead>
-              <tr>
                 <th class="sortable" onclick="sortEquipment('name')" style="cursor: pointer;">
                   Machine / Hardware <i class="fa-solid fa-sort text-muted" id="sort-icon-name"></i>
                 </th>
@@ -238,6 +236,7 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -320,11 +319,11 @@
   function renderEquipment() {
     const tbody = document.getElementById('eq-tbody');
     if (!filteredEquipment.length) {
-      tbody.innerHTML = `<tr><td colspan="8">${DataGridHelper.getEmptyStateHtml('No Equipment Found', 'No hardware matches your search or filter options.', 'resetEquipmentFilters()')}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9">${DataGridHelper.getEmptyStateHtml('No Equipment Found', 'No hardware matches your search or filter options.', 'resetEquipmentFilters()')}</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = filteredEquipment.map(e => {
+    tbody.innerHTML = filteredEquipment.map((e, index) => {
       let badge = 'badge-success';
       if (e.condition === 'Needs Service') badge = 'badge-warning';
       if (e.condition === 'Under Maintenance') badge = 'badge-danger';

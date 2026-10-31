@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -177,7 +178,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Phone <span class="required">*</span></label>
-            <input type="tel" id="tr-phone" class="form-control" placeholder="+1 (555) 301-7777" required>
+            <input type="tel" id="tr-phone" class="form-control" placeholder="Enter phone number" autocomplete="tel-national" required>
           </div>
         </div>
 
@@ -205,6 +206,8 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -311,7 +314,7 @@
 
           <div style="font-size: 0.8125rem; display: flex; flex-direction: column; gap: 0.45rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 1.25rem;">
             <div><i class="fa-solid fa-envelope text-accent"></i> ${t.email}</div>
-            <div><i class="fa-solid fa-phone text-accent"></i> ${t.phone}</div>
+            <div><i class="fa-solid fa-phone text-accent"></i> ${IntlPhoneInput.format(t.phone, t.phoneCountryCode)}</div>
             <div><i class="fa-solid fa-calendar-check text-accent"></i> ${t.availability}</div>
             <div><i class="fa-solid fa-person-running text-accent"></i> Classes: ${(t.assignedClasses || []).join(', ') || 'General PT'}</div>
           </div>
@@ -332,12 +335,16 @@
   function handleSaveTrainer(e) {
     e.preventDefault();
     const gymId = Auth.getTenantGymId();
+    const phoneParts = IntlPhoneInput.getParts('tr-phone');
     const newTr = {
       id: `tr_${Date.now()}`,
       gymId: gymId,
       name: document.getElementById('tr-name').value,
       email: document.getElementById('tr-email').value,
-      phone: document.getElementById('tr-phone').value,
+      phone: phoneParts.phone,
+      phoneCountryCode: phoneParts.countryCode,
+      phoneCountryIso: phoneParts.countryIso,
+      phoneNationalNumber: phoneParts.nationalNumber,
       avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&h=100&fit=crop',
       specialization: document.getElementById('tr-spec').value,
       availability: document.getElementById('tr-avail').value,

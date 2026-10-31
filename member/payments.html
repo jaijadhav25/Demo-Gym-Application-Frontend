@@ -156,7 +156,6 @@
 
       <!-- Transaction Table Card -->
       <div class="attendance-card card table-container">
-      <div class="attendance-card card table-container">
         <div class="attendance-header card-header table-toolbar" style="gap: 0.75rem; align-items: center; flex-wrap: wrap;">
           <div>
             <h3 class="card-title"><i class="fa-solid fa-file-invoice-dollar text-accent"></i> Personal Invoices & Receipts</h3>
@@ -172,6 +171,7 @@
               <option value="">All Statuses</option>
               <option value="Paid">Paid</option>
               <option value="Pending">Pending</option>
+              <option value="Refunded">Refunded</option>
               <option value="Failed">Failed</option>
             </select>
             <!-- Method filter -->
@@ -188,8 +188,12 @@
             </button>
           </div>
         </div>
+        <div class="member-payment-tabs" role="tablist" aria-label="Payment history views">
+          <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-payment-view="transactions" onclick="setPaymentView('transactions', this)"><i class="fa-solid fa-arrow-right-arrow-left"></i> Transactions</button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" data-payment-view="invoices" onclick="setPaymentView('invoices', this)"><i class="fa-solid fa-file-invoice"></i> Invoices</button>
+        </div>
         <div class="attendance-body card-body">
-          <div class="attendance-table-wrapper table-responsive">
+          <div class="attendance-table-wrapper table-responsive" id="member-transactions-view">
             <table class="attendance-table data-table table">
               <thead>
                 <tr>
@@ -213,6 +217,7 @@
               </tbody>
             </table>
           </div>
+          <div id="member-invoices-view" class="member-invoice-list" hidden></div>
         </div>
       </div>
     </main>
@@ -278,9 +283,11 @@
 
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -289,6 +296,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     loadMemberPayments();
   });
+  window.addEventListener('gymflow:currency-changed', loadMemberPayments);
+  window.addEventListener('gymflow:exchange-rates-updated', loadMemberPayments);
 
   function loadMemberPayments() {
     const memberId = Auth.getActiveMemberId();
@@ -327,8 +336,11 @@
       ];
     }
 
-    const total = payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
-    document.getElementById('kpi-total-spent').textContent = App.formatCurrency(total);
+    const total = payments.reduce((acc, p) => {
+      const amount = Currency.convert(Number(p.amount) || 0, p.currency || 'INR').amount;
+      return acc + (String(p.status).toLowerCase() === 'paid' ? amount : String(p.status).toLowerCase() === 'refunded' ? -amount : 0);
+    }, 0);
+    document.getElementById('kpi-total-spent').textContent = App.formatCurrency(total, Currency.getCurrency());
 
     renderPaymentsList(payments);
   }
@@ -380,24 +392,53 @@
 
   function renderPaymentsList(list = filteredPayments) {
     const tbody = document.getElementById('member-payments-tbody');
+    const invoices = document.getElementById('member-invoices-view');
     if (!list || list.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7">${DataGridHelper.getEmptyStateHtml('No Payment Invoices Found', 'No transactions match your search or filter options.', 'resetMemberPaymentFilters()')}</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = list.map(p => `
+    } else {
+      tbody.innerHTML = list.map(p => `
       <tr>
-        <td><strong>#${p.invoiceNumber || p.id}</strong></td>
-        <td>${App.formatDate(p.date)}</td>
-        <td>${p.description || 'Gym Membership'}</td>
-        <td><i class="fa-solid fa-credit-card text-muted"></i> ${p.method || 'Credit Card'}</td>
-        <td><strong>${App.formatCurrency(p.amount)}</strong></td>
-        <td><span class="badge badge-success">${p.status || 'Paid'}</span></td>
-        <td style="text-align: right;">
+        <td data-label="Invoice"><strong>#${p.invoiceNumber || p.id}</strong></td>
+        <td data-label="Date">${App.formatDate(p.date)}</td>
+        <td data-label="Description">${p.description || 'Gym Membership'}</td>
+        <td data-label="Payment method"><i class="fa-solid fa-credit-card text-muted"></i> ${p.method || 'Credit Card'}</td>
+        <td data-label="Amount"><strong>${App.formatCurrency(p.amount, p.currency || 'INR')}</strong></td>
+        <td data-label="Status"><span class="badge ${String(p.status || 'Paid').toLowerCase() === 'paid' ? 'badge-success' : String(p.status).toLowerCase() === 'pending' ? 'badge-warning' : String(p.status).toLowerCase() === 'refunded' ? 'badge-neutral' : 'badge-danger'}">${p.status || 'Paid'}</span></td>
+        <td data-label="Receipt" style="text-align: right;">
           <button class="btn btn-sm btn-outline" onclick="viewReceipt('${p.id}')"><i class="fa-solid fa-receipt"></i> View</button>
         </td>
       </tr>
-    `).join('');
+      `).join('');
+    }
+
+    invoices.innerHTML = `
+      <div class="table-responsive">
+        <table class="attendance-table data-table table">
+          <thead><tr><th>Invoice #</th><th>Date</th><th>Description</th><th>Payment Method</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>${list?.length ? list.map(p => `
+            <tr>
+              <td><strong>#${p.invoiceNumber || p.id}</strong></td>
+              <td>${App.formatDate(p.date)}</td>
+              <td>${p.description || 'Gym Membership'}</td>
+              <td><i class="fa-solid fa-credit-card text-muted"></i> ${p.method || 'Credit Card'}</td>
+              <td><strong>${App.formatCurrency(p.amount, p.currency || 'INR')}</strong></td>
+              <td><span class="badge ${String(p.status || 'Paid').toLowerCase() === 'paid' ? 'badge-success' : String(p.status).toLowerCase() === 'pending' ? 'badge-warning' : String(p.status).toLowerCase() === 'refunded' ? 'badge-neutral' : 'badge-danger'}">${p.status || 'Paid'}</span></td>
+              <td><button class="btn btn-sm btn-outline" onclick="viewReceipt('${p.id}')"><i class="fa-solid fa-receipt"></i> View</button></td>
+            </tr>
+          `).join('') : `<tr><td colspan="7">${DataGridHelper.getEmptyStateHtml('No Payment Invoices Found', 'No transactions match your search or filter options.', 'resetMemberPaymentFilters()')}</td></tr>`}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function setPaymentView(view, button) {
+    const showInvoices = view === 'invoices';
+    document.getElementById('member-transactions-view').hidden = showInvoices;
+    document.getElementById('member-invoices-view').hidden = !showInvoices;
+    document.querySelectorAll('.member-payment-tabs [role="tab"]').forEach(tab => {
+      const active = tab === button;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', String(active));
+    });
   }
 
   function viewReceipt(id) {
@@ -408,11 +449,11 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem;">
           <div>
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800;">IronPulse Fitness Club</h2>
-            <p class="text-xs text-muted" style="margin: 0;">742 Evergreen Terrace, Austin, TX</p>
-            <p class="text-xs text-muted" style="margin: 0;">contact@ironpulse.com &bull; TX-8492031-G</p>
+            <p class="text-xs text-muted" style="margin: 0;">Bandra West, Mumbai, Maharashtra</p>
+            <p class="text-xs text-muted" style="margin: 0;">billing@ironpulse.in &bull; GSTIN: 27AABCI1234F1Z5</p>
           </div>
           <div style="text-align: right;">
-            <span class="badge badge-success" style="font-size: 0.85rem;">PAID RECEIPT</span>
+            <span class="badge ${String(p.status || 'Paid').toLowerCase() === 'paid' ? 'badge-success' : String(p.status).toLowerCase() === 'pending' ? 'badge-warning' : 'badge-neutral'}" style="font-size: 0.85rem;">${App.escapeHtml(p.status || 'Paid').toUpperCase()} RECEIPT</span>
             <p class="text-xs text-muted" style="margin-top: 0.25rem;">Invoice: <strong>#${p.invoiceNumber || p.id}</strong></p>
           </div>
         </div>
@@ -420,8 +461,8 @@
         <div style="display: flex; justify-content: space-between; margin-bottom: 1.25rem; font-size: 0.85rem;">
           <div>
             <span class="text-muted">Billed To:</span><br>
-            <strong>Alex Morgan</strong> (#MEM-101)<br>
-            alex.morgan@example.com
+            <strong>${App.escapeHtml(GymFlowDB.getById('members', Auth.getActiveMemberId())?.name || 'Member')}</strong> (#${App.escapeHtml(Auth.getActiveMemberId())})<br>
+            ${App.escapeHtml(GymFlowDB.getById('members', Auth.getActiveMemberId())?.email || '')}
           </div>
           <div style="text-align: right;">
             <span class="text-muted">Payment Date:</span><br>
@@ -440,15 +481,16 @@
           <tbody>
             <tr>
               <td style="padding: 0.75rem 0;">${p.description}</td>
-              <td style="padding: 0.75rem 0; text-align: right;"><strong>${App.formatCurrency(p.amount)}</strong></td>
+              <td style="padding: 0.75rem 0; text-align: right;"><strong>${App.formatCurrency(p.amount, p.currency || 'INR')}</strong></td>
             </tr>
           </tbody>
         </table>
 
         <div style="border-top: 2px solid var(--border-color); padding-top: 0.75rem; display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800;">
           <span>Total Paid:</span>
-          <span class="text-accent">${App.formatCurrency(p.amount)}</span>
+          <span class="text-accent">${App.formatCurrency(p.amount, p.currency || 'INR')}</span>
         </div>
+        ${(p.currency || 'INR') !== Currency.getCurrency() ? `<p class="text-xs text-muted" data-currency-ignore style="text-align:right;margin:.5rem 0 0">Actual charged: ${Currency.formatOriginal(p.amount, p.currency || 'INR')} (${App.escapeHtml(p.currency || 'INR')})</p>` : ''}
       </div>
     `;
     Modal.open('modal-receipt');

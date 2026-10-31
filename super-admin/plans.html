@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -171,7 +171,7 @@
 
         <div class="grid-3 price-calculator-grid" style="margin-bottom: 0;">
           <div class="form-group">
-            <label class="form-label" for="plan-monthly-price">Monthly Price (INR) <span class="required">*</span></label>
+            <label class="form-label" for="plan-monthly-price">Monthly Price (<span data-current-currency-code>INR</span>) <span class="required">*</span></label>
             <input type="number" id="plan-monthly-price" class="form-control" min="0" step="1" placeholder="e.g. 999" required>
           </div>
           <div class="form-group">
@@ -182,7 +182,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="plan-annual-price">Annual Price (INR)</label>
+            <label class="form-label" for="plan-annual-price">Annual Price (<span data-current-currency-code>INR</span>)</label>
             <input type="number" id="plan-annual-price" class="form-control" min="0" readonly required aria-describedby="annual-savings-preview">
           </div>
         </div>
@@ -259,6 +259,7 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -339,10 +340,10 @@
           </div>
           <div class="card-body" style="flex:1;">
             <div style="font-size:2.25rem;font-weight:800;font-family:var(--font-heading);margin-bottom:.25rem;">
-              ₹${escapeHTML(plan.monthlyPrice)}<span style="font-size:.875rem;color:var(--text-muted);font-weight:500;">/mo</span>
+              ${App.formatCurrency(Number(plan.monthlyPrice) || 0, plan.currency || 'INR')}<span style="font-size:.875rem;color:var(--text-muted);font-weight:500;">/mo</span>
             </div>
-            <div class="text-xs text-muted mb-4">₹${Number(plan.annualPrice || 0).toLocaleString('en-IN')}/yr
-              <div class="annual-card-savings">Save ₹${annualSavings.amount.toLocaleString('en-IN')} (${annualSavings.percent}% off yearly)</div>
+            <div class="text-xs text-muted mb-4">${App.formatCurrency(Number(plan.annualPrice) || 0, plan.currency || 'INR')}/yr
+              <div class="annual-card-savings">Save ${App.formatCurrency(annualSavings.amount, plan.currency || 'INR')} (${annualSavings.percent}% off yearly)</div>
             </div>
             <div style="font-size:.8125rem;color:var(--text-muted);display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border-color);">
               <div><i class="fa-solid fa-code-branch text-accent"></i> <strong>${escapeHTML(plan.maxBranches)}</strong> Branches Max</div>
@@ -532,11 +533,11 @@
       const discountBadge = document.getElementById('annual-discount-badge');
 
       if (fullPricePreview) fullPricePreview.textContent = hasMonthlyPrice
-        ? `₹${fullYearPrice.toLocaleString('en-IN')}` : '—';
+        ? App.formatCurrency(fullYearPrice, Currency.getCurrency()) : '—';
       if (annualPricePreview) annualPricePreview.textContent = hasMonthlyPrice
-        ? `₹${annualPrice.toLocaleString('en-IN')}` : '—';
+        ? App.formatCurrency(annualPrice, Currency.getCurrency()) : '—';
       if (savingsPreview) savingsPreview.textContent = hasMonthlyPrice
-        ? `₹${savings.toLocaleString('en-IN')}` : '—';
+        ? App.formatCurrency(savings, Currency.getCurrency()) : '—';
       if (discountBadge) discountBadge.textContent = savings > 0
         ? `Save ${discount}%` : 'No discount';
     }
@@ -557,13 +558,18 @@
   function editPlan(planId) {
     const plan = GymFlowDB.getById('saasPlans', planId);
     if (!plan) return;
+    const sourceCurrency = plan.currency || 'INR';
+    if (sourceCurrency !== Currency.getCurrency() && !Currency.convert(1, sourceCurrency).converted) {
+      Toast.warning('Exchange rates are unavailable. This plan cannot be edited in the selected currency yet.');
+      return;
+    }
 
     document.getElementById('plan-modal-title').innerHTML =
       '<i class="fa-solid fa-pen text-accent"></i> Edit SaaS Plan';
     document.getElementById('plan-id').value = plan.id;
     document.getElementById('plan-name').value = plan.name || '';
     document.getElementById('plan-badge').value = plan.badge || '';
-    document.getElementById('plan-monthly-price').value = plan.monthlyPrice ?? '';
+    document.getElementById('plan-monthly-price').value = Currency.convert(Number(plan.monthlyPrice) || 0, sourceCurrency).amount;
     document.getElementById('plan-annual-discount').value = String(getAnnualDiscountPercent(plan));
     calculateAnnualPrice();
     document.getElementById('plan-max-branches').value = plan.maxBranches ?? '';
@@ -592,6 +598,7 @@
       name: document.getElementById('plan-name').value.trim(),
       badge: document.getElementById('plan-badge').value.trim(),
       monthlyPrice: Number(document.getElementById('plan-monthly-price').value),
+      currency: Currency.getCurrency(),
       annualPrice: Number(document.getElementById('plan-annual-price').value),
       annualDiscountPercent: Number(document.getElementById('plan-annual-discount').value),
       maxBranches: Number(document.getElementById('plan-max-branches').value),

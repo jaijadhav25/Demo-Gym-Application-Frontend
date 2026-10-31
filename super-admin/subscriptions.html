@@ -207,6 +207,7 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -307,7 +308,7 @@
           </td>
           <td><span class="badge badge-purple">${g.planName}</span></td>
           <td class="text-xs text-muted">Monthly (Recurring)</td>
-          <td><strong>₹${rate}.00 / mo</strong></td>
+          <td><strong>${App.formatCurrency(rate)} / mo</strong></td>
           <td class="text-xs text-muted">${g.renewalDate || '2026-05-15'}</td>
           <td><span class="badge ${badge}"><span class="badge-dot"></span>${g.status ? g.status.toUpperCase() : 'ACTIVE'}</span></td>
           <td style="text-align: right;">

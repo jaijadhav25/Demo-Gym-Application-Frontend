@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -171,7 +172,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Contact Phone <span class="required">*</span></label>
-            <input type="tel" id="br-phone" class="form-control" placeholder="+1 (555) 234-5690" required>
+            <input type="tel" id="br-phone" class="form-control" placeholder="Enter phone number" autocomplete="tel-national" required>
           </div>
         </div>
         <div class="form-group">
@@ -192,6 +193,8 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -277,7 +280,7 @@
         <div class="card-body">
           <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.875rem;">
             <div><i class="fa-solid fa-user-tie text-accent"></i> <strong>Manager:</strong> ${b.manager || 'N/A'}</div>
-            <div><i class="fa-solid fa-phone text-accent"></i> <strong>Phone:</strong> ${b.phone || 'N/A'}</div>
+            <div><i class="fa-solid fa-phone text-accent"></i> <strong>Phone:</strong> ${b.phone ? IntlPhoneInput.format(b.phone, b.phoneCountryCode) : 'N/A'}</div>
             <div><i class="fa-solid fa-clock text-accent"></i> <strong>Hours:</strong> ${b.openingHours || 'N/A'}</div>
             <div style="margin-top: 0.5rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
               <span>Enrolled Members:</span>
@@ -292,13 +295,17 @@
   function handleSaveBranch(e) {
     e.preventDefault();
     const gymId = Auth.getTenantGymId();
+    const phoneParts = IntlPhoneInput.getParts('br-phone');
     const newBr = {
       id: `br_${Date.now()}`,
       gymId: gymId,
       name: document.getElementById('br-name').value,
       manager: document.getElementById('br-manager').value,
       address: document.getElementById('br-address').value,
-      phone: document.getElementById('br-phone').value,
+      phone: phoneParts.phone,
+      phoneCountryCode: phoneParts.countryCode,
+      phoneCountryIso: phoneParts.countryIso,
+      phoneNationalNumber: phoneParts.nationalNumber,
       openingHours: document.getElementById('br-hours').value,
       memberCount: 0,
       status: 'active'

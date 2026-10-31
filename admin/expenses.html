@@ -192,7 +192,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Amount (₹) <span class="required">*</span></label>
+            <label class="form-label">Amount (<span data-current-currency-symbol>₹</span>) <span class="required">*</span></label>
             <input type="number" id="exp-amount" class="form-control" placeholder="450.00" step="0.01" min="1" required>
           </div>
         </div>
@@ -231,6 +231,7 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -242,6 +243,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     loadExpenses();
   });
+  window.addEventListener('gymflow:currency-changed', loadExpenses);
+  window.addEventListener('gymflow:exchange-rates-updated', loadExpenses);
 
   function loadExpenses() {
     const gymId = Auth.getTenantGymId();
@@ -278,10 +281,10 @@
       return DataGridHelper.compare(a, b, currentSortKey, isSortAsc);
     });
 
-    const total = filteredExpenses.reduce((acc, e) => acc + Number(e.amount), 0);
+    const total = filteredExpenses.reduce((acc, e) => acc + Currency.convert(Number(e.amount) || 0, e.currency || 'INR').amount, 0);
     const badge = document.getElementById('exp-total-badge');
     if (badge) {
-      badge.textContent = `Total Outflow: ₹${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+      badge.textContent = `Total Outflow: ${App.formatCurrency(total, Currency.getCurrency())}`;
     }
 
     renderExpenses();
@@ -321,7 +324,7 @@
       <tr>
         <td><span class="badge badge-neutral">${e.category}</span></td>
         <td><strong>${e.description}</strong></td>
-        <td><strong>₹${Number(e.amount).toFixed(2)}</strong></td>
+        <td><strong>${App.formatCurrency(Number(e.amount), e.currency || 'INR')}</strong></td>
         <td class="text-xs text-muted">${e.date}</td>
         <td>${e.vendor}</td>
         <td><span class="badge badge-purple">${e.method}</span></td>
@@ -343,6 +346,7 @@
       category: document.getElementById('exp-cat').value,
       description: document.getElementById('exp-desc').value,
       amount: Number(document.getElementById('exp-amount').value),
+      currency: Currency.getCurrency(),
       date: new Date().toISOString().split('T')[0],
       vendor: document.getElementById('exp-vendor').value,
       paymentMethod: document.getElementById('exp-method').value,

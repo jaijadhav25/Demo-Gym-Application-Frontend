@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -115,7 +116,7 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Phone Number <span class="required">*</span></label>
-                <input type="tel" id="prof-phone" class="form-control" value="+1 (555) 101-2001">
+                <input type="tel" id="prof-phone" class="form-control" autocomplete="tel-national">
               </div>
               <div class="form-group">
                 <label class="form-label">Date of Birth</label>
@@ -133,13 +134,17 @@
               <div class="form-group">
                 <label class="form-label">Primary Home Branch</label>
                 <select id="prof-branch" class="form-select">
-                  <option value="Downtown Flagship" selected>Downtown Flagship (Austin, TX)</option>
-                  <option value="Westside Fitness">Westside Fitness (Austin, TX)</option>
+                  <option value="Bandra Central">Bandra Central (Mumbai)</option>
+                  <option value="Andheri West">Andheri West (Mumbai)</option>
                 </select>
               </div>
               <div class="form-group" style="grid-column: span 2;">
-                <label class="form-label">Emergency Contact (Name & Phone)</label>
-                <input type="text" id="prof-emergency" class="form-control" value="Sarah Morgan (+1 555-101-9999)">
+                <label class="form-label" for="prof-emergency-name">Emergency Contact Name</label>
+                <input type="text" id="prof-emergency-name" class="form-control" value="">
+              </div>
+              <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="prof-emergency-phone">Emergency Contact Phone</label>
+                <input type="tel" id="prof-emergency-phone" class="form-control" autocomplete="tel-national">
               </div>
             </div>
 
@@ -219,9 +224,12 @@
 
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -235,13 +243,18 @@
     if (mem) {
       document.getElementById('prof-name').value = mem.name || '';
       document.getElementById('prof-email').value = mem.email || '';
-      document.getElementById('prof-phone').value = mem.phone || '';
+      IntlPhoneInput.setValue('prof-phone', mem.phone || '', mem.phoneCountryCode, mem.phoneCountryIso);
       document.getElementById('prof-dob').value = mem.dob || '';
       document.getElementById('prof-gender').value = mem.gender || 'Male';
-      document.getElementById('prof-emergency').value = mem.emergencyContact || '';
+      const emergency = String(mem.emergencyContact || '');
+      const namedEmergency = emergency.match(/^(.*?)\s*\((\+?[\d\s().-]+)\)\s*$/);
+      const emergencyPhone = mem.emergencyPhone || namedEmergency?.[2] || (/^\+?[\d\s().-]+$/.test(emergency) ? emergency : '');
+      document.getElementById('prof-emergency-name').value = mem.emergencyContactName || namedEmergency?.[1] || '';
+      IntlPhoneInput.setValue('prof-emergency-phone', emergencyPhone, mem.emergencyPhoneCountryCode, mem.emergencyPhoneCountryIso);
       document.getElementById('prof-goal').value = mem.fitnessGoal || '';
       document.getElementById('prof-trainer').value = mem.assignedTrainer || 'Coach David Miller';
       document.getElementById('prof-notes').value = mem.notes || '';
+      document.getElementById('prof-branch').value = mem.branchName || 'Bandra Central';
       document.getElementById('prof-display-name').textContent = mem.name || 'Alex Morgan';
       if (mem.avatar) {
         document.getElementById('prof-avatar-img').src = mem.avatar;
@@ -269,14 +282,26 @@
 
   function handleSaveProfile() {
     const memberId = Auth.getActiveMemberId();
+    const phoneParts = IntlPhoneInput.getParts('prof-phone');
+    const emergencyParts = IntlPhoneInput.getParts('prof-emergency-phone');
+    const emergencyName = document.getElementById('prof-emergency-name').value.trim();
     const updated = {
       name: document.getElementById('prof-name').value,
       email: document.getElementById('prof-email').value,
-      phone: document.getElementById('prof-phone').value,
+      phone: phoneParts.phone,
+      phoneCountryCode: phoneParts.countryCode,
+      phoneCountryIso: phoneParts.countryIso,
+      phoneNationalNumber: phoneParts.nationalNumber,
       dob: document.getElementById('prof-dob').value,
       gender: document.getElementById('prof-gender').value,
-      emergencyContact: document.getElementById('prof-emergency').value,
+      emergencyContact: emergencyName ? `${emergencyName}${emergencyParts.phone ? ` (${emergencyParts.phone})` : ''}` : emergencyParts.phone,
+      emergencyContactName: emergencyName,
+      emergencyPhone: emergencyParts.phone,
+      emergencyPhoneCountryCode: emergencyParts.countryCode,
+      emergencyPhoneCountryIso: emergencyParts.countryIso,
+      emergencyPhoneNationalNumber: emergencyParts.nationalNumber,
       fitnessGoal: document.getElementById('prof-goal').value,
+      branchName: document.getElementById('prof-branch').value,
       notes: document.getElementById('prof-notes').value,
       avatar: document.getElementById('prof-avatar-img').src
     };

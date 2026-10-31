@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/international-phone-input.css">
 </head>
 <body>
 
@@ -194,7 +195,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Phone <span class="required">*</span></label>
-            <input type="tel" id="stf-phone" class="form-control" placeholder="+1 (555) 401-9999" required>
+            <input type="tel" id="stf-phone" class="form-control" placeholder="Enter phone number" autocomplete="tel-national" required>
           </div>
         </div>
 
@@ -219,6 +220,8 @@
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/international-phone-input.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -314,7 +317,7 @@
           </div>
         </td>
         <td><span class="badge badge-purple">${s.role}</span></td>
-        <td class="text-xs text-muted">${s.email}<br>${s.phone}</td>
+        <td class="text-xs text-muted">${s.email}<br>${IntlPhoneInput.format(s.phone, s.phoneCountryCode)}</td>
         <td>${s.branch}</td>
         <td><span class="badge ${s.status === 'inactive' ? 'badge-neutral' : 'badge-success'}"><span class="badge-dot"></span>${s.status ? s.status.toUpperCase() : 'ACTIVE'}</span></td>
         <td style="text-align: right;">
@@ -329,13 +332,17 @@
   function handleSaveStaff(e) {
     e.preventDefault();
     const gymId = Auth.getTenantGymId();
+    const phoneParts = IntlPhoneInput.getParts('stf-phone');
     const newStf = {
       id: `stf_${Date.now()}`,
       gymId: gymId,
       name: document.getElementById('stf-name').value,
       role: document.getElementById('stf-role').value,
       email: document.getElementById('stf-email').value,
-      phone: document.getElementById('stf-phone').value,
+      phone: phoneParts.phone,
+      phoneCountryCode: phoneParts.countryCode,
+      phoneCountryIso: phoneParts.countryIso,
+      phoneNationalNumber: phoneParts.nationalNumber,
       branch: document.getElementById('stf-branch').value,
       status: 'active'
     };

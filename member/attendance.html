@@ -113,8 +113,8 @@
           <div class="stat-icon green"><i class="fa-solid fa-fire"></i></div>
           <div class="stat-info">
             <span class="stat-label">Active Streak</span>
-            <span class="stat-value">14 Days</span>
-            <span class="stat-change text-success"><i class="fa-solid fa-arrow-trend-up"></i> Personal Record!</span>
+            <span class="stat-value" id="kpi-active-streak">0 Days</span>
+            <span class="stat-change text-success" id="kpi-streak-label"><i class="fa-solid fa-arrow-trend-up"></i> Keep your routine going</span>
           </div>
         </div>
 
@@ -123,7 +123,7 @@
           <div class="stat-info">
             <span class="stat-label">Visits This Month</span>
             <span class="stat-value" id="kpi-monthly-visits">18 Visits</span>
-            <span class="stat-change text-success">Target: 16 visits</span>
+            <span class="stat-change text-success" id="kpi-monthly-target">Target: 16 visits</span>
           </div>
         </div>
 
@@ -131,8 +131,8 @@
           <div class="stat-icon purple"><i class="fa-solid fa-clock"></i></div>
           <div class="stat-info">
             <span class="stat-label">Peak Workout Window</span>
-            <span class="stat-value">06:30 – 08:00 AM</span>
-            <span class="stat-change text-muted">Early Bird Lifter</span>
+            <span class="stat-value" id="kpi-peak-window">—</span>
+            <span class="stat-change text-muted">Based on your check-ins</span>
           </div>
         </div>
 
@@ -140,8 +140,8 @@
           <div class="stat-icon orange"><i class="fa-solid fa-stopwatch"></i></div>
           <div class="stat-info">
             <span class="stat-label">Avg. Workout Length</span>
-            <span class="stat-value">68 Minutes</span>
-            <span class="stat-change text-muted">Optimal duration</span>
+            <span class="stat-value" id="kpi-average-duration">—</span>
+            <span class="stat-change text-muted">Average recorded session</span>
           </div>
         </div>
       </div>
@@ -159,7 +159,6 @@
       </div>
 
       <!-- Attendance Table Card -->
-      <div class="attendance-card card table-container">
       <div class="attendance-card card table-container">
         <div class="attendance-header card-header table-toolbar" style="gap: 0.75rem; align-items: center; flex-wrap: wrap;">
           <div>
@@ -223,10 +222,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/storage.js"></script>
+<script src="../assets/js/dashboard-demo-data.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/charts.js"></script>
 <script src="../assets/js/components.js"></script>
 <script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/currency.js"></script>
 <script src="../assets/js/app.js"></script>
 
 <script>
@@ -254,8 +255,41 @@
       ];
     }
 
+    memberLogs.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+    updateAttendanceStats();
     document.getElementById('kpi-monthly-visits').textContent = `${memberLogs.length} Visits`;
     renderAttendanceTable(memberLogs);
+  }
+
+  function updateAttendanceStats() {
+    const today = new Date();
+    const todayKey = today.toISOString().slice(0, 10);
+    const monthCount = memberLogs.filter(item => String(item.date || '').slice(0, 7) === todayKey.slice(0, 7)).length;
+    const goal = Number(GymFlowDB.getById('members', Auth.getActiveMemberId())?.monthlyAttendanceGoal || 16);
+    document.getElementById('kpi-monthly-visits').textContent = `${monthCount} Visits`;
+    document.getElementById('kpi-monthly-target').textContent = `Target: ${goal} visits`;
+    const visited = new Set(memberLogs.map(item => item.date));
+    let streak = 0;
+    const cursor = new Date(`${todayKey}T00:00:00`);
+    while (visited.has(cursor.toISOString().slice(0, 10))) { streak += 1; cursor.setDate(cursor.getDate() - 1); }
+    document.getElementById('kpi-active-streak').textContent = `${streak} ${streak === 1 ? 'Day' : 'Days'}`;
+    document.getElementById('kpi-streak-label').innerHTML = streak ? '<i class="fa-solid fa-arrow-trend-up"></i> Current check-in streak' : 'Check in today to start a streak';
+    const minutes = memberLogs.map(item => {
+      const parseTime = value => {
+        const match = String(value || '').match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        if (!match) return null;
+        let hours = Number(match[1]) % 12;
+        if (match[3].toUpperCase() === 'PM') hours += 12;
+        return hours * 60 + Number(match[2]);
+      };
+      const start = parseTime(item.checkInTime), end = parseTime(item.checkOutTime);
+      return start === null || end === null ? null : (end - start + 1440) % 1440;
+    }).filter(value => value !== null && value > 0 && value < 360);
+    document.getElementById('kpi-average-duration').textContent = minutes.length ? `${Math.round(minutes.reduce((sum, value) => sum + value, 0) / minutes.length)} Minutes` : '—';
+    const hourCounts = {};
+    memberLogs.forEach(item => { const hour = String(item.checkInTime || '').match(/(\d{1,2})/); if (hour) hourCounts[hour[1]] = (hourCounts[hour[1]] || 0) + 1; });
+    const peakHour = Object.keys(hourCounts).sort((a, b) => hourCounts[b] - hourCounts[a])[0];
+    document.getElementById('kpi-peak-window').textContent = peakHour ? `${peakHour.padStart(2, '0')}:00 – ${String((Number(peakHour) + 1) % 12 || 12).padStart(2, '0')}:00` : 'No check-ins yet';
   }
 
   let filteredLogs = [];
@@ -312,12 +346,12 @@
 
     tbody.innerHTML = list.map(l => `
       <tr>
-        <td><strong>${App.formatDate(l.date)}</strong></td>
-        <td><i class="fa-solid fa-arrow-right-to-bracket text-success"></i> ${l.checkInTime}</td>
-        <td>${l.checkOutTime ? `<i class="fa-solid fa-arrow-right-from-bracket text-muted"></i> ${l.checkOutTime}` : '<span class="badge badge-warning">In Session</span>'}</td>
-        <td><i class="fa-solid fa-location-dot text-muted"></i> ${l.branchName || 'Downtown Flagship'}</td>
-        <td><span class="badge badge-neutral">${l.method || 'Mobile QR'}</span></td>
-        <td><span class="badge badge-success">${l.status || 'Completed'}</span></td>
+        <td data-label="Date"><strong>${App.formatDate(l.date)}</strong></td>
+        <td data-label="Check-in"><i class="fa-solid fa-arrow-right-to-bracket text-success"></i> ${l.checkInTime}</td>
+        <td data-label="Check-out">${l.checkOutTime ? `<i class="fa-solid fa-arrow-right-from-bracket text-muted"></i> ${l.checkOutTime}` : '<span class="badge badge-warning">In Session</span>'}</td>
+        <td data-label="Branch"><i class="fa-solid fa-location-dot text-muted"></i> ${l.branchName || 'Downtown Flagship'}</td>
+        <td data-label="Method"><span class="badge badge-neutral">${l.method || 'Mobile QR'}</span></td>
+        <td data-label="Status"><span class="badge badge-success">${l.status || 'Completed'}</span></td>
       </tr>
     `).join('');
   }
@@ -325,6 +359,7 @@
   function recordSelfCheckIn() {
     const memberId = Auth.getActiveMemberId();
     const gymId = Auth.getTenantGymId();
+    const member = GymFlowDB.getById('members', memberId);
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const dateStr = now.toISOString().split('T')[0];
@@ -333,9 +368,9 @@
       id: `att_${Date.now()}`,
       gymId: gymId,
       branchId: 'br_1',
-      branchName: 'Downtown Flagship',
+      branchName: member?.branchName || 'Bandra Central',
       memberId: memberId,
-      memberName: 'Alex Morgan',
+      memberName: member?.name || Auth.getUser()?.name || 'Member',
       date: dateStr,
       checkInTime: timeStr,
       checkOutTime: null,
@@ -346,7 +381,7 @@
     GymFlowDB.insert('attendance', newLog);
     memberLogs.unshift(newLog);
     renderAttendanceTable(memberLogs);
-    Toast.success(`Checked in at Downtown Flagship (${timeStr})! Enjoy your training.`);
+    Toast.success(`Checked in at ${member?.branchName || 'Bandra Central'} (${timeStr})! Enjoy your training.`);
   }
 
   function initWeeklyChart() {
@@ -356,10 +391,21 @@
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: Array.from({ length: 7 }, (_, index) => {
+          const date = new Date(); date.setDate(date.getDate() - 6 + index);
+          return date.toLocaleDateString('en-US', { weekday: 'short' });
+        }),
         datasets: [{
-          label: 'Minutes Trained',
-          data: [75, 80, 0, 70, 85, 90, 0],
+          label: 'Check-ins',
+          data: (() => {
+            const start = new Date();
+            start.setDate(start.getDate() - 6);
+            return Array.from({ length: 7 }, (_, index) => {
+              const date = new Date(start); date.setDate(start.getDate() + index);
+              const key = date.toISOString().slice(0, 10);
+              return memberLogs.filter(item => item.date === key).length;
+            });
+          })(),
           backgroundColor: '#10b981',
           borderRadius: 6
         }]
@@ -374,7 +420,7 @@
           x: { grid: { display: false } },
           y: {
             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { callback: (v) => `${v}m` }
+            ticks: { precision: 0, stepSize: 1 }
           }
         }
       }
